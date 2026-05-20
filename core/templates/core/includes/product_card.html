@@ -1,0 +1,39 @@
+<div class="product-card-wrap">
+  <article class="product-card">
+
+    <div class="card-image-wrap">
+      {% if product.old_price %}
+        <span class="discount-badge">-{{ product.discount_percent }}%</span>
+      {% endif %}
+      <img src="{{ product.image.url }}" alt="{{ product.title }}" loading="lazy">
+    </div>
+
+    <div class="card-body">
+      <h3 class="title">{{ product.title }}</h3>
+
+      <p class="meta">
+        {{ product.category.name }} · {{ product.brand.name|default:"No Brand" }}
+      </p>
+
+      {% if product.stock %}
+        <p class="stock"><i class="fas fa-check-circle"></i> In stock</p>
+      {% else %}
+        <p class="stock out">Out of stock</p>
+      {% endif %}
+
+      <div class="price-row">
+        <span class="price">Rs {{ product.price }}</span>
+        {% if product.old_price %}
+          <span class="price-old">Rs {{ product.old_price }}</span>
+        {% endif %}
+      </div>
+
+      <a href="#" class="btn-cart" data-id="{{ product.id }}">Add To Cart</a>
+
+      {% if product.description %}
+        <p class="card-desc">{{ product.description|truncatewords:18 }}</p>
+      {% endif %}
+    </div>
+
+  </article>
+</div>

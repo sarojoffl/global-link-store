@@ -1,0 +1,145 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Home – Global Link Store{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- HERO SECTION -->
+<section class="hero-section container">
+  <div class="hero-slider">
+
+    {% for slide in hero_slides %}
+      <div class="hero-slide {% if forloop.first %}is-active{% endif %}">
+        <a href="{{ slide.url|default:'#' }}" class="hero-slide-link">
+          <img src="{{ slide.image.url }}" alt="Hero Banner">
+        </a>
+        <a href="{{ slide.url|default:'#' }}" class="hero-cta">Shop Now</a>
+      </div>
+    {% endfor %}
+
+    <button class="hero-arrow hero-arrow--prev">
+      <i class="fas fa-chevron-left"></i>
+    </button>
+    <button class="hero-arrow hero-arrow--next">
+      <i class="fas fa-chevron-right"></i>
+    </button>
+
+    <div class="hero-controls">
+      {% for slide in hero_slides %}
+        <span class="hero-dot {% if forloop.first %}is-active{% endif %}"></span>
+      {% endfor %}
+    </div>
+
+    <div class="hero-progress"></div>
+    <span class="hero-counter">1 / {{ hero_slides|length }}</span>
+
+  </div>
+</section>
+
+<!-- BRAND STRIP -->
+<section class="brand-strip container">
+  <button class="brand-arrow brand-arrow--prev">
+    <i class="fas fa-chevron-left"></i>
+  </button>
+  <div class="brand-track-wrapper">
+    <div class="brand-track">
+      {% for brand in brands %}
+        <a href="{{ brand.url|default:'#' }}" class="brand-item">
+          <img src="{{ brand.logo.url }}" alt="{{ brand.name }}">
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+  <button class="brand-arrow brand-arrow--next">
+    <i class="fas fa-chevron-right"></i>
+  </button>
+</section>
+
+<!-- CATEGORIES -->
+<section class="section container">
+  <div class="section-header">
+    <h2>Popular Categories</h2>
+  </div>
+  <div class="category-grid">
+    {% for cat in popular_categories %}
+      <a href="#" class="category-card">
+        <div class="cat-image">
+          <i class="{{ cat.icon }}"></i>
+        </div>
+        <h3>{{ cat.name }}</h3>
+        <p class="count">{{ cat.product_set.count }} products</p>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- FEATURED PRODUCTS -->
+<section class="section container">
+  <div class="section-header">
+    <h2>Featured Products</h2>
+    <a href="#" class="btn-more">More Products</a>
+  </div>
+  <div class="products-row">
+    {% for product in featured_products %}
+      {% include 'core/includes/product_card.html' %}
+    {% empty %}
+      <p>No featured products found.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- LATEST PRODUCTS -->
+<section class="section container">
+  <div class="section-header">
+    <h2>Latest Products</h2>
+    <a href="#" class="btn-more">More Products</a>
+  </div>
+  <div class="products-row">
+    {% for product in latest_products %}
+      {% include 'core/includes/product_card.html' %}
+    {% empty %}
+      <p>No products found.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- NEW ARRIVALS -->
+<section class="section container">
+  <div class="section-header">
+    <h2>New Arrivals</h2>
+    <a href="#" class="btn-more">More Products</a>
+  </div>
+  <div class="products-row">
+    {% for product in new_arrivals %}
+      {% include 'core/includes/product_card.html' %}
+    {% empty %}
+      <p>No new arrivals found.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- BEST OFFERS -->
+<section class="section container">
+  <div class="section-header">
+    <h2>Best Offers</h2>
+    <a href="#" class="btn-more">More Products</a>
+  </div>
+  <div class="products-row">
+    {% for product in best_offers %}
+      {% include 'core/includes/product_card.html' %}
+    {% empty %}
+      <p>No offers available.</p>
+    {% endfor %}
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/home.js' %}" defer></script>
+{% endblock %}
