@@ -1,0 +1,81 @@
+/* ───────── VERIFY EMAIL PAGE ───────── */
+.verify-wrapper {
+  min-height: calc(100vh - 120px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 16px;
+  background: #f9fafb;
+}
+
+.verify-card {
+  width: 100%;
+  max-width: 520px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 40px 32px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+  border: 1px solid #e5e7eb;
+}
+
+/* ICON */
+.verify-icon {
+  font-size: 52px;
+  color: #2563eb;
+  margin-bottom: 16px;
+}
+
+/* TITLE */
+.verify-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #111;
+  margin-bottom: 10px;
+}
+
+/* TEXT */
+.verify-text {
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+/* BUTTON AREA */
+.verify-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* PRIMARY BUTTON */
+.btn-verify-primary {
+  background: #2563eb;
+  color: #fff;
+  padding: 12px 14px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: 0.2s ease;
+}
+
+.btn-verify-primary:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+/* SECONDARY BUTTON */
+.btn-verify-secondary {
+  background: #f3f4f6;
+  color: #111;
+  padding: 12px 14px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: 0.2s ease;
+}
+
+.btn-verify-secondary:hover {
+  background: #e5e7eb;
+}

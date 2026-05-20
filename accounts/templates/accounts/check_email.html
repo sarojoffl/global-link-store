@@ -1,0 +1,41 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Verify Email – Global Link Store{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/verify.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="verify-wrapper">
+  <div class="verify-card">
+
+    <div class="verify-icon">
+      <i class="fas fa-envelope-open-text"></i>
+    </div>
+
+    <div class="verify-title">
+      Verify your email address
+    </div>
+
+    <div class="verify-text">
+      We’ve sent a verification link to your email address.
+      Please check your inbox and click the link to activate your account.
+      <br><br>
+      If you don’t see it, check your <strong>spam folder</strong>.
+    </div>
+
+    <div class="verify-actions">
+      <a href="{% url 'accounts:login' %}" class="btn-verify-primary">
+        Go to Login
+      </a>
+
+      <a href="{% url 'accounts:register' %}" class="btn-verify-secondary">
+        Try another email
+      </a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
