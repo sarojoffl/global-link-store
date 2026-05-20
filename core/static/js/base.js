@@ -1,5 +1,5 @@
 /**
- * Global Link Store — Base interactions (sticky nav, back to top)
+ * Global Link Store — Base interactions
  */
 (function () {
   "use strict";
@@ -10,11 +10,13 @@
 
   let navbarOffset = 0;
 
+  /* ───────── NAVBAR OFFSET ───────── */
   function updateNavbarOffset() {
     if (!navbar || !topBar) return;
     navbarOffset = topBar.offsetHeight;
   }
 
+  /* ───────── SCROLL HANDLER ───────── */
   function onScroll() {
     const scrollY = window.scrollY;
 
@@ -33,19 +35,51 @@
     }
   }
 
+  /* ───────── BACK TO TOP ───────── */
   function initBackToTop() {
     if (!backToTop) return;
+
     backToTop.addEventListener("click", function () {
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
     });
   }
 
+  /* ───────── MESSAGES ───────── */
+  function initMessages() {
+    document.addEventListener("click", function (e) {
+      const btn = e.target.closest(".message-close");
+      if (!btn) return;
+
+      const message = btn.closest(".site-message");
+      if (!message) return;
+
+      message.style.opacity = "0";
+      message.style.transform = "translateY(-8px)";
+      message.style.transition = "0.25s ease";
+
+      setTimeout(() => {
+        message.remove();
+      }, 250);
+    });
+  }
+
+  /* ───────── INIT ───────── */
+  function init() {
+    updateNavbarOffset();
+    initBackToTop();
+    initMessages();
+  }
+
+  /* ───────── EVENTS ───────── */
   window.addEventListener("resize", updateNavbarOffset);
   window.addEventListener("scroll", onScroll, { passive: true });
 
-  document.addEventListener("DOMContentLoaded", function () {
-    updateNavbarOffset();
-    initBackToTop();
-    onScroll();
-  });
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
 })();

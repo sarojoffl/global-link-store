@@ -17,7 +17,7 @@
 
   <header class="site-header">
     <div class="top-bar">
-      <a href="{% url 'index' %}" class="logo" aria-label="Global Link Store home">
+      <a href="{% url 'core:index' %}" class="logo" aria-label="Global Link Store home">
         <div class="logo-icon">
           <i class="fas fa-shopping-cart" aria-hidden="true"></i>
           <span class="check"><i class="fas fa-check" aria-hidden="true"></i></span>
@@ -29,7 +29,7 @@
       </a>
 
       <div class="search-wrapper">
-        <form method="get" action="{% url 'index' %}" role="search">
+        <form method="get" action="{% url 'core:index' %}" role="search">
           <label for="search-input" class="visually-hidden">Search for products</label>
           <input
             id="search-input"
@@ -81,7 +81,7 @@
 
       <ul class="nav-links">
         <li>
-          <a href="{% url 'index' %}" class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">Home</a>
+          <a href="{% url 'core:index' %}" class="{% if request.resolver_match.url_name == 'core:index' %}active{% endif %}">Home</a>
         </li>
         <li>
           <a href="#">Laptop By Brands <i class="fas fa-chevron-down" aria-hidden="true"></i></a>
@@ -125,20 +125,49 @@
       </ul>
 
       <div class="nav-icons">
-        <a href="#" class="nav-icon-btn" title="My Account" aria-label="My Account">
-          <i class="fas fa-user" aria-hidden="true"></i>
-        </a>
+
+        {% if user.is_authenticated %}
+          <div class="nav-icon-dropdown">
+            <button class="nav-icon-btn" aria-label="My Account">
+              <i class="fas fa-user"></i>
+              <span class="nav-icon-label">{{ user.first_name|default:user.username }}</span>
+            </button>
+            <div class="nav-user-dropdown">
+              <a href="#"><i class="fas fa-user-circle"></i> My Profile</a>
+              <a href="#"><i class="fas fa-box"></i> My Orders</a>
+              <a href="#"><i class="fas fa-heart"></i> Wishlist</a>
+              <div class="dropdown-divider"></div>
+              <a href="{% url 'accounts:logout' %}" class="logout-link">
+                <i class="fas fa-sign-out-alt"></i> Logout
+              </a>
+            </div>
+          </div>
+        {% else %}
+          <div class="nav-icon-dropdown">
+            <button class="nav-icon-btn" aria-label="My Account">
+              <i class="fas fa-user"></i>
+              <span class="nav-icon-label">Account</span>
+            </button>
+            <div class="nav-user-dropdown">
+              <a href="{% url 'accounts:login' %}"><i class="fas fa-sign-in-alt"></i> Login</a>
+              <a href="{% url 'accounts:register' %}"><i class="fas fa-user-plus"></i> Register</a>
+            </div>
+          </div>
+        {% endif %}
+
         <a href="#" class="nav-icon-btn" title="Compare" aria-label="Compare products">
           <i class="fas fa-exchange-alt" aria-hidden="true"></i>
           <span class="badge">{{ wishlist_count|default:0 }}</span>
         </a>
+
         <a href="#" class="cart-btn" aria-label="Shopping cart">
           <span class="cart-icon-wrap">
             <i class="fas fa-shopping-cart" aria-hidden="true"></i>
-            <span class="badge">{{ cart_count|default:0 }}</span>
+            <span class="badge" id="cart-count">{{ cart_count|default:0 }}</span>
           </span>
           <span class="cart-total">Rs {{ cart_total|default:"0.00" }}</span>
         </a>
+
       </div>
     </div>
   </nav>
@@ -152,13 +181,26 @@
   </aside>
 
   <main class="main-content">
+    {% if messages and request.resolver_match.view_name != "accounts:login" and request.resolver_match.view_name != "accounts:register" %}
+      <div class="messages-container container">
+        {% for message in messages %}
+          <div class="site-message site-message--{{ message.tags }}">
+            <span>{{ message }}</span>
+            <button class="message-close" aria-label="Dismiss">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
     {% block content %}{% endblock %}
   </main>
 
   <footer class="site-footer">
     <div class="footer-main">
       <div class="footer-about">
-        <a href="{% url 'index' %}" class="logo">
+        <a href="{% url 'core:index' %}" class="logo">
           <div class="logo-icon">
             <i class="fas fa-shopping-cart" aria-hidden="true"></i>
             <span class="check"><i class="fas fa-check" aria-hidden="true"></i></span>
