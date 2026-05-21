@@ -95,6 +95,15 @@
 
       <button type="submit" class="btn-auth">Create Account</button>
 
+      <div class="auth-divider">
+        <span>or</span>
+      </div>
+
+      <a href="{% url 'social:begin' 'google-oauth2' %}" class="btn-google">
+        <img src="https://developers.google.com/identity/images/g-logo.png" alt="G">
+        Sign up with Google
+      </a>
+
     </form>
 
     <p class="auth-switch">
