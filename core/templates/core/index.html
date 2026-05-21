@@ -2,142 +2,124 @@
 {% load static %}
 
 {% block title %}Home – Global Link Store{% endblock %}
+{% block body_class %} class="page-home"{% endblock %}
 
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/home.css' %}">
 {% endblock %}
 
 {% block content %}
+<div class="home-page">
 
-<!-- HERO SECTION -->
-<section class="hero-section container">
-  <div class="hero-slider">
-
-    {% for slide in hero_slides %}
-      <div class="hero-slide {% if forloop.first %}is-active{% endif %}">
-        <a href="{{ slide.url|default:'#' }}" class="hero-slide-link">
-          <img src="{{ slide.image.url }}" alt="Hero Banner">
-        </a>
-        <a href="{{ slide.url|default:'#' }}" class="hero-cta">Shop Now</a>
-      </div>
-    {% endfor %}
-
-    <button class="hero-arrow hero-arrow--prev">
-      <i class="fas fa-chevron-left"></i>
-    </button>
-    <button class="hero-arrow hero-arrow--next">
-      <i class="fas fa-chevron-right"></i>
-    </button>
-
-    <div class="hero-controls">
-      {% for slide in hero_slides %}
-        <span class="hero-dot {% if forloop.first %}is-active{% endif %}"></span>
-      {% endfor %}
-    </div>
-
-    <div class="hero-progress"></div>
-    <span class="hero-counter">1 / {{ hero_slides|length }}</span>
-
-  </div>
-</section>
-
-<!-- BRAND STRIP -->
-<section class="brand-strip container">
-  <button class="brand-arrow brand-arrow--prev">
-    <i class="fas fa-chevron-left"></i>
-  </button>
-  <div class="brand-track-wrapper">
-    <div class="brand-track">
-      {% for brand in brands %}
-        <a href="{{ brand.url|default:'#' }}" class="brand-item">
-          <img src="{{ brand.logo.url }}" alt="{{ brand.name }}">
-        </a>
-      {% endfor %}
-    </div>
-  </div>
-  <button class="brand-arrow brand-arrow--next">
-    <i class="fas fa-chevron-right"></i>
-  </button>
-</section>
-
-<!-- CATEGORIES -->
-<section class="section container">
-  <div class="section-header">
-    <h2>Popular Categories</h2>
-  </div>
-  <div class="category-grid">
-    {% for cat in popular_categories %}
-      <a href="#" class="category-card">
-        <div class="cat-image">
-          <i class="{{ cat.icon }}"></i>
+  <div class="home-top-zone{% if home_settings.top_zone_background %} home-top-zone--has-bg{% endif %}"
+    {% if home_settings.top_zone_background %}style="--home-top-bg: url('{{ home_settings.top_zone_background.url }}');"{% endif %}>
+    {% if hero_slides_left or hero_slides_right %}
+      <section class="hero-section container">
+        <div class="hero-dual">
+          {% include 'core/includes/hero_slider.html' with slides=hero_slides_left slider_id='hero-slider-left' %}
+          {% include 'core/includes/hero_slider.html' with slides=hero_slides_right slider_id='hero-slider-right' %}
         </div>
-        <h3>{{ cat.name }}</h3>
-        <p class="count">{{ cat.product_set.count }} products</p>
-      </a>
-    {% endfor %}
-  </div>
-</section>
+      </section>
+    {% endif %}
 
-<!-- FEATURED PRODUCTS -->
-<section class="section container">
-  <div class="section-header">
-    <h2>Featured Products</h2>
-    <a href="#" class="btn-more">More Products</a>
+    {% if brands %}
+      <section class="brand-strip container">
+        <button type="button" class="brand-arrow brand-arrow--prev" aria-label="Previous brands">
+          <i class="fas fa-chevron-left" aria-hidden="true"></i>
+        </button>
+        <div class="brand-track-wrapper">
+          <div class="brand-track">
+            {% for brand in brands %}
+              <a href="{{ brand.url|default:'#' }}" class="brand-item">
+                <img src="{{ brand.logo.url }}" alt="{{ brand.name }}">
+              </a>
+            {% endfor %}
+          </div>
+        </div>
+        <button type="button" class="brand-arrow brand-arrow--next" aria-label="Next brands">
+          <i class="fas fa-chevron-right" aria-hidden="true"></i>
+        </button>
+      </section>
+    {% endif %}
   </div>
-  <div class="products-row">
-    {% for product in featured_products %}
-      {% include 'core/includes/product_card.html' %}
-    {% empty %}
-      <p>No featured products found.</p>
-    {% endfor %}
-  </div>
-</section>
 
-<!-- LATEST PRODUCTS -->
-<section class="section container">
-  <div class="section-header">
-    <h2>Latest Products</h2>
-    <a href="#" class="btn-more">More Products</a>
-  </div>
-  <div class="products-row">
-    {% for product in latest_products %}
-      {% include 'core/includes/product_card.html' %}
-    {% empty %}
-      <p>No products found.</p>
-    {% endfor %}
-  </div>
-</section>
+  {% if popular_categories %}
+    <section class="home-section home-section--categories container">
+      <div class="section-header">
+        <div class="section-heading">
+          <span class="section-eyebrow">Browse</span>
+          <h2>Popular Categories</h2>
+        </div>
+      </div>
+      <div class="category-grid">
+        {% for cat in popular_categories %}
+          <a href="{% url 'core:index' %}?category={{ cat.slug }}" class="category-card">
+            <div class="cat-image">
+              <i class="{{ cat.icon|default:'fas fa-box' }}"></i>
+            </div>
+            <h3>{{ cat.name }}</h3>
+            <p class="count">{{ cat.product_set.count }} products</p>
+          </a>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
 
-<!-- NEW ARRIVALS -->
-<section class="section container">
-  <div class="section-header">
-    <h2>New Arrivals</h2>
-    <a href="#" class="btn-more">More Products</a>
-  </div>
-  <div class="products-row">
-    {% for product in new_arrivals %}
-      {% include 'core/includes/product_card.html' %}
-    {% empty %}
-      <p>No new arrivals found.</p>
-    {% endfor %}
-  </div>
-</section>
+  {% include 'core/includes/about_section.html' %}
 
-<!-- BEST OFFERS -->
-<section class="section container">
-  <div class="section-header">
-    <h2>Best Offers</h2>
-    <a href="#" class="btn-more">More Products</a>
-  </div>
-  <div class="products-row">
-    {% for product in best_offers %}
-      {% include 'core/includes/product_card.html' %}
-    {% empty %}
-      <p>No offers available.</p>
-    {% endfor %}
-  </div>
-</section>
+  {% if featured_products %}
+    <section class="home-section container">
+      <div class="section-header">
+        <div class="section-heading">
+          <span class="section-eyebrow">Handpicked</span>
+          <h2>Featured Products</h2>
+        </div>
+        <a href="#" class="btn-more">View all <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+      </div>
+      {% include 'core/includes/products_slider.html' with products=featured_products %}
+    </section>
+  {% endif %}
 
+  {% if latest_products %}
+    <section class="home-section home-section--alt container">
+      <div class="section-header">
+        <div class="section-heading">
+          <span class="section-eyebrow">Just in</span>
+          <h2>Latest Products</h2>
+        </div>
+        <a href="#" class="btn-more">View all <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+      </div>
+      {% include 'core/includes/products_slider.html' with products=latest_products %}
+    </section>
+  {% endif %}
+
+  {% if new_arrivals %}
+    <section class="home-section container">
+      <div class="section-header">
+        <div class="section-heading">
+          <span class="section-eyebrow">Fresh</span>
+          <h2>New Arrivals</h2>
+        </div>
+        <a href="#" class="btn-more">View all <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+      </div>
+      {% include 'core/includes/products_slider.html' with products=new_arrivals %}
+    </section>
+  {% endif %}
+
+  {% if best_offers %}
+    <section class="home-section home-section--offers container">
+      <div class="section-header">
+        <div class="section-heading">
+          <span class="section-eyebrow">Save more</span>
+          <h2>Best Offers</h2>
+        </div>
+        <a href="#" class="btn-more">View all <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+      </div>
+      {% include 'core/includes/products_slider.html' with products=best_offers %}
+    </section>
+  {% endif %}
+
+</div>
 {% endblock %}
 
 {% block extra_js %}

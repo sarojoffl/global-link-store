@@ -1,0 +1,15 @@
+<div class="products-slider">
+  <button type="button" class="products-arrow products-arrow--prev" aria-label="Previous products">
+    <i class="fas fa-chevron-left" aria-hidden="true"></i>
+  </button>
+  <div class="products-track-wrapper">
+    <div class="products-track">
+      {% for product in products %}
+        {% include 'core/includes/product_card.html' %}
+      {% endfor %}
+    </div>
+  </div>
+  <button type="button" class="products-arrow products-arrow--next" aria-label="Next products">
+    <i class="fas fa-chevron-right" aria-hidden="true"></i>
+  </button>
+</div>

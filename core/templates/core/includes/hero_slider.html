@@ -1,0 +1,40 @@
+<div class="hero-slider"{% if slider_id %} id="{{ slider_id }}"{% endif %}>
+  <div class="hero-slides-track">
+    {% for slide in slides %}
+      <div class="hero-slide {% if forloop.first %}is-active{% endif %}" data-media="{{ slide.media_type }}">
+        <a href="{{ slide.url|default:'#' }}" class="hero-slide-link" aria-label="View offer">
+          {% if slide.media_type == "video" and slide.video %}
+            <video class="hero-video" muted loop playsinline preload="metadata"{% if forloop.first %} autoplay{% endif %}>
+              <source src="{{ slide.video.url }}" type="video/mp4">
+            </video>
+          {% elif slide.image %}
+            <img src="{{ slide.image.url }}" alt="Hero banner">
+          {% endif %}
+        </a>
+        {% if slide.url %}
+          <a href="{{ slide.url }}" class="hero-cta">Shop Now</a>
+        {% endif %}
+      </div>
+    {% empty %}
+      <div class="hero-slide is-active hero-slide--placeholder">
+        <span>Add slides in admin (choose Left or Right slider)</span>
+      </div>
+    {% endfor %}
+  </div>
+
+  {% if slides|length > 1 %}
+    <div class="hero-ui" aria-hidden="false">
+      <button type="button" class="hero-arrow hero-arrow--prev" aria-label="Previous slide">
+        <i class="fas fa-chevron-left" aria-hidden="true"></i>
+      </button>
+      <button type="button" class="hero-arrow hero-arrow--next" aria-label="Next slide">
+        <i class="fas fa-chevron-right" aria-hidden="true"></i>
+      </button>
+      <div class="hero-controls" role="tablist" aria-label="Slide pagination">
+        {% for slide in slides %}
+          <button type="button" class="hero-dot {% if forloop.first %}is-active{% endif %}" aria-label="Go to slide {{ forloop.counter }}"></button>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+</div>

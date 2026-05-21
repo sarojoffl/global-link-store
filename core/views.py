@@ -1,13 +1,27 @@
+from django.db.models import Q
 from django.shortcuts import render
-from .models import Brand, Product, Category, HeroSlide
+from .models import AboutSection, HeroSlide, HomePageSettings
+from products.models import Product, Category, Brand
+
+
+def _active_hero_slides(placement):
+    return HeroSlide.objects.filter(
+        active=True,
+        placement=placement,
+    ).filter(
+        Q(media_type="image", image__isnull=False)
+        | Q(media_type="video", video__isnull=False)
+    ).order_by("order", "id")
 
 
 def index(request):
-
     context = {
         "query": request.GET.get("q", ""),
 
-        "hero_slides": HeroSlide.objects.filter(active=True),
+        "home_settings": HomePageSettings.load(),
+        "about_section": AboutSection.load(),
+        "hero_slides_left": _active_hero_slides("left"),
+        "hero_slides_right": _active_hero_slides("right"),
 
         "popular_categories": Category.objects.filter(
             is_popular=True

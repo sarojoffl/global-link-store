@@ -1,110 +1,131 @@
 from django.db import models
-from django.utils.text import slugify
 
-
-class Category(models.Model):
-    name = models.CharField(max_length=120)
-
-    slug = models.SlugField(
-        unique=True,
-        blank=True
-    )
-
-    icon = models.CharField(
-        max_length=100,
-        blank=True
-    )
-
-    is_popular = models.BooleanField(default=False)
-
-    def save(self, *args, **kwargs):
-
-        if not self.slug:
-            self.slug = slugify(self.name)
-
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return self.name
-
-class Brand(models.Model):
-    name = models.CharField(max_length=120)
-    slug = models.SlugField(unique=True, blank=True)
-    logo = models.ImageField(upload_to='brands/')
-    url = models.URLField(blank=True)
-    is_active = models.BooleanField(default=True)
-    order = models.PositiveIntegerField(default=0)
-
-    class Meta:
-        ordering = ['order', 'name']
-
-    def __str__(self):
-        return self.name
-
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.name)
-        super().save(*args, **kwargs)
-
-class Product(models.Model):
-
-    PRODUCT_TYPES = (
-        ("featured", "Featured"),
-        ("offer", "Best Offer"),
-        ("new", "New Arrival"),
-    )
-
-    title = models.CharField(max_length=255)
-    slug = models.SlugField(unique=True, blank=True)
-
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True)
-
-    price = models.DecimalField(max_digits=12, decimal_places=2)
-    old_price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
-
-    image = models.ImageField(upload_to="products/")
-
-    description = models.TextField(blank=True)
-
-    stock = models.BooleanField(default=True)
-
-    product_type = models.CharField(
-        max_length=20,
-        choices=PRODUCT_TYPES,
-        blank=True
-    )
-
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.title)
-
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return self.title
-
-    @property
-    def discount_percent(self):
-        if self.old_price and self.price:
-            return int(((self.old_price - self.price) / self.old_price) * 100)
-        return 0
-    
-class ProductImage(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="images")
-    image = models.ImageField(upload_to="products/gallery/")
-    order = models.PositiveIntegerField(default=0)
-
-    def __str__(self):
-        return f"{self.product.title} Image"
 
 class HeroSlide(models.Model):
-    image = models.ImageField(upload_to="hero/")
+    PLACEMENT_CHOICES = (
+        ("left", "Left slider"),
+        ("right", "Right slider"),
+    )
+    MEDIA_CHOICES = (
+        ("image", "Image"),
+        ("video", "Video file"),
+    )
+
+    placement = models.CharField(
+        max_length=10,
+        choices=PLACEMENT_CHOICES,
+        default="left",
+        help_text="Which hero slider this slide appears in.",
+    )
+    media_type = models.CharField(
+        max_length=10,
+        choices=MEDIA_CHOICES,
+        default="image",
+    )
+    image = models.ImageField(upload_to="hero/", blank=True, null=True)
+    video = models.FileField(
+        upload_to="hero/videos/",
+        blank=True,
+        null=True,
+        help_text="MP4/WebM video file (used when media type is Video).",
+    )
     url = models.CharField(max_length=255, blank=True, null=True)
     active = models.BooleanField(default=True)
     order = models.PositiveIntegerField(default=0)
 
+    class Meta:
+        ordering = ["placement", "order", "id"]
+
     def __str__(self):
-        return f"Hero Slide {self.id}"
+        label = self.get_placement_display()
+        kind = self.get_media_type_display()
+        return f"{label} — {kind} (#{self.pk})"
+
+    @property
+    def has_media(self):
+        if self.media_type == "video":
+            return bool(self.video)
+        return bool(self.image)
+
+
+class HomePageSettings(models.Model):
+    """Singleton homepage options (background, etc.)."""
+
+    top_zone_background = models.ImageField(
+        upload_to="home/backgrounds/",
+        blank=True,
+        null=True,
+        help_text="Background image behind hero sliders and brand strip (up to Popular Categories).",
+    )
+
+    class Meta:
+        verbose_name = "Homepage settings"
+        verbose_name_plural = "Homepage settings"
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        pass
+
+    @classmethod
+    def load(cls):
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj
+
+    def __str__(self):
+        return "Homepage settings"
+
+
+class AboutSection(models.Model):
+    """Singleton about block with animated stats for the homepage."""
+
+    title = models.CharField(max_length=255, default="About Global Link Store")
+    heading = models.CharField(
+        max_length=255,
+        default="Quality laptops, phones & electronics — delivered across Nepal",
+    )
+    description = models.TextField(
+        default=(
+            "Global Link Store is your trusted online destination for laptops, "
+            "smartphones, desktops, and accessories. We partner with leading brands "
+            "and focus on genuine products, fair pricing, and reliable support."
+        )
+    )
+    products_listed = models.PositiveIntegerField(
+        default=500,
+        help_text="Shown in stats counter (e.g. products available).",
+    )
+    orders_delivered = models.PositiveIntegerField(
+        default=1200,
+        help_text="Shown in stats counter.",
+    )
+    happy_customers = models.PositiveIntegerField(
+        default=850,
+        help_text="Shown in stats counter.",
+    )
+    years_of_service = models.PositiveIntegerField(
+        default=5,
+        help_text="Years in business — counter animates to this number.",
+    )
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = "About section"
+        verbose_name_plural = "About section"
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        pass
+
+    @classmethod
+    def load(cls):
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj
+
+    def __str__(self):
+        return self.title

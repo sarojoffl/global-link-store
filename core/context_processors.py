@@ -1,19 +1,25 @@
+from products.models import Brand, Category
+
+
 def store_defaults(request):
-    """Shared template context for layout (nav categories, cart placeholders)."""
+    """Shared template context for layout (nav, categories, cart placeholders)."""
+    categories = list(Category.objects.order_by("name"))
+
+    nav_items = []
+    for category in categories:
+        brands = (
+            Brand.objects.filter(
+                is_active=True,
+                product__category=category,
+            )
+            .distinct()
+            .order_by("order", "name")
+        )
+        nav_items.append({"category": category, "brands": brands})
+
     return {
-        "categories": getattr(request, "_store_categories", None)
-        or [
-            {"name": "Mobile phones", "slug": "mobile"},
-            {"name": "Laptops", "slug": "laptops"},
-            {"name": "Desktop PC", "slug": "desktop"},
-            {"name": "Monitors", "slug": "monitors"},
-            {"name": "Audio Device", "slug": "audio"},
-            {"name": "Printers", "slug": "printers"},
-            {"name": "Accessories", "slug": "accessories"},
-            {"name": "Graphics Cards", "slug": "gpu"},
-            {"name": "SSD Drive", "slug": "ssd"},
-            {"name": "Drones", "slug": "drones"},
-        ],
+        "categories": categories,
+        "nav_items": nav_items,
         "cart_count": 0,
         "cart_total": "0.00",
         "wishlist_count": 0,

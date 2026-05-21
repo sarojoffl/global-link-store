@@ -1,0 +1,37 @@
+{% if about_section.is_active %}
+<section class="home-section home-section--about container" id="about-section">
+  <div class="about-section__layout">
+    <div class="about-section__content">
+      <span class="section-eyebrow">{{ about_section.title }}</span>
+      <h2 class="about-section__heading">{{ about_section.heading }}</h2>
+      <p class="about-section__text">{{ about_section.description|linebreaksbr }}</p>
+      <a href="{% url 'core:index' %}" class="about-section__cta">
+        Explore our store <i class="fas fa-arrow-right" aria-hidden="true"></i>
+      </a>
+    </div>
+
+    <div class="about-section__stats">
+      <div class="about-stat">
+        <span class="about-stat__icon" aria-hidden="true"><i class="fas fa-box-open"></i></span>
+        <span class="about-stat__value" data-count="{{ about_section.products_listed }}">0</span>
+        <span class="about-stat__label">Products listed</span>
+      </div>
+      <div class="about-stat">
+        <span class="about-stat__icon" aria-hidden="true"><i class="fas fa-truck"></i></span>
+        <span class="about-stat__value" data-count="{{ about_section.orders_delivered }}">0</span>
+        <span class="about-stat__label">Orders delivered</span>
+      </div>
+      <div class="about-stat">
+        <span class="about-stat__icon" aria-hidden="true"><i class="fas fa-smile"></i></span>
+        <span class="about-stat__value" data-count="{{ about_section.happy_customers }}">0</span>
+        <span class="about-stat__label">Happy customers</span>
+      </div>
+      <div class="about-stat">
+        <span class="about-stat__icon" aria-hidden="true"><i class="fas fa-award"></i></span>
+        <span class="about-stat__value" data-count="{{ about_section.years_of_service }}">0</span>
+        <span class="about-stat__label">Years of service</span>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
