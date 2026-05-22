@@ -1,15 +1,17 @@
 <div class="product-card-wrap">
   <article class="product-card">
 
-    <div class="card-image-wrap">
+    <a href="{% url 'products:detail' product.slug %}" class="card-image-wrap">
       {% if product.old_price %}
         <span class="discount-badge">-{{ product.discount_percent }}%</span>
       {% endif %}
       <img src="{{ product.image.url }}" alt="{{ product.title }}" loading="lazy">
-    </div>
+    </a>
 
     <div class="card-body">
-      <h3 class="title">{{ product.title }}</h3>
+      <h3 class="title">
+        <a href="{% url 'products:detail' product.slug %}">{{ product.title }}</a>
+      </h3>
 
       <p class="meta">
         {{ product.category.name }} · {{ product.brand.name|default:"No Brand" }}
@@ -28,7 +30,7 @@
         {% endif %}
       </div>
 
-      <a href="#" class="btn-cart" data-id="{{ product.id }}">Add To Cart</a>
+      <a href="{% url 'products:detail' product.slug %}" class="btn-cart" data-id="{{ product.id }}">Add To Cart</a>
 
       {% if product.description %}
         <p class="card-desc">{{ product.description|truncatewords:18 }}</p>

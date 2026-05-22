@@ -1,0 +1,425 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}{{ product.title }} – Global Link Store{% endblock %}
+{% block body_class %} class="page-product"{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/product.css' %}">
+  <link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="product-page">
+  <div class="container">
+
+    <nav class="product-breadcrumb" aria-label="Breadcrumb">
+      <a href="{% url 'core:index' %}">Home</a>
+      <span class="bc-sep" aria-hidden="true"><i class="fas fa-chevron-right"></i></span>
+      <a href="{% url 'products:category' product.category.slug %}">
+        {{ product.category.name }}
+      </a>
+      {% if product.brand %}
+        <span class="bc-sep" aria-hidden="true"><i class="fas fa-chevron-right"></i></span>
+        <a href="{% url 'products:brand' product.brand.slug %}">
+          {{ product.brand.name }}
+        </a>
+      {% endif %}
+      <span class="bc-sep" aria-hidden="true"><i class="fas fa-chevron-right"></i></span>
+      <span class="bc-current" aria-current="page">{{ product.title|truncatewords:8 }}</span>
+    </nav>
+
+    <section class="product-main" aria-label="Product overview">
+      <div class="product-gallery">
+        <div class="gallery-main">
+          {% if product.old_price %}
+            <span class="discount-badge" id="product-discount-badge">-{{ product.discount_percent }}% OFF</span>
+          {% endif %}
+          {% if product.product_type == "new" %}
+            <span class="product-badge product-badge--new">New Arrival</span>
+          {% elif product.product_type == "featured" %}
+            <span class="product-badge product-badge--featured">Featured</span>
+          {% elif product.product_type == "offer" %}
+            <span class="product-badge product-badge--offer">Best Offer</span>
+          {% endif %}
+          <button type="button" class="gallery-zoom" aria-label="View full image" data-gallery-zoom>
+            <i class="fas fa-expand" aria-hidden="true"></i>
+          </button>
+          <div class="gallery-zoom-wrap" data-zoom-wrap>
+            <img
+              id="gallery-main-img"
+              src="{{ gallery.0.url }}"
+              alt="{{ product.title }}"
+              data-gallery-main
+            >
+            <div class="zoom-lens" hidden aria-hidden="true"></div>
+          </div>
+          <div class="zoom-result" hidden aria-hidden="true"></div>
+        </div>
+        {% if gallery|length > 1 %}
+          <div class="gallery-thumbs" role="list">
+            {% for item in gallery %}
+              <button
+                type="button"
+                class="gallery-thumb{% if forloop.first %} is-active{% endif %}"
+                role="listitem"
+                aria-label="View image {{ forloop.counter }}"
+                data-gallery-thumb="{{ item.url }}"
+              >
+                <img src="{{ item.url }}" alt="" loading="lazy">
+              </button>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="product-info">
+        <div class="product-info__meta">
+          {% if product.brand %}
+            <a
+              href="{% url 'products:category' product.category.slug %}?brand={{ product.brand.slug }}"
+              class="product-brand"
+            >
+              {% if product.brand.logo %}
+                <img src="{{ product.brand.logo.url }}" alt="{{ product.brand.name }}" class="product-brand__logo">
+              {% endif %}
+              <span>{{ product.brand.name }}</span>
+            </a>
+          {% endif %}
+          <span class="product-sku">SKU: GLS-{{ product.id|stringformat:"05d" }}</span>
+        </div>
+
+        <h1 class="product-title">{{ product.title }}</h1>
+
+        <div class="product-rating" aria-label="Product rating">
+          <div class="stars" aria-hidden="true">
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star-half-alt"></i>
+          </div>
+          <span class="rating-value">4.5</span>
+          <a href="#reviews" class="rating-count">(12 reviews)</a>
+          <span class="rating-divider">|</span>
+          <span class="rating-sold"><i class="fas fa-shopping-bag"></i> 48 sold</span>
+        </div>
+
+        <div class="product-price-block">
+          <div class="price-row">
+            <span class="price" id="product-price" data-base-price="{{ product.price }}">
+              Rs {{ product.price|floatformat:2 }}
+            </span>
+            {% if product.old_price %}
+              <span class="price-old" id="product-old-price" data-base-old-price="{{ product.old_price }}">
+                Rs {{ product.old_price|floatformat:2 }}
+              </span>
+              <span class="price-save" id="product-save" data-base-save="{{ product.save_amount }}">
+                Save Rs {{ product.save_amount|floatformat:2 }}
+              </span>
+            {% endif %}
+          </div>
+          <p class="price-note"><i class="fas fa-info-circle"></i> Price includes VAT. Delivery charges may apply.</p>
+        </div>
+
+        {% if product.stock %}
+          <p class="product-stock in-stock"><i class="fas fa-check-circle"></i> In stock — ready to ship</p>
+        {% else %}
+          <p class="product-stock out-of-stock"><i class="fas fa-times-circle"></i> Out of stock</p>
+        {% endif %}
+
+        {% if variant_groups %}
+          <div class="product-variants">
+            {% for group in variant_groups %}
+              <div class="variant-group" data-variant-group="{{ group.name }}">
+                <span class="variant-label">{{ group.name }}</span>
+                <div class="variant-options" role="group" aria-label="{{ group.name }}">
+                  {% for option in group.productvariantoption_set.all %}
+                    <button
+                      type="button"
+                      class="variant-option{% if forloop.first %} is-selected{% endif %}"
+                      data-adjustment="{{ option.price_adjustment }}"
+                      data-value="{{ option.value }}"
+                    >
+                      {{ option.value }}
+                    </button>
+                  {% endfor %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <div class="product-actions">
+          <div class="qty-selector" aria-label="Quantity">
+            <button type="button" class="qty-btn qty-btn--minus" aria-label="Decrease quantity" data-qty-minus>
+              <i class="fas fa-minus" aria-hidden="true"></i>
+            </button>
+            <input
+              type="number"
+              id="product-qty"
+              class="qty-input"
+              value="1"
+              min="1"
+              max="10"
+              aria-label="Quantity"
+            >
+            <button type="button" class="qty-btn qty-btn--plus" aria-label="Increase quantity" data-qty-plus>
+              <i class="fas fa-plus" aria-hidden="true"></i>
+            </button>
+          </div>
+
+          <button
+            type="button"
+            class="btn-add-cart"
+            data-product-id="{{ product.id }}"
+            data-product-title="{{ product.title }}"
+            {% if not product.stock %}disabled{% endif %}
+          >
+            <i class="fas fa-shopping-cart" aria-hidden="true"></i>
+            Add to Cart
+          </button>
+          <button
+            type="button"
+            class="btn-buy-now"
+            {% if not product.stock %}disabled{% endif %}
+          >
+            Buy Now
+          </button>
+        </div>
+
+        <div class="product-secondary-actions">
+          <button type="button" class="secondary-action" data-wishlist>
+            <i class="far fa-heart" aria-hidden="true"></i> Wishlist
+          </button>
+          <button type="button" class="secondary-action" data-compare>
+            <i class="fas fa-exchange-alt" aria-hidden="true"></i> Compare
+          </button>
+          <div class="share-group">
+            <span class="share-label">Share:</span>
+            <button type="button" class="share-btn" data-share="copy" aria-label="Copy link">
+              <i class="fas fa-link" aria-hidden="true"></i>
+            </button>
+            <a
+              href="https://wa.me/?text={{ product.title|urlencode }}%20{{ request.build_absolute_uri|urlencode }}"
+              class="share-btn share-btn--whatsapp"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Share on WhatsApp"
+            >
+              <i class="fab fa-whatsapp" aria-hidden="true"></i>
+            </a>
+            <a
+              href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri|urlencode }}"
+              class="share-btn share-btn--facebook"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Share on Facebook"
+            >
+              <i class="fab fa-facebook-f" aria-hidden="true"></i>
+            </a>
+          </div>
+        </div>
+
+        <ul class="product-trust">
+          <li><i class="fas fa-truck" aria-hidden="true"></i> Free delivery in Kathmandu valley</li>
+          <li><i class="fas fa-shield-alt" aria-hidden="true"></i> Genuine product warranty</li>
+          <li><i class="fas fa-undo" aria-hidden="true"></i> 7-day easy return policy</li>
+          <li><i class="fas fa-headset" aria-hidden="true"></i> 24/7 customer support</li>
+        </ul>
+
+        <dl class="product-highlights">
+          <div class="highlight-item">
+            <dt>Category</dt>
+            <dd>
+              <a href="{% url 'products:category' product.category.slug %}">{{ product.category.name }}</a>
+            </dd>
+          </div>
+          {% if product.brand %}
+            <div class="highlight-item">
+              <dt>Brand</dt>
+              <dd>{{ product.brand.name }}</dd>
+            </div>
+          {% endif %}
+          <div class="highlight-item">
+            <dt>Availability</dt>
+            <dd>{% if product.stock %}In Stock{% else %}Out of Stock{% endif %}</dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="product-tabs-section home-section" aria-label="Product details">
+      <div class="product-tabs" role="tablist">
+        <button type="button" class="tab-btn is-active" role="tab" aria-selected="true" data-tab="description">
+          Description
+        </button>
+        <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="specifications">
+          Specifications
+        </button>
+        <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="reviews" id="reviews">
+          Reviews
+        </button>
+        <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="shipping">
+          Shipping &amp; Returns
+        </button>
+      </div>
+
+      <div class="tab-panels">
+        <div class="tab-panel is-active" id="tab-description" role="tabpanel">
+          {% if product.description %}
+            <div class="product-description">{{ product.description|linebreaks }}</div>
+          {% else %}
+            <p class="tab-empty">No description available for this product yet.</p>
+          {% endif %}
+        </div>
+
+        <div class="tab-panel" id="tab-specifications" role="tabpanel" hidden>
+          {% if specs_by_section %}
+            {% for section, specs in specs_by_section.items %}
+              <div class="specs-group">
+                <h3 class="specs-heading">{{ section }}</h3>
+                <table class="specs-table">
+                  <tbody>
+                    {% for spec in specs %}
+                      <tr>
+                        <th scope="row">{{ spec.name }}</th>
+                        <td>{{ spec.value }}</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% endfor %}
+          {% else %}
+            <p class="tab-empty">Specifications will be added soon.</p>
+          {% endif %}
+        </div>
+
+        <div class="tab-panel" id="tab-reviews" role="tabpanel" hidden>
+          <div class="reviews-summary">
+            <div class="reviews-score">
+              <span class="reviews-score__value">4.5</span>
+              <div class="stars" aria-hidden="true">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star-half-alt"></i>
+              </div>
+              <span class="reviews-score__count">Based on 12 reviews</span>
+            </div>
+            <div class="reviews-bars">
+              <div class="review-bar"><span>5</span><div class="bar"><span style="width: 70%"></span></div><span>8</span></div>
+              <div class="review-bar"><span>4</span><div class="bar"><span style="width: 20%"></span></div><span>2</span></div>
+              <div class="review-bar"><span>3</span><div class="bar"><span style="width: 8%"></span></div><span>1</span></div>
+              <div class="review-bar"><span>2</span><div class="bar"><span style="width: 0%"></span></div><span>0</span></div>
+              <div class="review-bar"><span>1</span><div class="bar"><span style="width: 8%"></span></div><span>1</span></div>
+            </div>
+          </div>
+
+          <div class="reviews-list">
+            <article class="review-card">
+              <div class="review-card__header">
+                <div class="review-avatar">RK</div>
+                <div>
+                  <strong>Rajesh K.</strong>
+                  <span class="review-verified"><i class="fas fa-check-circle"></i> Verified Purchase</span>
+                </div>
+                <time datetime="2025-04-12">12 Apr 2025</time>
+              </div>
+              <div class="review-stars" aria-label="5 out of 5 stars">
+                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+              </div>
+              <h4>Excellent product, fast delivery</h4>
+              <p>Exactly as described. Packaging was secure and the product works perfectly. Global Link Store support was very helpful.</p>
+            </article>
+            <article class="review-card">
+              <div class="review-card__header">
+                <div class="review-avatar">SP</div>
+                <div>
+                  <strong>Sunita P.</strong>
+                  <span class="review-verified"><i class="fas fa-check-circle"></i> Verified Purchase</span>
+                </div>
+                <time datetime="2025-03-28">28 Mar 2025</time>
+              </div>
+              <div class="review-stars" aria-label="4 out of 5 stars">
+                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i>
+              </div>
+              <h4>Great value for money</h4>
+              <p>Good quality at this price point. Would recommend to anyone looking for reliable electronics in Nepal.</p>
+            </article>
+          </div>
+
+          <form class="review-form" aria-label="Write a review">
+            <h3>Write a Review</h3>
+            <p class="review-form-note">Share your experience with this product. Reviews are moderated before publishing.</p>
+            <div class="review-form__stars">
+              <label>Your rating</label>
+              <div class="star-input" role="group" aria-label="Rate from 1 to 5 stars">
+                {% for i in "12345" %}
+                  <button type="button" class="star-input__btn" data-rating="{{ i }}" aria-label="{{ i }} star">
+                    <i class="far fa-star" aria-hidden="true"></i>
+                  </button>
+                {% endfor %}
+              </div>
+            </div>
+            <label for="review-title">Review title</label>
+            <input type="text" id="review-title" placeholder="Summarize your experience" disabled>
+            <label for="review-body">Your review</label>
+            <textarea id="review-body" rows="4" placeholder="What did you like or dislike?" disabled></textarea>
+            <button type="button" class="btn-review-submit" disabled>Submit Review (coming soon)</button>
+          </form>
+        </div>
+
+        <div class="tab-panel" id="tab-shipping" role="tabpanel" hidden>
+          <div class="shipping-info">
+            <h3>Delivery</h3>
+            <ul>
+              <li>Standard delivery within Kathmandu valley: 1–2 business days</li>
+              <li>Outside valley: 3–7 business days depending on location</li>
+              <li>Order tracking shared via SMS after dispatch</li>
+            </ul>
+            <h3>Returns &amp; Refunds</h3>
+            <ul>
+              <li>7-day return for unused items in original packaging</li>
+              <li>Defective items replaced within warranty period</li>
+              <li>Contact <a href="tel:+9779851402916">+977-9851402916</a> or <a href="mailto:shop@globallinkstore.com">shop@globallinkstore.com</a></li>
+            </ul>
+            <h3>Payment Methods</h3>
+            <p>We accept cash on delivery, bank transfer, eSewa, Khalti, and major cards (Visa, Mastercard).</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {% if related_products %}
+      <section class="home-section home-section--alt" aria-labelledby="related-heading">
+        <div class="section-header">
+          <div class="section-heading">
+            <span class="section-eyebrow">You may also like</span>
+            <h2 id="related-heading">Related Products</h2>
+          </div>
+          <a href="{% url 'products:category' product.category.slug %}" class="btn-more">
+            View all <i class="fas fa-arrow-right" aria-hidden="true"></i>
+          </a>
+        </div>
+        {% include "core/includes/products_slider.html" with products=related_products %}
+      </section>
+    {% endif %}
+
+  </div>
+</div>
+
+<div class="gallery-lightbox" id="gallery-lightbox" hidden aria-hidden="true">
+  <button type="button" class="lightbox-close" aria-label="Close">
+    <i class="fas fa-times" aria-hidden="true"></i>
+  </button>
+  <img src="" alt="{{ product.title }}" id="lightbox-img">
+</div>
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/product.js' %}" defer></script>
+  <script src="{% static 'js/home.js' %}" defer></script>
+{% endblock %}

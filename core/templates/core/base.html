@@ -29,14 +29,14 @@
       </a>
 
       <div class="search-wrapper">
-        <form method="get" action="{% url 'core:index' %}" role="search">
+        <form method="get" action="{% url 'products:list' %}" role="search">
           <label for="search-input" class="visually-hidden">Search for products</label>
           <input
             id="search-input"
             type="search"
             name="q"
             placeholder="Search products"
-            value="{{ query|default:'' }}"
+            value="{{ request.GET.q|default:'' }}"
             autocomplete="off"
           >
           <button type="submit" class="search-btn" aria-label="Search">
@@ -81,7 +81,7 @@
           <i class="fas fa-chevron-down chevron" aria-hidden="true"></i>
           <div class="cat-dropdown">
             {% for cat in categories %}
-              <a href="{% url 'core:index' %}?category={{ cat.slug }}">{{ cat.name }}</a>
+              <a href="{% url 'products:category' cat.slug %}">{{ cat.name }}</a>
             {% empty %}
               <a href="{% url 'core:index' %}">All Products</a>
             {% endfor %}
@@ -94,7 +94,7 @@
           </li>
           {% for item in nav_items %}
             <li>
-              <a href="{% url 'core:index' %}?category={{ item.category.slug }}">
+              <a href="{% url 'products:category' item.category.slug %}">
                 {{ item.category.name }}
                 {% if item.brands %}
                   <i class="fas fa-chevron-down" aria-hidden="true"></i>
@@ -103,7 +103,7 @@
               {% if item.brands %}
                 <div class="dropdown">
                   {% for brand in item.brands %}
-                    <a href="{% url 'core:index' %}?category={{ item.category.slug }}&amp;brand={{ brand.slug }}">
+                    <a href="{% url 'products:category' item.category.slug %}?brand={{ brand.slug }}">
                       {{ brand.name }}
                     </a>
                   {% endfor %}
@@ -176,7 +176,7 @@
         <summary>All Categories</summary>
         <div class="mobile-nav-sub">
           {% for cat in categories %}
-            <a href="{% url 'core:index' %}?category={{ cat.slug }}">{{ cat.name }}</a>
+            <a href="{% url 'products:category' cat.slug %}">{{ cat.name }}</a>
           {% empty %}
             <a href="{% url 'core:index' %}">All Products</a>
           {% endfor %}
@@ -187,9 +187,9 @@
         <details class="mobile-nav-group">
           <summary>{{ item.category.name }}</summary>
           <div class="mobile-nav-sub">
-            <a href="{% url 'core:index' %}?category={{ item.category.slug }}">All {{ item.category.name }}</a>
+            <a href="{% url 'products:category' item.category.slug %}">All {{ item.category.name }}</a>
             {% for brand in item.brands %}
-              <a href="{% url 'core:index' %}?category={{ item.category.slug }}&amp;brand={{ brand.slug }}">
+              <a href="{% url 'products:category' item.category.slug %}?brand={{ brand.slug }}">
                 {{ brand.name }}
               </a>
             {% endfor %}
@@ -288,7 +288,7 @@
         <h4>Categories</h4>
         <ul>
           {% for cat in categories|slice:":6" %}
-            <li><a href="{% url 'core:index' %}?category={{ cat.slug }}">{{ cat.name }}</a></li>
+            <li><a href="{% url 'products:category' cat.slug %}">{{ cat.name }}</a></li>
           {% empty %}
             <li><a href="#">Mobile phones</a></li>
             <li><a href="#">Laptops</a></li>
@@ -299,7 +299,7 @@
         <h4>Categories</h4>
         <ul>
           {% for cat in categories|slice:"6:11" %}
-            <li><a href="{% url 'core:index' %}?category={{ cat.slug }}">{{ cat.name }}</a></li>
+            <li><a href="{% url 'products:category' cat.slug %}">{{ cat.name }}</a></li>
           {% empty %}
             <li><a href="#">Accessories</a></li>
           {% endfor %}

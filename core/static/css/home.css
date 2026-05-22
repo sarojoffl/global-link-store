@@ -291,15 +291,13 @@ body.page-home .main-content {
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0.55;
-  filter: grayscale(100%);
-  transition: opacity 0.3s ease, filter 0.3s ease, transform 0.3s ease;
+  opacity: 1;
+  filter: grayscale(0%);
+  transition: transform 0.3s ease;
   padding: 0 10px;
 }
 
 .brand-item:hover {
-  opacity: 1;
-  filter: grayscale(0%);
   transform: scale(1.05);
 }
 
@@ -582,6 +580,7 @@ body.page-home .main-content {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  color: inherit;
 }
 
 .card-image-wrap img {
@@ -628,6 +627,15 @@ body.page-home .main-content {
   -webkit-box-orient: vertical;
   overflow: hidden;
   min-height: 40px;
+}
+
+.card-body .title a {
+  color: inherit;
+  transition: color 0.2s ease;
+}
+
+.card-body .title a:hover {
+  color: var(--color-primary);
 }
 
 .card-body .meta {

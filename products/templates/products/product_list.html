@@ -1,0 +1,311 @@
+{% extends "core/base.html" %}
+{% load static catalog_tags %}
+
+{% block title %}{{ page_title }} – Global Link Store{% endblock %}
+{% block body_class %} class="page-catalog"{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/catalog.css' %}">
+  <link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="catalog-page">
+  <div class="container">
+
+    <nav class="catalog-breadcrumb" aria-label="Breadcrumb">
+      <a href="{% url 'core:index' %}">Home</a>
+      <span class="bc-sep" aria-hidden="true"><i class="fas fa-chevron-right"></i></span>
+      {% if active_category and filter_brand and not query %}
+        <a href="{% url 'products:category' active_category.slug %}">{{ active_category.name }}</a>
+        <span class="bc-sep" aria-hidden="true"><i class="fas fa-chevron-right"></i></span>
+        <span class="bc-current" aria-current="page">{{ filter_brand.name }}</span>
+      {% elif active_category and not query %}
+        <span class="bc-current" aria-current="page">{{ active_category.name }}</span>
+      {% elif active_brand and not query %}
+        <a href="{% url 'products:list' %}">Products</a>
+        <span class="bc-sep" aria-hidden="true"><i class="fas fa-chevron-right"></i></span>
+        <span class="bc-current" aria-current="page">{{ active_brand.name }}</span>
+      {% elif query %}
+        <a href="{% url 'products:list' %}">Products</a>
+        <span class="bc-sep" aria-hidden="true"><i class="fas fa-chevron-right"></i></span>
+        <span class="bc-current" aria-current="page">Search</span>
+      {% else %}
+        <span class="bc-current" aria-current="page">All Products</span>
+      {% endif %}
+    </nav>
+
+    <header class="catalog-header">
+      <div class="catalog-header__text">
+        <h1>{{ page_title }}</h1>
+        <p>{{ page_subtitle }}</p>
+      </div>
+      <div class="catalog-header__tools">
+        <button type="button" class="btn-filters-toggle" data-filters-toggle aria-expanded="false">
+          <i class="fas fa-sliders-h" aria-hidden="true"></i>
+          Filters
+          {% if has_active_filters or selected_brand_slugs or in_stock or on_sale or product_type or min_price or max_price %}
+            <span class="filter-toggle-badge"></span>
+          {% endif %}
+        </button>
+        <form method="get" action="{{ form_action }}" class="catalog-sort-form" id="catalog-sort-form">
+          {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+          {% for b in selected_brand_slugs %}
+            <input type="hidden" name="brand" value="{{ b }}">
+          {% endfor %}
+          {% if min_price %}<input type="hidden" name="min_price" value="{{ min_price }}">{% endif %}
+          {% if max_price %}<input type="hidden" name="max_price" value="{{ max_price }}">{% endif %}
+          {% if in_stock %}<input type="hidden" name="in_stock" value="1">{% endif %}
+          {% if on_sale %}<input type="hidden" name="on_sale" value="1">{% endif %}
+          {% if product_type %}<input type="hidden" name="type" value="{{ product_type }}">{% endif %}
+          <label for="sort" class="visually-hidden">Sort by</label>
+          <select name="sort" id="sort" class="catalog-sort" data-auto-submit>
+            {% for key, label in sort_options %}
+              <option value="{{ key }}"{% if sort == key %} selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </form>
+      </div>
+    </header>
+
+    {% if query or has_active_filters or selected_brand_slugs or in_stock or on_sale or product_type or min_price or max_price %}
+      <div class="active-filters" aria-label="Active filters">
+        {% if query %}
+          <a href="{{ form_action }}{% catalog_query q='' %}" class="filter-chip">
+            Search: {{ query|truncatechars:24 }} <i class="fas fa-times" aria-hidden="true"></i>
+          </a>
+        {% endif %}
+        {% if filter_brand and not active_brand %}
+          <span class="filter-chip filter-chip--static">{{ filter_brand.name }}</span>
+        {% elif active_brand %}
+          <span class="filter-chip filter-chip--static">{{ active_brand.name }}</span>
+        {% endif %}
+        {% if in_stock %}
+          <a href="{{ form_action }}{% catalog_query in_stock='' %}" class="filter-chip">
+            In stock <i class="fas fa-times" aria-hidden="true"></i>
+          </a>
+        {% endif %}
+        {% if on_sale %}
+          <a href="{{ form_action }}{% catalog_query on_sale='' %}" class="filter-chip">
+            On sale <i class="fas fa-times" aria-hidden="true"></i>
+          </a>
+        {% endif %}
+        {% if product_type %}
+          <a href="{{ form_action }}{% catalog_query type='' %}" class="filter-chip">
+            {{ product_type|title }} <i class="fas fa-times" aria-hidden="true"></i>
+          </a>
+        {% endif %}
+        {% if min_price or max_price %}
+          <a href="{{ form_action }}{% catalog_query min_price='' max_price='' %}" class="filter-chip">
+            Rs {{ min_price|default:"0" }} – {{ max_price|default:"max" }}
+            <i class="fas fa-times" aria-hidden="true"></i>
+          </a>
+        {% endif %}
+        <a href="{% if active_category %}{% url 'products:category' active_category.slug %}{% elif active_brand %}{% url 'products:brand' active_brand.slug %}{% else %}{% url 'products:list' %}{% endif %}" class="filter-chip filter-chip--clear">
+          Clear all
+        </a>
+      </div>
+    {% endif %}
+
+    <div class="catalog-layout">
+      <aside class="catalog-filters" id="catalog-filters" aria-label="Product filters">
+        <div class="filters-panel">
+          <div class="filters-panel__head">
+            <h2>Filters</h2>
+            <button type="button" class="filters-close" data-filters-close aria-label="Close filters">
+              <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+          </div>
+
+          <form method="get" action="{{ form_action }}" class="filters-form" id="filters-form">
+            {% if query %}
+              <input type="hidden" name="q" value="{{ query }}">
+            {% endif %}
+            {% if sort and sort != 'newest' %}
+              <input type="hidden" name="sort" value="{{ sort }}">
+            {% endif %}
+
+            <div class="filter-group">
+              <h3 class="filter-group__title">Categories</h3>
+              <ul class="filter-list">
+                <li>
+                  <a href="{% url 'products:list' %}{% if query %}?q={{ query|urlencode }}{% endif %}"
+                     class="filter-link{% if not active_category and not active_brand %} is-active{% endif %}">
+                    All categories
+                  </a>
+                </li>
+                {% for cat in categories %}
+                  <li>
+                    <a href="{% url 'products:category' cat.slug %}{% if query %}?q={{ query|urlencode }}{% endif %}"
+                       class="filter-link{% if active_category and active_category.slug == cat.slug %} is-active{% endif %}">
+                      {% if cat.icon %}<i class="{{ cat.icon }}" aria-hidden="true"></i>{% endif %}
+                      {{ cat.name }}
+                      <span class="filter-count">{{ cat.product_count }}</span>
+                    </a>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+
+            {% if brand_filters %}
+              <div class="filter-group">
+                <h3 class="filter-group__title">Brand</h3>
+                <ul class="filter-checklist">
+                  {% for brand in brand_filters %}
+                    <li>
+                      <label class="filter-check">
+                        <input
+                          type="checkbox"
+                          name="brand"
+                          value="{{ brand.slug }}"
+                          {% if brand.slug in selected_brand_slugs or active_brand and active_brand.slug == brand.slug %}checked{% endif %}
+                          {% if active_brand and active_brand.slug == brand.slug %}disabled{% endif %}
+                        >
+                        <span class="filter-check__label">{{ brand.name }}</span>
+                        <span class="filter-count">{{ brand.product_count }}</span>
+                      </label>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
+
+            <div class="filter-group">
+              <h3 class="filter-group__title">Price (Rs)</h3>
+              <div class="filter-price-row">
+                <input
+                  type="number"
+                  name="min_price"
+                  placeholder="Min"
+                  min="0"
+                  step="1"
+                  value="{{ min_price }}"
+                  class="filter-price-input"
+                >
+                <span class="filter-price-sep">–</span>
+                <input
+                  type="number"
+                  name="max_price"
+                  placeholder="Max"
+                  min="0"
+                  step="1"
+                  value="{{ max_price }}"
+                  class="filter-price-input"
+                >
+              </div>
+              {% if price_min_bound and price_max_bound %}
+                <p class="filter-hint">
+                  Available: Rs {{ price_min_bound|floatformat:0 }} – {{ price_max_bound|floatformat:0 }}
+                </p>
+              {% endif %}
+            </div>
+
+            <div class="filter-group">
+              <h3 class="filter-group__title">Availability</h3>
+              <label class="filter-check">
+                <input type="checkbox" name="in_stock" value="1"{% if in_stock %} checked{% endif %}>
+                <span class="filter-check__label">In stock only</span>
+              </label>
+              <label class="filter-check">
+                <input type="checkbox" name="on_sale" value="1"{% if on_sale %} checked{% endif %}>
+                <span class="filter-check__label">On sale</span>
+              </label>
+            </div>
+
+            <div class="filter-group">
+              <h3 class="filter-group__title">Collection</h3>
+              <ul class="filter-checklist">
+                {% for value, label in product_types %}
+                  {% if value %}
+                    <li>
+                      <label class="filter-check">
+                        <input type="radio" name="type" value="{{ value }}"{% if product_type == value %} checked{% endif %}>
+                        <span class="filter-check__label">{{ label }}</span>
+                      </label>
+                    </li>
+                  {% endif %}
+                {% endfor %}
+                <li>
+                  <label class="filter-check">
+                    <input type="radio" name="type" value=""{% if not product_type %} checked{% endif %}>
+                    <span class="filter-check__label">All products</span>
+                  </label>
+                </li>
+              </ul>
+            </div>
+
+            <div class="filter-actions">
+              <button type="submit" class="btn-apply-filters">Apply Filters</button>
+              <a href="{% if active_category %}{% url 'products:category' active_category.slug %}{% elif active_brand %}{% url 'products:brand' active_brand.slug %}{% else %}{% url 'products:list' %}{% endif %}{% if query %}?q={{ query|urlencode }}{% endif %}" class="btn-clear-filters">
+                Reset
+              </a>
+            </div>
+          </form>
+        </div>
+      </aside>
+
+      <div class="catalog-results">
+        {% if total_count %}
+          <p class="catalog-results__count">
+            Showing <strong>{{ page_obj.start_index }}–{{ page_obj.end_index }}</strong>
+            of <strong>{{ total_count }}</strong> products
+          </p>
+        {% endif %}
+
+        {% if products %}
+          <div class="catalog-grid">
+            {% for product in products %}
+              {% include "core/includes/product_card.html" %}
+            {% endfor %}
+          </div>
+
+          {% if page_obj.has_other_pages %}
+            <nav class="catalog-pagination" aria-label="Pagination">
+              {% if page_obj.has_previous %}
+                <a href="{{ form_action }}{% catalog_query page=page_obj.previous_page_number %}" class="page-link page-link--prev">
+                  <i class="fas fa-chevron-left" aria-hidden="true"></i> Previous
+                </a>
+              {% endif %}
+              <ul class="page-numbers">
+                {% for num in page_obj.paginator.page_range %}
+                  {% if page_obj.number == num %}
+                    <li><span class="page-current" aria-current="page">{{ num }}</span></li>
+                  {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+                    <li>
+                      <a href="{{ form_action }}{% catalog_query page=num %}" class="page-link">{{ num }}</a>
+                    </li>
+                  {% endif %}
+                {% endfor %}
+              </ul>
+              {% if page_obj.has_next %}
+                <a href="{{ form_action }}{% catalog_query page=page_obj.next_page_number %}" class="page-link page-link--next">
+                  Next <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                </a>
+              {% endif %}
+            </nav>
+          {% endif %}
+        {% else %}
+          <div class="catalog-empty">
+            <div class="catalog-empty__icon">
+              <i class="fas fa-search" aria-hidden="true"></i>
+            </div>
+            <h2>No products found</h2>
+            {% if query %}
+              <p>We couldn't find anything matching "<strong>{{ query }}</strong>". Try different keywords or clear filters.</p>
+            {% else %}
+              <p>Try adjusting your filters or browse all categories.</p>
+            {% endif %}
+            <a href="{% url 'products:list' %}" class="btn-apply-filters">View all products</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</div>
+<div class="filters-overlay" data-filters-overlay hidden></div>
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/catalog.js' %}" defer></script>
+{% endblock %}

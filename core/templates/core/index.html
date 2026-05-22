@@ -30,7 +30,7 @@
         <div class="brand-track-wrapper">
           <div class="brand-track">
             {% for brand in brands %}
-              <a href="{{ brand.url|default:'#' }}" class="brand-item">
+              <a href="{% url 'products:brand' brand.slug %}" class="brand-item">
                 <img src="{{ brand.logo.url }}" alt="{{ brand.name }}">
               </a>
             {% endfor %}
@@ -53,7 +53,7 @@
       </div>
       <div class="category-grid">
         {% for cat in popular_categories %}
-          <a href="{% url 'core:index' %}?category={{ cat.slug }}" class="category-card">
+          <a href="{% url 'products:category' cat.slug %}" class="category-card">
             <div class="cat-image">
               <i class="{{ cat.icon|default:'fas fa-box' }}"></i>
             </div>
@@ -74,7 +74,7 @@
           <span class="section-eyebrow">Handpicked</span>
           <h2>Featured Products</h2>
         </div>
-        <a href="#" class="btn-more">View all <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+        <a href="{% url 'products:list' %}?type=featured" class="btn-more">View all <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
       </div>
       {% include 'core/includes/products_slider.html' with products=featured_products %}
     </section>
@@ -87,7 +87,7 @@
           <span class="section-eyebrow">Just in</span>
           <h2>Latest Products</h2>
         </div>
-        <a href="#" class="btn-more">View all <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+        <a href="{% url 'products:list' %}" class="btn-more">View all <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
       </div>
       {% include 'core/includes/products_slider.html' with products=latest_products %}
     </section>
@@ -100,7 +100,7 @@
           <span class="section-eyebrow">Fresh</span>
           <h2>New Arrivals</h2>
         </div>
-        <a href="#" class="btn-more">View all <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+        <a href="{% url 'products:list' %}?type=new" class="btn-more">View all <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
       </div>
       {% include 'core/includes/products_slider.html' with products=new_arrivals %}
     </section>
@@ -113,7 +113,7 @@
           <span class="section-eyebrow">Save more</span>
           <h2>Best Offers</h2>
         </div>
-        <a href="#" class="btn-more">View all <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+        <a href="{% url 'products:list' %}?type=offer" class="btn-more">View all <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
       </div>
       {% include 'core/includes/products_slider.html' with products=best_offers %}
     </section>

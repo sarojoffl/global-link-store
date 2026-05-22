@@ -91,6 +91,12 @@ class Product(models.Model):
         if self.old_price and self.price:
             return int(((self.old_price - self.price) / self.old_price) * 100)
         return 0
+
+    @property
+    def save_amount(self):
+        if self.old_price and self.price:
+            return self.old_price - self.price
+        return 0
     
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="images")
