@@ -1099,6 +1099,22 @@ body.page-product .main-content {
   }
 }
 
+.cart-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-text);
+  color: #fff;
+  padding: 12px 22px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 9000;
+  box-shadow: var(--shadow-md);
+  animation: tabFade 0.3s ease;
+}
+
 @media (max-width: 480px) {
   .product-breadcrumb {
     font-size: 12px;

@@ -1,0 +1,22 @@
+<nav class="dashboard-nav" aria-label="Account navigation">
+  <a href="{% url 'accounts:dashboard' %}" class="dashboard-nav__link{% if active == 'dashboard' %} is-active{% endif %}">
+    <i class="fas fa-th-large" aria-hidden="true"></i> Dashboard
+  </a>
+  <a href="{% url 'shop:order_list' %}" class="dashboard-nav__link{% if active == 'orders' %} is-active{% endif %}">
+    <i class="fas fa-box" aria-hidden="true"></i> My Orders
+  </a>
+  <a href="{% url 'shop:wishlist' %}" class="dashboard-nav__link{% if active == 'wishlist' %} is-active{% endif %}">
+    <i class="fas fa-heart" aria-hidden="true"></i> Wishlist
+    {% if wishlist_count %}<span class="dashboard-nav__badge">{{ wishlist_count }}</span>{% endif %}
+  </a>
+  <a href="{% url 'accounts:profile' %}" class="dashboard-nav__link{% if active == 'profile' %} is-active{% endif %}">
+    <i class="fas fa-user-circle" aria-hidden="true"></i> Profile
+  </a>
+  <a href="{% url 'accounts:addresses' %}" class="dashboard-nav__link{% if active == 'addresses' %} is-active{% endif %}">
+    <i class="fas fa-map-marker-alt" aria-hidden="true"></i> Address Book
+  </a>
+  <a href="{% url 'shop:cart' %}" class="dashboard-nav__link{% if active == 'cart' %} is-active{% endif %}">
+    <i class="fas fa-shopping-cart" aria-hidden="true"></i> Cart
+    {% if cart_count %}<span class="dashboard-nav__badge">{{ cart_count }}</span>{% endif %}
+  </a>
+</nav>

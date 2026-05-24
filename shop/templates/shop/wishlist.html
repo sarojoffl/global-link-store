@@ -1,0 +1,47 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Wishlist – Global Link Store{% endblock %}
+{% block body_class %} class="page-dashboard"{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/shop.css' %}">
+  <link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="shop-page">
+  <div class="container dashboard-layout">
+    {% include "accounts/includes/dashboard_nav.html" with active="wishlist" %}
+    <div class="dashboard-main">
+      <header class="shop-page__header">
+        <h1>Wishlist</h1>
+        <p>{{ wishlist_items|length }} saved item{{ wishlist_items|length|pluralize }}</p>
+      </header>
+
+      {% if wishlist_items %}
+        <div class="catalog-grid">
+          {% for item in wishlist_items %}
+            <div class="wishlist-item-wrap">
+              {% include "core/includes/product_card.html" with product=item.product %}
+              <form method="post" action="{% url 'shop:wishlist_toggle' item.product.id %}" class="wishlist-remove-bar">
+                {% csrf_token %}
+                <button type="submit" class="btn-text-link btn-text-link--danger">
+                  <i class="fas fa-heart-broken" aria-hidden="true"></i> Remove from wishlist
+                </button>
+              </form>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="shop-empty shop-card">
+          <i class="fas fa-heart" aria-hidden="true"></i>
+          <h2>Your wishlist is empty</h2>
+          <p>Save products you love and come back to them later.</p>
+          <a href="{% url 'products:list' %}" class="btn-shop-primary">Browse Products</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

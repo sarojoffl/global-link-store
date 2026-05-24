@@ -1,8 +1,9 @@
 from products.models import Brand, Category
+from shop.context import shop_context
 
 
 def store_defaults(request):
-    """Shared template context for layout (nav, categories, cart placeholders)."""
+    """Shared template context for layout (nav, categories, cart, wishlist)."""
     categories = list(Category.objects.order_by("name"))
 
     nav_items = []
@@ -17,10 +18,10 @@ def store_defaults(request):
         )
         nav_items.append({"category": category, "brands": brands})
 
+    ctx = shop_context(request)
+
     return {
         "categories": categories,
         "nav_items": nav_items,
-        "cart_count": 0,
-        "cart_total": "0.00",
-        "wishlist_count": 0,
+        **ctx,
     }

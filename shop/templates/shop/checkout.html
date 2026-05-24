@@ -1,0 +1,121 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Checkout – Global Link Store{% endblock %}
+{% block body_class %} class="page-checkout"{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/shop.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="shop-page">
+  <div class="container">
+    <header class="shop-page__header">
+      <h1>Checkout</h1>
+      <p>Review your order and enter delivery details</p>
+    </header>
+
+    <div class="checkout-layout">
+      <section class="checkout-form-wrap shop-card">
+        <h2>Delivery Details</h2>
+        <form method="post" class="checkout-form" novalidate>
+          {% csrf_token %}
+
+          {% if form.address_id.field.queryset.exists %}
+            <div class="form-group">
+              <label for="id_address_id">Saved address</label>
+              {{ form.address_id }}
+            </div>
+            <p class="form-divider">Or enter a new address</p>
+          {% endif %}
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="id_full_name">Full name</label>
+              {{ form.full_name }}
+              {% if form.full_name.errors %}<span class="form-error">{{ form.full_name.errors.0 }}</span>{% endif %}
+            </div>
+            <div class="form-group">
+              <label for="id_phone">Phone</label>
+              {{ form.phone }}
+              {% if form.phone.errors %}<span class="form-error">{{ form.phone.errors.0 }}</span>{% endif %}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="id_email">Email</label>
+            {{ form.email }}
+            {% if form.email.errors %}<span class="form-error">{{ form.email.errors.0 }}</span>{% endif %}
+          </div>
+
+          <div class="form-group">
+            <label for="id_street">Street address</label>
+            {{ form.street }}
+            {% if form.street.errors %}<span class="form-error">{{ form.street.errors.0 }}</span>{% endif %}
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="id_city">City</label>
+              {{ form.city }}
+            </div>
+            <div class="form-group">
+              <label for="id_province">Province</label>
+              {{ form.province }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="id_postal_code">Postal code</label>
+            {{ form.postal_code }}
+          </div>
+
+          <div class="form-group">
+            <span class="form-label">Payment method</span>
+            <div class="payment-options">
+              {{ form.payment_method }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="id_notes">Order notes</label>
+            {{ form.notes }}
+          </div>
+
+          <button type="submit" class="btn-shop-primary btn-shop-primary--lg">
+            Place Order — Rs {{ total|floatformat:2 }}
+          </button>
+        </form>
+      </section>
+
+      <aside class="checkout-summary shop-card">
+        <h2>Your Order</h2>
+        <ul class="checkout-items">
+          {% for item in items %}
+            <li class="checkout-item">
+              <img src="{{ item.product.image.url }}" alt="">
+              <div>
+                <strong>{{ item.product.title|truncatewords:6 }}</strong>
+                <span>× {{ item.quantity }} — Rs {{ item.line_total|floatformat:2 }}</span>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+        <dl class="summary-rows">
+          <div><dt>Subtotal</dt><dd>Rs {{ subtotal|floatformat:2 }}</dd></div>
+          <div><dt>Shipping</dt><dd>{% if shipping == 0 %}Free{% else %}Rs {{ shipping|floatformat:2 }}{% endif %}</dd></div>
+          <div class="summary-total"><dt>Total</dt><dd>Rs {{ total|floatformat:2 }}</dd></div>
+        </dl>
+        {% if subtotal < shipping_free_threshold %}
+          <p class="summary-hint">Free shipping on orders over Rs {{ shipping_free_threshold|floatformat:0 }}</p>
+        {% endif %}
+      </aside>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/shop.js' %}" defer></script>
+{% endblock %}

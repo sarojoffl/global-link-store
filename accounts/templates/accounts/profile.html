@@ -1,0 +1,51 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}My Profile – Global Link Store{% endblock %}
+{% block body_class %} class="page-dashboard"{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/shop.css' %}">
+  <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="shop-page">
+  <div class="container dashboard-layout">
+    {% include "accounts/includes/dashboard_nav.html" with active="profile" %}
+    <div class="dashboard-main">
+      <header class="shop-page__header">
+        <h1>Profile</h1>
+        <p>Update your personal information</p>
+      </header>
+
+      <div class="shop-card profile-form-card">
+        <form method="post" class="checkout-form" novalidate>
+          {% csrf_token %}
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="id_first_name">First name</label>
+              {{ form.first_name }}
+            </div>
+            <div class="form-group">
+              <label for="id_last_name">Last name</label>
+              {{ form.last_name }}
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="id_email">Email</label>
+            {{ form.email }}
+            {% if form.email.errors %}<span class="form-error">{{ form.email.errors.0 }}</span>{% endif %}
+          </div>
+          <div class="form-group">
+            <label for="id_phone">Phone</label>
+            {{ form.phone }}
+          </div>
+          <p class="form-hint">Username: <strong>{{ user.username }}</strong> (cannot be changed)</p>
+          <button type="submit" class="btn-shop-primary">Save Changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

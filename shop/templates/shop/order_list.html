@@ -1,0 +1,49 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}My Orders – Global Link Store{% endblock %}
+{% block body_class %} class="page-dashboard"{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/shop.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="shop-page">
+  <div class="container dashboard-layout">
+    {% include "accounts/includes/dashboard_nav.html" with active="orders" %}
+    <div class="dashboard-main">
+      <header class="shop-page__header">
+        <h1>My Orders</h1>
+        <p>{{ orders|length }} order{{ orders|length|pluralize }}</p>
+      </header>
+
+      {% if orders %}
+        <div class="orders-list">
+          {% for order in orders %}
+            <article class="order-card shop-card">
+              <div class="order-card__head">
+                <div>
+                  <strong>{{ order.order_number }}</strong>
+                  <time datetime="{{ order.created_at|date:'c' }}">{{ order.created_at|date:"d M Y, H:i" }}</time>
+                </div>
+                <span class="order-status order-status--{{ order.status }}">{{ order.get_status_display }}</span>
+              </div>
+              <p class="order-card__items">{{ order.items.count }} item{{ order.items.count|pluralize }} · Rs {{ order.total|floatformat:2 }}</p>
+              <p class="order-card__ship">{{ order.shipping_name }} — {{ order.shipping_city }}</p>
+              <a href="{% url 'shop:order_detail' order.order_number %}" class="btn-shop-secondary">View Details</a>
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="shop-empty shop-card">
+          <i class="fas fa-box" aria-hidden="true"></i>
+          <h2>No orders yet</h2>
+          <p>When you place an order, it will appear here.</p>
+          <a href="{% url 'products:list' %}" class="btn-shop-primary">Start Shopping</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

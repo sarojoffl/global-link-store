@@ -1,0 +1,69 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}My Account – Global Link Store{% endblock %}
+{% block body_class %} class="page-dashboard"{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/shop.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="shop-page">
+  <div class="container dashboard-layout">
+    {% include "accounts/includes/dashboard_nav.html" with active="dashboard" %}
+    <div class="dashboard-main">
+      <header class="shop-page__header">
+        <h1>Hello, {{ user.first_name|default:user.username }}!</h1>
+        <p>Manage your orders, profile, and saved addresses.</p>
+      </header>
+
+      <div class="dashboard-stats">
+        <a href="{% url 'shop:order_list' %}" class="stat-card shop-card">
+          <i class="fas fa-box" aria-hidden="true"></i>
+          <span class="stat-card__value">{{ order_count }}</span>
+          <span class="stat-card__label">Orders</span>
+        </a>
+        <a href="{% url 'shop:wishlist' %}" class="stat-card shop-card">
+          <i class="fas fa-heart" aria-hidden="true"></i>
+          <span class="stat-card__value">{{ wishlist_count }}</span>
+          <span class="stat-card__label">Wishlist</span>
+        </a>
+        <a href="{% url 'accounts:addresses' %}" class="stat-card shop-card">
+          <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+          <span class="stat-card__value">{{ address_count }}</span>
+          <span class="stat-card__label">Addresses</span>
+        </a>
+        <a href="{% url 'shop:cart' %}" class="stat-card shop-card">
+          <i class="fas fa-shopping-cart" aria-hidden="true"></i>
+          <span class="stat-card__value">{{ cart_count }}</span>
+          <span class="stat-card__label">Cart items</span>
+        </a>
+      </div>
+
+      <section class="shop-card">
+        <div class="section-head-inline">
+          <h2>Recent Orders</h2>
+          <a href="{% url 'shop:order_list' %}">View all</a>
+        </div>
+        {% if recent_orders %}
+          <div class="orders-list orders-list--compact">
+            {% for order in recent_orders %}
+              <article class="order-card order-card--compact">
+                <div class="order-card__head">
+                  <strong>{{ order.order_number }}</strong>
+                  <span class="order-status order-status--{{ order.status }}">{{ order.get_status_display }}</span>
+                </div>
+                <p>Rs {{ order.total|floatformat:2 }} · {{ order.created_at|date:"d M Y" }}</p>
+                <a href="{% url 'shop:order_detail' order.order_number %}" class="btn-text-link">Details →</a>
+              </article>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-muted">No orders yet. <a href="{% url 'products:list' %}">Start shopping</a></p>
+        {% endif %}
+      </section>
+    </div>
+  </div>
+</div>
+{% endblock %}

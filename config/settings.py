@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     "core",
     'accounts',
     "products",
+    "shop",
     "social_django",
 ]
 
@@ -108,10 +109,12 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.social_user',
     'social_core.pipeline.user.get_username',
     'social_core.pipeline.user.create_user',
-    'accounts.pipeline.activate_user',   # custom step — see Step 4
+    'accounts.pipeline.activate_user',
+    'accounts.pipeline.setup_user_account',
     'social_core.pipeline.social_auth.associate_user',
     'social_core.pipeline.social_auth.load_extra_data',
     'social_core.pipeline.user.user_details',
+    'accounts.pipeline.merge_cart_on_login',
 )
 
 # Internationalization

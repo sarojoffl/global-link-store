@@ -1,0 +1,84 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Order {{ order.order_number }} – Global Link Store{% endblock %}
+{% block body_class %} class="page-dashboard"{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/shop.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="shop-page">
+  <div class="container dashboard-layout">
+    {% include "accounts/includes/dashboard_nav.html" with active="orders" %}
+    <div class="dashboard-main">
+      <nav class="catalog-breadcrumb">
+        <a href="{% url 'shop:order_list' %}">My Orders</a>
+        <span class="bc-sep"><i class="fas fa-chevron-right"></i></span>
+        <span class="bc-current">{{ order.order_number }}</span>
+      </nav>
+
+      <header class="order-detail-header shop-card">
+        <div>
+          <h1>{{ order.order_number }}</h1>
+          <p>Placed on {{ order.created_at|date:"F j, Y \a\t g:i A" }}</p>
+        </div>
+        <span class="order-status order-status--{{ order.status }}">{{ order.get_status_display }}</span>
+      </header>
+
+      <div class="order-detail-grid">
+        <section class="shop-card">
+          <h2>Items</h2>
+          <table class="order-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Qty</th>
+                <th>Price</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in order.items.all %}
+                <tr>
+                  <td>
+                    <strong>{{ item.product_title }}</strong>
+                    {% if item.variant_note %}<br><small>{{ item.variant_note }}</small>{% endif %}
+                  </td>
+                  <td>{{ item.quantity }}</td>
+                  <td>Rs {{ item.unit_price|floatformat:2 }}</td>
+                  <td>Rs {{ item.line_total|floatformat:2 }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          <dl class="summary-rows summary-rows--right">
+            <div><dt>Subtotal</dt><dd>Rs {{ order.subtotal|floatformat:2 }}</dd></div>
+            <div><dt>Shipping</dt><dd>Rs {{ order.shipping_cost|floatformat:2 }}</dd></div>
+            <div class="summary-total"><dt>Total</dt><dd>Rs {{ order.total|floatformat:2 }}</dd></div>
+          </dl>
+        </section>
+
+        <aside class="shop-card">
+          <h2>Delivery</h2>
+          <address class="order-address">
+            <strong>{{ order.shipping_name }}</strong><br>
+            {{ order.shipping_street }}<br>
+            {{ order.shipping_city }}{% if order.shipping_province %}, {{ order.shipping_province }}{% endif %}
+            {% if order.shipping_postal_code %} {{ order.shipping_postal_code }}{% endif %}<br>
+            <a href="tel:{{ order.shipping_phone }}">{{ order.shipping_phone }}</a><br>
+            <a href="mailto:{{ order.email }}">{{ order.email }}</a>
+          </address>
+          <h2>Payment</h2>
+          <p>{{ order.get_payment_method_display }}</p>
+          {% if order.notes %}
+            <h2>Notes</h2>
+            <p>{{ order.notes }}</p>
+          {% endif %}
+        </aside>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -4,6 +4,8 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 
+from .models import Address, UserProfile
+
 
 class RegisterForm(forms.ModelForm):
     password1 = forms.CharField(
@@ -25,14 +27,12 @@ class RegisterForm(forms.ModelForm):
             'last_name':  forms.TextInput(attrs={'placeholder': 'Last Name'}),
         }
 
-    # Prevent duplicate email
     def clean_email(self):
         email = self.cleaned_data.get('email')
         if User.objects.filter(email=email).exists():
             raise forms.ValidationError("This email is already registered.")
         return email
 
-    # Prevent duplicate username
     def clean_username(self):
         username = self.cleaned_data.get('username')
         if User.objects.filter(username=username).exists():
@@ -71,3 +71,53 @@ class LoginForm(AuthenticationForm):
     password = forms.CharField(
         widget=forms.PasswordInput(attrs={'placeholder': 'Password'})
     )
+
+
+class ProfileForm(forms.ModelForm):
+    first_name = forms.CharField(max_length=150, required=False)
+    last_name = forms.CharField(max_length=150, required=False)
+    email = forms.EmailField(required=True)
+    phone = forms.CharField(max_length=20, required=False, label="Phone number")
+
+    class Meta:
+        model = User
+        fields = ["first_name", "last_name", "email"]
+
+    def __init__(self, user, *args, **kwargs):
+        super().__init__(*args, instance=user, **kwargs)
+        profile, _ = UserProfile.objects.get_or_create(user=user)
+        self.fields["phone"].initial = profile.phone
+        self._profile = profile
+        for name in ("first_name", "last_name", "email", "phone"):
+            if name in self.fields:
+                self.fields[name].widget.attrs.setdefault("class", "shop-input")
+
+    def save(self, commit=True):
+        user = super().save(commit=commit)
+        self._profile.phone = self.cleaned_data.get("phone", "")
+        self._profile.save()
+        return user
+
+
+class AddressForm(forms.ModelForm):
+    class Meta:
+        model = Address
+        fields = [
+            "label",
+            "full_name",
+            "phone",
+            "street",
+            "city",
+            "province",
+            "postal_code",
+            "is_default",
+        ]
+        widgets = {
+            "label": forms.TextInput(attrs={"placeholder": "Home, Office, etc."}),
+            "full_name": forms.TextInput(attrs={"placeholder": "Full name"}),
+            "phone": forms.TextInput(attrs={"placeholder": "+977-98XXXXXXXX"}),
+            "street": forms.TextInput(attrs={"placeholder": "Street address"}),
+            "city": forms.TextInput(attrs={"placeholder": "City"}),
+            "province": forms.TextInput(attrs={"placeholder": "Province / State"}),
+            "postal_code": forms.TextInput(attrs={"placeholder": "Postal code"}),
+        }

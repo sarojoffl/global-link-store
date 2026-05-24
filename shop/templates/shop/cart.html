@@ -1,0 +1,86 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Shopping Cart – Global Link Store{% endblock %}
+{% block body_class %} class="page-cart"{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/shop.css' %}">
+  <link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="shop-page">
+  <div class="container">
+    <header class="shop-page__header">
+      <h1>Shopping Cart</h1>
+      <p>{% if item_count %}{{ item_count }} item{{ item_count|pluralize }} in your cart{% else %}Your cart is empty{% endif %}</p>
+    </header>
+
+    {% if items %}
+      <div class="cart-layout">
+        <section class="cart-items shop-card">
+          {% for item in items %}
+            <article class="cart-line">
+              <a href="{% url 'products:detail' item.product.slug %}" class="cart-line__image">
+                <img src="{{ item.product.image.url }}" alt="{{ item.product.title }}">
+              </a>
+              <div class="cart-line__body">
+                <h3><a href="{% url 'products:detail' item.product.slug %}">{{ item.product.title }}</a></h3>
+                <p class="cart-line__meta">{{ item.product.category.name }}{% if item.product.brand %} · {{ item.product.brand.name }}{% endif %}</p>
+                {% if item.variant_note %}
+                  <p class="cart-line__variant">{{ item.variant_note }}</p>
+                {% endif %}
+                <p class="cart-line__price">Rs {{ item.unit_price|floatformat:2 }} each</p>
+              </div>
+              <div class="cart-line__actions">
+                <form method="post" action="{% url 'shop:cart_update' item.id %}" class="cart-qty-form">
+                  {% csrf_token %}
+                  <button type="button" class="qty-btn" data-qty-minus>-</button>
+                  <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="10" class="qty-input" aria-label="Quantity">
+                  <button type="button" class="qty-btn" data-qty-plus>+</button>
+                  <button type="submit" class="btn-text-link">Update</button>
+                </form>
+                <form method="post" action="{% url 'shop:cart_remove' item.id %}">
+                  {% csrf_token %}
+                  <button type="submit" class="btn-remove" aria-label="Remove item">
+                    <i class="fas fa-trash-alt" aria-hidden="true"></i>
+                  </button>
+                </form>
+              </div>
+              <div class="cart-line__total">Rs {{ item.line_total|floatformat:2 }}</div>
+            </article>
+          {% endfor %}
+        </section>
+
+        <aside class="cart-summary shop-card">
+          <h2>Order Summary</h2>
+          <dl class="summary-rows">
+            <div><dt>Subtotal</dt><dd>Rs {{ subtotal|floatformat:2 }}</dd></div>
+            <div><dt>Shipping</dt><dd>{% if shipping == 0 %}Free{% else %}Rs {{ shipping|floatformat:2 }}{% endif %}</dd></div>
+            <div class="summary-total"><dt>Total</dt><dd>Rs {{ total|floatformat:2 }}</dd></div>
+          </dl>
+          {% if user.is_authenticated %}
+            <a href="{% url 'shop:checkout' %}" class="btn-shop-primary">Proceed to Checkout</a>
+          {% else %}
+            <a href="{% url 'accounts:login' %}?next={% url 'shop:checkout' %}" class="btn-shop-primary">Login to Checkout</a>
+            <p class="summary-note">Guest cart saved — sign in to complete your order.</p>
+          {% endif %}
+          <a href="{% url 'products:list' %}" class="btn-shop-secondary">Continue Shopping</a>
+        </aside>
+      </div>
+    {% else %}
+      <div class="shop-empty shop-card">
+        <i class="fas fa-shopping-cart" aria-hidden="true"></i>
+        <h2>Your cart is empty</h2>
+        <p>Looks like you haven't added anything yet.</p>
+        <a href="{% url 'products:list' %}" class="btn-shop-primary">Browse Products</a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/shop.js' %}" defer></script>
+{% endblock %}

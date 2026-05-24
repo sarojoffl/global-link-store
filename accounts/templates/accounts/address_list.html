@@ -1,0 +1,52 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Address Book – Global Link Store{% endblock %}
+{% block body_class %} class="page-dashboard"{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/shop.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="shop-page">
+  <div class="container dashboard-layout">
+    {% include "accounts/includes/dashboard_nav.html" with active="addresses" %}
+    <div class="dashboard-main">
+      <header class="shop-page__header shop-page__header--row">
+        <div>
+          <h1>Address Book</h1>
+          <p>Saved delivery addresses for faster checkout</p>
+        </div>
+        <a href="{% url 'accounts:address_add' %}" class="btn-shop-primary">Add Address</a>
+      </header>
+
+      {% if addresses %}
+        <div class="address-grid">
+          {% for address in addresses %}
+            <article class="address-card shop-card{% if address.is_default %} address-card--default{% endif %}">
+              {% if address.is_default %}<span class="address-default-badge">Default</span>{% endif %}
+              <h3>{{ address.label }}</h3>
+              <p><strong>{{ address.full_name }}</strong></p>
+              <p>{{ address.street }}</p>
+              <p>{{ address.city }}{% if address.province %}, {{ address.province }}{% endif %}</p>
+              <p><a href="tel:{{ address.phone }}">{{ address.phone }}</a></p>
+              <div class="address-card__actions">
+                <a href="{% url 'accounts:address_edit' address.pk %}" class="btn-text-link">Edit</a>
+                <a href="{% url 'accounts:address_delete' address.pk %}" class="btn-text-link btn-text-link--danger">Delete</a>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="shop-empty shop-card">
+          <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+          <h2>No saved addresses</h2>
+          <p>Add an address to speed up checkout.</p>
+          <a href="{% url 'accounts:address_add' %}" class="btn-shop-primary">Add Address</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

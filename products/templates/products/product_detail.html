@@ -172,6 +172,7 @@
           <button
             type="button"
             class="btn-add-cart"
+            data-add-cart
             data-product-id="{{ product.id }}"
             data-product-title="{{ product.title }}"
             {% if not product.stock %}disabled{% endif %}
@@ -182,6 +183,8 @@
           <button
             type="button"
             class="btn-buy-now"
+            data-buy-now
+            data-product-id="{{ product.id }}"
             {% if not product.stock %}disabled{% endif %}
           >
             Buy Now
@@ -189,9 +192,18 @@
         </div>
 
         <div class="product-secondary-actions">
-          <button type="button" class="secondary-action" data-wishlist>
-            <i class="far fa-heart" aria-hidden="true"></i> Wishlist
-          </button>
+          {% if user.is_authenticated %}
+            <form method="post" action="{% url 'shop:wishlist_toggle' product.id %}" class="wishlist-toggle-form" data-wishlist-form>
+              {% csrf_token %}
+              <button type="submit" class="secondary-action" data-wishlist-btn>
+                <i class="far fa-heart" aria-hidden="true"></i> Wishlist
+              </button>
+            </form>
+          {% else %}
+            <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="secondary-action">
+              <i class="far fa-heart" aria-hidden="true"></i> Wishlist
+            </a>
+          {% endif %}
           <button type="button" class="secondary-action" data-compare>
             <i class="fas fa-exchange-alt" aria-hidden="true"></i> Compare
           </button>

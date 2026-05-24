@@ -1,0 +1,28 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Delete Address – Global Link Store{% endblock %}
+{% block body_class %} class="page-dashboard"{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/shop.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="shop-page">
+  <div class="container dashboard-layout">
+    {% include "accounts/includes/dashboard_nav.html" with active="addresses" %}
+    <div class="dashboard-main">
+      <div class="shop-card">
+        <h1>Delete address?</h1>
+        <p>{{ address.label }} — {{ address.full_name }}, {{ address.city }}</p>
+        <form method="post" class="form-actions-row">
+          {% csrf_token %}
+          <button type="submit" class="btn-shop-primary btn-shop-primary--danger">Delete</button>
+          <a href="{% url 'accounts:addresses' %}" class="btn-shop-secondary">Cancel</a>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

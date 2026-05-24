@@ -121,9 +121,10 @@
                 <span class="nav-icon-label">{{ user.first_name|default:user.username }}</span>
               </button>
               <div class="nav-user-dropdown">
-                <a href="#"><i class="fas fa-user-circle" aria-hidden="true"></i> My Profile</a>
-                <a href="#"><i class="fas fa-box" aria-hidden="true"></i> My Orders</a>
-                <a href="#"><i class="fas fa-heart" aria-hidden="true"></i> Wishlist</a>
+                <a href="{% url 'accounts:dashboard' %}"><i class="fas fa-th-large" aria-hidden="true"></i> Dashboard</a>
+                <a href="{% url 'accounts:profile' %}"><i class="fas fa-user-circle" aria-hidden="true"></i> My Profile</a>
+                <a href="{% url 'shop:order_list' %}"><i class="fas fa-box" aria-hidden="true"></i> My Orders</a>
+                <a href="{% url 'shop:wishlist' %}"><i class="fas fa-heart" aria-hidden="true"></i> Wishlist</a>
                 <div class="dropdown-divider"></div>
                 <a href="{% url 'accounts:logout' %}" class="logout-link">
                   <i class="fas fa-sign-out-alt" aria-hidden="true"></i> Logout
@@ -143,15 +144,17 @@
             </div>
           {% endif %}
 
-          <a href="#" class="nav-icon-btn" title="Compare" aria-label="Compare products">
-            <i class="fas fa-exchange-alt" aria-hidden="true"></i>
-            <span class="badge">{{ wishlist_count|default:0 }}</span>
-          </a>
+          {% if user.is_authenticated %}
+            <a href="{% url 'shop:wishlist' %}" class="nav-icon-btn" title="Wishlist" aria-label="Wishlist">
+              <i class="fas fa-heart" aria-hidden="true"></i>
+              <span class="badge" data-wishlist-count {% if not wishlist_count %}hidden{% endif %}>{{ wishlist_count|default:0 }}</span>
+            </a>
+          {% endif %}
 
-          <a href="#" class="cart-btn" aria-label="Shopping cart">
+          <a href="{% url 'shop:cart' %}" class="cart-btn" aria-label="Shopping cart">
             <span class="cart-icon-wrap">
               <i class="fas fa-shopping-cart" aria-hidden="true"></i>
-              <span class="badge" id="cart-count">{{ cart_count|default:0 }}</span>
+              <span class="badge" id="cart-count"{% if not cart_count %} hidden{% endif %}>{{ cart_count|default:0 }}</span>
             </span>
             <span class="cart-total">Rs {{ cart_total|default:"0.00" }}</span>
           </a>
@@ -200,17 +203,18 @@
       <div class="mobile-nav-actions">
         <p class="mobile-nav-actions-title">Account &amp; Cart</p>
         {% if user.is_authenticated %}
-          <a href="#" class="mobile-nav-action">
-            <i class="fas fa-user-circle" aria-hidden="true"></i>
-            <span>{{ user.first_name|default:user.username }}</span>
+          <a href="{% url 'accounts:dashboard' %}" class="mobile-nav-action">
+            <i class="fas fa-th-large" aria-hidden="true"></i>
+            <span>Dashboard</span>
           </a>
-          <a href="#" class="mobile-nav-action">
+          <a href="{% url 'shop:order_list' %}" class="mobile-nav-action">
             <i class="fas fa-box" aria-hidden="true"></i>
             <span>My Orders</span>
           </a>
-          <a href="#" class="mobile-nav-action">
+          <a href="{% url 'shop:wishlist' %}" class="mobile-nav-action">
             <i class="fas fa-heart" aria-hidden="true"></i>
             <span>Wishlist</span>
+            {% if wishlist_count %}<span class="mobile-nav-badge">{{ wishlist_count }}</span>{% endif %}
           </a>
           <a href="{% url 'accounts:logout' %}" class="mobile-nav-action logout-link">
             <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
@@ -226,12 +230,7 @@
             <span>Register</span>
           </a>
         {% endif %}
-        <a href="#" class="mobile-nav-action">
-          <i class="fas fa-exchange-alt" aria-hidden="true"></i>
-          <span>Compare</span>
-          {% if wishlist_count %}<span class="mobile-nav-badge">{{ wishlist_count }}</span>{% endif %}
-        </a>
-        <a href="#" class="mobile-nav-action mobile-nav-cart">
+        <a href="{% url 'shop:cart' %}" class="mobile-nav-action mobile-nav-cart">
           <i class="fas fa-shopping-cart" aria-hidden="true"></i>
           <span>Cart · Rs {{ cart_total|default:"0.00" }}</span>
           {% if cart_count %}<span class="mobile-nav-badge">{{ cart_count }}</span>{% endif %}
@@ -333,6 +332,7 @@
   </button>
 
   <script src="{% static 'js/base.js' %}" defer></script>
+  <script src="{% static 'js/shop.js' %}" defer></script>
   {% block extra_js %}{% endblock %}
 </body>
 </html>

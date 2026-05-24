@@ -1,0 +1,42 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} – Global Link Store{% endblock %}
+{% block body_class %} class="page-dashboard"{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/shop.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="shop-page">
+  <div class="container dashboard-layout">
+    {% include "accounts/includes/dashboard_nav.html" with active="addresses" %}
+    <div class="dashboard-main">
+      <header class="shop-page__header">
+        <h1>{{ title }}</h1>
+      </header>
+      <div class="shop-card">
+        <form method="post" class="checkout-form" novalidate>
+          {% csrf_token %}
+          {% for field in form %}
+            <div class="form-group{% if field.name == 'is_default' %} form-group--checkbox{% endif %}">
+              {% if field.field.widget.input_type == 'checkbox' %}
+                <label class="filter-check">{{ field }} <span>{{ field.label }}</span></label>
+              {% else %}
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}<span class="form-error">{{ field.errors.0 }}</span>{% endif %}
+              {% endif %}
+            </div>
+          {% endfor %}
+          <div class="form-actions-row">
+            <button type="submit" class="btn-shop-primary">Save Address</button>
+            <a href="{% url 'accounts:addresses' %}" class="btn-shop-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
