@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Redirecting to eSewa...</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin-top: 100px;
+        color: #333;
+      }
+    </style>
+</head>
+<body>
+    <h3>Please wait while we redirect you to eSewa... ⏳</h3>
+    <form id="esewa-form" action="https://rc-epay.esewa.com.np/api/epay/main/v2/form" method="POST" novalidate>
+        <input type="hidden" name="amount" value="{{ esewa_data.amount }}" required>
+        <input type="hidden" name="tax_amount" value="{{ esewa_data.tax_amount }}" required>
+        <input type="hidden" name="total_amount" value="{{ esewa_data.total_amount }}" required>
+        <input type="hidden" name="transaction_uuid" value="{{ esewa_data.transaction_uuid }}" required>
+        <input type="hidden" name="product_code" value="{{ esewa_data.product_code }}" required>
+        <input type="hidden" name="product_service_charge" value="{{ esewa_data.product_service_charge }}" required>
+        <input type="hidden" name="product_delivery_charge" value="{{ esewa_data.product_delivery_charge }}" required>
+        <input type="hidden" name="success_url" value="{{ esewa_data.success_url }}" required>
+        <input type="hidden" name="failure_url" value="{{ esewa_data.failure_url }}" required>
+        <input type="hidden" name="signed_field_names" value="{{ esewa_data.signed_field_names }}" required>
+        <input type="hidden" name="signature" value="{{ esewa_data.signature }}" required>
+        <input type="submit" style="display:none;">
+    </form>
+
+    <script>
+      document.getElementById('esewa-form').submit();
+    </script>
+</body>
+</html>

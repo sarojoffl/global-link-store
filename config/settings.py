@@ -162,3 +162,27 @@ EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
+
+# Site URL (used for payment return URLs)
+SITE_URL = os.getenv("SITE_URL", "http://127.0.0.1:8000")
+
+# eSewa payment gateway
+ESEWA_SECRET_KEY = os.getenv("ESEWA_SECRET_KEY", "")
+ESEWA_PRODUCT_CODE = os.getenv("ESEWA_PRODUCT_CODE", "EPAYTEST")
+ESEWA_PAYMENT_URL = os.getenv(
+    "ESEWA_PAYMENT_URL",
+    "https://rc-epay.esewa.com.np/api/epay/main/v2/form",
+)
+ESEWA_RETURN_URL = os.getenv("ESEWA_RETURN_URL", f"{SITE_URL}/payment/esewa")
+
+# Khalti payment gateway
+KHALTI_SECRET_KEY = os.getenv("KHALTI_SECRET_KEY", "")
+KHALTI_INITIATE_URL = os.getenv(
+    "KHALTI_INITIATE_URL",
+    "https://a.khalti.com/api/v2/epayment/initiate/",
+)
+KHALTI_LOOKUP_URL = os.getenv(
+    "KHALTI_LOOKUP_URL",
+    "https://a.khalti.com/api/v2/epayment/lookup/",
+)
+KHALTI_RETURN_URL = os.getenv("KHALTI_RETURN_URL", f"{SITE_URL}/payment/khalti/verify/")

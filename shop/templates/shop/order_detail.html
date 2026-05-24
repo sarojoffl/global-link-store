@@ -72,6 +72,9 @@
           </address>
           <h2>Payment</h2>
           <p>{{ order.get_payment_method_display }}</p>
+          {% if order.payment_id %}
+            <p class="order-payment-ref"><small>Reference: {{ order.payment_id }}</small></p>
+          {% endif %}
           {% if order.notes %}
             <h2>Notes</h2>
             <p>{{ order.notes }}</p>

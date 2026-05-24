@@ -56,6 +56,7 @@ class Order(models.Model):
     STATUS_SHIPPED = "shipped"
     STATUS_DELIVERED = "delivered"
     STATUS_CANCELLED = "cancelled"
+    STATUS_PAYMENT_FAILED = "payment_failed"
 
     STATUS_CHOICES = [
         (STATUS_PENDING, "Pending"),
@@ -63,13 +64,16 @@ class Order(models.Model):
         (STATUS_SHIPPED, "Shipped"),
         (STATUS_DELIVERED, "Delivered"),
         (STATUS_CANCELLED, "Cancelled"),
+        (STATUS_PAYMENT_FAILED, "Payment Failed"),
     ]
 
     PAYMENT_COD = "cod"
-    PAYMENT_BANK = "bank"
+    PAYMENT_ESEWA = "esewa"
+    PAYMENT_KHALTI = "khalti"
     PAYMENT_CHOICES = [
         (PAYMENT_COD, "Cash on Delivery"),
-        (PAYMENT_BANK, "Bank Transfer"),
+        (PAYMENT_ESEWA, "eSewa"),
+        (PAYMENT_KHALTI, "Khalti"),
     ]
 
     user = models.ForeignKey(
@@ -82,6 +86,7 @@ class Order(models.Model):
     order_number = models.CharField(max_length=32, unique=True, default=generate_order_number)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
     payment_method = models.CharField(max_length=20, choices=PAYMENT_CHOICES, default=PAYMENT_COD)
+    payment_id = models.CharField(max_length=255, blank=True)
 
     email = models.EmailField()
     shipping_name = models.CharField(max_length=120)

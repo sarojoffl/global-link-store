@@ -20,7 +20,8 @@ class CheckoutForm(forms.Form):
     payment_method = forms.ChoiceField(
         choices=[
             ("cod", "Cash on Delivery"),
-            ("bank", "Bank Transfer"),
+            ("esewa", "eSewa"),
+            ("khalti", "Khalti"),
         ],
         widget=forms.RadioSelect,
         initial="cod",

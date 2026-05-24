@@ -527,6 +527,7 @@ body.page-dashboard {
 .order-status--shipped { background: #e0e7ff; color: #4338ca; }
 .order-status--delivered { background: #dcfce7; color: #16a34a; }
 .order-status--cancelled { background: #fee2e2; color: #dc2626; }
+.order-status--payment_failed { background: #fee2e2; color: #dc2626; }
 
 .order-card__items,
 .order-card__ship {
