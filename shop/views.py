@@ -26,7 +26,7 @@ from .cart import (
 )
 from .forms import CheckoutForm
 from .models import Order, OrderItem, WishlistItem
-from .payments import generate_esewa_signature
+from .payments import generate_esewa_signature, verify_esewa_signature
 
 
 def cart_detail(request):
@@ -282,22 +282,53 @@ def _place_order(request, cart, summary, form):
 @csrf_exempt
 def esewa_verify(request, order_id, status):
     order = get_object_or_404(Order, pk=order_id)
-    ref_id = request.GET.get("refId")
 
-    if not ref_id and "data" in request.GET:
-        try:
-            decoded_data = base64.b64decode(request.GET["data"]).decode("utf-8")
-            data_json = json.loads(decoded_data)
-            ref_id = data_json.get("transaction_uuid")
-            status = "su" if data_json.get("status") == "COMPLETE" else "fu"
-        except (json.JSONDecodeError, UnicodeDecodeError, KeyError):
-            order.status = Order.STATUS_PAYMENT_FAILED
-            order.save(update_fields=["status", "updated_at"])
-            messages.error(request, "Payment verification failed.")
-            return redirect("shop:order_detail", order_number=order.order_number)
+    # eSewa sends a base64-encoded JSON payload in the "data" param
+    raw_data = request.GET.get("data")
+    if not raw_data:
+        order.status = Order.STATUS_PAYMENT_FAILED
+        order.save(update_fields=["status", "updated_at"])
+        messages.error(request, "Payment verification failed: no data received.")
+        return redirect("shop:order_detail", order_number=order.order_number)
 
-    if status == "su" and ref_id:
-        order.payment_id = ref_id
+    # Decode the payload
+    try:
+        decoded_data = base64.b64decode(raw_data).decode("utf-8")
+        data_json = json.loads(decoded_data)
+    except (ValueError, UnicodeDecodeError):
+        order.status = Order.STATUS_PAYMENT_FAILED
+        order.save(update_fields=["status", "updated_at"])
+        messages.error(request, "Payment verification failed: malformed data.")
+        return redirect("shop:order_detail", order_number=order.order_number)
+
+    # Verify signature before trusting anything
+    received_signature = data_json.get("signature", "")
+    signed_field_names = data_json.get("signed_field_names", "")
+    signed_fields = [f.strip() for f in signed_field_names.split(",") if f.strip()]
+
+    if not signed_fields or not received_signature:
+        order.status = Order.STATUS_PAYMENT_FAILED
+        order.save(update_fields=["status", "updated_at"])
+        messages.error(request, "Payment verification failed: missing signature.")
+        return redirect("shop:order_detail", order_number=order.order_number)
+
+    if not verify_esewa_signature(
+        settings.ESEWA_SECRET_KEY,
+        data_json,
+        signed_fields,
+        received_signature,
+    ):
+        order.status = Order.STATUS_PAYMENT_FAILED
+        order.save(update_fields=["status", "updated_at"])
+        messages.error(request, "Payment verification failed: signature mismatch.")
+        return redirect("shop:order_detail", order_number=order.order_number)
+
+    # Signature is valid — now check payment status
+    payment_status = data_json.get("status")
+    transaction_uuid = data_json.get("transaction_uuid", "")
+
+    if payment_status == "COMPLETE" and transaction_uuid:
+        order.payment_id = transaction_uuid
         _finalize_paid_order(request, order)
         messages.success(
             request,

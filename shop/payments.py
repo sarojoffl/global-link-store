@@ -11,3 +11,8 @@ def generate_esewa_signature(secret_key, data_dict, signed_fields):
         hashlib.sha256,
     ).digest()
     return base64.b64encode(signature).decode("utf-8")
+
+
+def verify_esewa_signature(secret_key, data_dict, signed_fields, received_signature):
+    expected = generate_esewa_signature(secret_key, data_dict, signed_fields)
+    return hmac.compare_digest(expected, received_signature)
