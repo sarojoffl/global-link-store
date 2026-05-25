@@ -24,7 +24,12 @@
           <h1>{{ order.order_number }}</h1>
           <p>Placed on {{ order.created_at|date:"F j, Y \a\t g:i A" }}</p>
         </div>
-        <span class="order-status order-status--{{ order.status }}">{{ order.get_status_display }}</span>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <a href="{% url 'shop:order_invoice' order.order_number %}" class="btn btn-outline btn-sm">
+            <i class="fas fa-download"></i> Invoice
+          </a>
+          <span class="order-status order-status--{{ order.status }}">{{ order.get_status_display }}</span>
+        </div>
       </header>
 
       <div class="order-detail-grid">

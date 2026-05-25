@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Invoice {{ order.order_number }}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; font-size: 14px; color: #111827; padding: 40px; }
+
+    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; }
+    .store-name { font-size: 20px; font-weight: bold; }
+    .invoice-label { font-size: 28px; font-weight: bold; color: #1d4ed8; }
+
+    hr { border: none; border-top: 1px solid #e5e7eb; margin: 20px 0; }
+
+    .meta { display: flex; gap: 40px; margin-bottom: 24px; }
+    .meta-item label { font-size: 11px; text-transform: uppercase; color: #6b7280; display: block; margin-bottom: 2px; }
+    .meta-item span { font-size: 13px; }
+
+    .address-block { background: #f9fafb; border-radius: 6px; padding: 16px 20px; margin-bottom: 24px; line-height: 1.8; }
+    .address-block label { font-size: 11px; text-transform: uppercase; color: #6b7280; display: block; margin-bottom: 4px; }
+
+    table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+    thead tr { background: #111827; color: white; }
+    thead th { padding: 10px 12px; font-size: 12px; text-align: left; }
+    thead th.right { text-align: right; }
+    tbody tr:nth-child(even) { background: #f9fafb; }
+    tbody td { padding: 10px 12px; font-size: 13px; border-bottom: 1px solid #e5e7eb; }
+    tbody td.right { text-align: right; }
+    small { color: #6b7280; font-size: 11px; }
+
+    .totals { width: 280px; margin-left: auto; }
+    .totals tr td { padding: 5px 0; font-size: 13px; }
+    .totals tr td:last-child { text-align: right; }
+    .totals tr td.label { color: #6b7280; }
+    .totals .total-row td { font-weight: bold; font-size: 15px; border-top: 2px solid #111827; padding-top: 10px; }
+
+    .notes { margin-top: 20px; }
+    .notes label { font-size: 11px; text-transform: uppercase; color: #6b7280; display: block; margin-bottom: 4px; }
+
+    .footer { margin-top: 48px; text-align: center; font-size: 11px; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 16px; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <span class="store-name">Global Link Store</span>
+    <span class="invoice-label">INVOICE</span>
+  </div>
+
+  <hr>
+
+  <div class="meta">
+    <div class="meta-item">
+      <label>Order Number</label>
+      <span>{{ order.order_number }}</span>
+    </div>
+    <div class="meta-item">
+      <label>Date</label>
+      <span>{{ order.created_at|date:"F j, Y" }}</span>
+    </div>
+    <div class="meta-item">
+      <label>Payment</label>
+      <span>{{ order.get_payment_method_display }}</span>
+    </div>
+    <div class="meta-item">
+      <label>Status</label>
+      <span>{{ order.get_status_display }}</span>
+    </div>
+  </div>
+
+  <div class="address-block">
+    <label>Bill To / Ship To</label>
+    {{ order.shipping_name }}<br>
+    {{ order.shipping_street }}<br>
+    {{ order.shipping_city }}{% if order.shipping_province %}, {{ order.shipping_province }}{% endif %}
+    {% if order.shipping_postal_code %} {{ order.shipping_postal_code }}{% endif %}<br>
+    {{ order.shipping_phone }}<br>
+    {{ order.email }}
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Qty</th>
+        <th class="right">Unit Price</th>
+        <th class="right">Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in order.items.all %}
+      <tr>
+        <td>
+          {{ item.product_title }}
+          {% if item.variant_note %}<br><small>{{ item.variant_note }}</small>{% endif %}
+        </td>
+        <td>{{ item.quantity }}</td>
+        <td class="right">Rs {{ item.unit_price|floatformat:2 }}</td>
+        <td class="right">Rs {{ item.line_total|floatformat:2 }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <table class="totals">
+    <tr>
+      <td class="label">Subtotal</td>
+      <td>Rs {{ order.subtotal|floatformat:2 }}</td>
+    </tr>
+    <tr>
+      <td class="label">Shipping</td>
+      <td>{% if order.shipping_cost == 0 %}Free{% else %}Rs {{ order.shipping_cost|floatformat:2 }}{% endif %}</td>
+    </tr>
+    <tr class="total-row">
+      <td>Total</td>
+      <td>Rs {{ order.total|floatformat:2 }}</td>
+    </tr>
+  </table>
+
+  {% if order.notes %}
+  <div class="notes">
+    <label>Notes</label>
+    {{ order.notes }}
+  </div>
+  {% endif %}
+
+  <div class="footer">
+    Thank you for shopping with Global Link Store. For any queries, contact support@globallinkstore.com
+  </div>
+
+</body>
+</html>

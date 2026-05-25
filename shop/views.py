@@ -9,10 +9,12 @@ from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from products.models import Product, ProductSKU
+from shop.tasks import send_order_confirmation_email
 
 from .cart import (
     SHIPPING_COST,
@@ -27,6 +29,7 @@ from .cart import (
 from .forms import CheckoutForm
 from .models import Order, OrderItem, WishlistItem
 from .payments import generate_esewa_signature, verify_esewa_signature
+import weasyprint
 
 
 def cart_detail(request):
@@ -307,6 +310,8 @@ def _place_order(request, cart, summary, form):
     with transaction.atomic():
         clear_cart(cart)
 
+    send_order_confirmation_email.delay(order.id)
+
     messages.success(
         request,
         f"Order {order.order_number} placed successfully! We'll contact you soon.",
@@ -365,6 +370,7 @@ def esewa_verify(request, order_id, status):
     if payment_status == "COMPLETE" and transaction_uuid:
         order.payment_id = transaction_uuid
         _finalize_paid_order(request, order)
+        send_order_confirmation_email.delay(order.id)
         messages.success(
             request,
             f"Payment received for order {order.order_number}. Thank you!",
@@ -407,6 +413,7 @@ def khalti_verify(request):
     payment_status = response.json().get("status")
     if payment_status == "Completed":
         _finalize_paid_order(request, order)
+        send_order_confirmation_email.delay(order.id)
         messages.success(
             request,
             f"Payment received for order {order.order_number}. Thank you!",
@@ -433,6 +440,22 @@ def order_detail(request, order_number):
         user=request.user,
     )
     return render(request, "shop/order_detail.html", {"order": order})
+
+
+@login_required
+def order_invoice(request, order_number):
+    order = get_object_or_404(
+        Order.objects.prefetch_related("items"),
+        order_number=order_number,
+        user=request.user,
+    )
+    html = render_to_string("shop/invoice.html", {"order": order})
+    pdf = weasyprint.HTML(string=html).write_pdf()
+    response = HttpResponse(pdf, content_type="application/pdf")
+    response["Content-Disposition"] = (
+        f'attachment; filename="invoice_{order.order_number}.pdf"'
+    )
+    return response
 
 
 @login_required
