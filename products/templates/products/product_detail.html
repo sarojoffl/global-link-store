@@ -76,8 +76,8 @@
       <div class="product-info">
         <div class="product-info__meta">
           {% if product.brand %}
-            <a
-              href="{% url 'products:category' product.category.slug %}?brand={{ product.brand.slug }}"
+            
+            <a href="{% url 'products:category' product.category.slug %}?brand={{ product.brand.slug }}"
               class="product-brand"
             >
               {% if product.brand.logo %}
@@ -122,11 +122,13 @@
           <p class="price-note"><i class="fas fa-info-circle"></i> Price includes VAT. Delivery charges may apply.</p>
         </div>
 
-        {% if product.stock %}
-          <p class="product-stock in-stock"><i class="fas fa-check-circle"></i> In stock — ready to ship</p>
-        {% else %}
-          <p class="product-stock out-of-stock"><i class="fas fa-times-circle"></i> Out of stock</p>
-        {% endif %}
+        <p class="product-stock{% if product.is_in_stock %} in-stock{% else %} out-of-stock{% endif %}" id="product-stock-status">
+          {% if product.is_in_stock %}
+            <i class="fas fa-check-circle"></i> <span>In stock — ready to ship</span>
+          {% else %}
+            <i class="fas fa-times-circle"></i> <span>Out of stock</span>
+          {% endif %}
+        </p>
 
         {% if variant_groups %}
           <div class="product-variants">
@@ -138,7 +140,6 @@
                     <button
                       type="button"
                       class="variant-option{% if forloop.first %} is-selected{% endif %}"
-                      data-adjustment="{{ option.price_adjustment }}"
                       data-value="{{ option.value }}"
                     >
                       {{ option.value }}
@@ -194,7 +195,7 @@
             data-add-cart
             data-product-id="{{ product.id }}"
             data-product-title="{{ product.title }}"
-            {% if not product.stock %}disabled{% endif %}
+            {% if not product.is_in_stock %}disabled{% endif %}
           >
             <i class="fas fa-shopping-cart" aria-hidden="true"></i>
             Add to Cart
@@ -204,7 +205,7 @@
             class="btn-buy-now"
             data-buy-now
             data-product-id="{{ product.id }}"
-            {% if not product.stock %}disabled{% endif %}
+            {% if not product.is_in_stock %}disabled{% endif %}
           >
             Buy Now
           </button>
@@ -231,8 +232,8 @@
             <button type="button" class="share-btn" data-share="copy" aria-label="Copy link">
               <i class="fas fa-link" aria-hidden="true"></i>
             </button>
-            <a
-              href="https://wa.me/?text={{ product.title|urlencode }}%20{{ request.build_absolute_uri|urlencode }}"
+            
+            <a href="https://wa.me/?text={{ product.title|urlencode }}%20{{ request.build_absolute_uri|urlencode }}"
               class="share-btn share-btn--whatsapp"
               target="_blank"
               rel="noopener noreferrer"
@@ -240,8 +241,8 @@
             >
               <i class="fab fa-whatsapp" aria-hidden="true"></i>
             </a>
-            <a
-              href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri|urlencode }}"
+            
+            <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri|urlencode }}"
               class="share-btn share-btn--facebook"
               target="_blank"
               rel="noopener noreferrer"
@@ -274,7 +275,7 @@
           {% endif %}
           <div class="highlight-item">
             <dt>Availability</dt>
-            <dd>{% if product.stock %}In Stock{% else %}Out of Stock{% endif %}</dd>
+            <dd>{% if product.is_in_stock %}In Stock{% else %}Out of Stock{% endif %}</dd>
           </div>
         </dl>
       </div>
@@ -441,6 +442,12 @@
 
   </div>
 </div>
+
+<script>
+  window.GLS_SKUS = {{ sku_data_json|safe }};
+  window.GLS_BASE_PRICE = {{ product.price }};
+  window.GLS_BASE_OLD_PRICE = {{ product.old_price|default:0 }};
+</script>
 
 <div class="gallery-lightbox" id="gallery-lightbox" hidden aria-hidden="true">
   <button type="button" class="lightbox-close" aria-label="Close">

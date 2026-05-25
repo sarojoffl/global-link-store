@@ -147,56 +147,175 @@
     if (e.key === "Escape" && lightbox && !lightbox.hidden) closeLightbox();
   });
 
-  /* ───────── VARIANTS & PRICE ───────── */
-  function getSelectedAdjustments() {
-    let total = 0;
-    document.querySelectorAll(".variant-group").forEach((group) => {
-      const selected = group.querySelector(".variant-option.is-selected");
-      if (selected) {
-        total += parseFloat(selected.dataset.adjustment || 0);
-      }
-    });
-    return total;
+  /* ───────── SKU LOOKUP & VARIANTS ───────── */
+
+  const SKUS = window.GLS_SKUS || [];
+  const BASE_PRICE = window.GLS_BASE_PRICE || basePrice;
+  const BASE_OLD_PRICE = window.GLS_BASE_OLD_PRICE || baseOldPrice;
+  const hasVariants = document.querySelectorAll(".variant-group").length > 0;
+
+  function normalizeCombo(str) {
+    return (str || "")
+      .split(",")
+      .map((s) => s.trim().toLowerCase())
+      .filter(Boolean)
+      .sort()
+      .join(",");
   }
 
-  function updatePrice() {
-    const adjustment = getSelectedAdjustments();
-    const currentPrice = basePrice + adjustment;
+  function getSelectedCombo() {
+    const parts = [];
+
+    document.querySelectorAll(".variant-group").forEach((group) => {
+      const label = group.dataset.variantGroup;
+      const selected = group.querySelector(".variant-option.is-selected");
+
+      if (label && selected) {
+        const key = label.trim();
+        const value = (selected.dataset.value || "").trim();
+        parts.push(`${key}:${value}`);
+      }
+    });
+
+    return normalizeCombo(parts.join(","));
+  }
+
+  function findSKU(combo) {
+    const normalized = normalizeCombo(combo);
+    for (const sku of SKUS) {
+      if (normalizeCombo(sku.variant_combo) === normalized) {
+        return sku;
+      }
+    }
+    return null;
+  }
+
+  /* STOCK HANDLING */
+  function updateStockStatus(sku) {
+    const stockEl = document.getElementById("product-stock-status");
+    const addBtn = document.querySelector("[data-add-cart]");
+    const buyBtn = document.querySelector("[data-buy-now]");
+
+    if (!stockEl) return;
+
+    const icon = stockEl.querySelector("i");
+    const text = stockEl.querySelector("span");
+
+    if (!sku) {
+      stockEl.className = "product-stock out-of-stock";
+      if (icon) icon.className = "fas fa-times-circle";
+      if (text) text.textContent = "This combination is not available";
+
+      if (addBtn) addBtn.disabled = true;
+      if (buyBtn) buyBtn.disabled = true;
+
+      if (qtyInput) {
+        qtyInput.max = 1;
+        qtyInput.value = 1;
+      }
+      return;
+    }
+
+    const inStock = sku.stock > 0;
+
+    stockEl.className = "product-stock " + (inStock ? "in-stock" : "out-of-stock");
+    if (icon) icon.className = inStock ? "fas fa-check-circle" : "fas fa-times-circle";
+
+    if (inStock) {
+      text.textContent =
+        sku.stock <= 5
+          ? `Only ${sku.stock} left — order soon`
+          : "In stock — ready to ship";
+
+      if (addBtn) addBtn.disabled = false;
+      if (buyBtn) buyBtn.disabled = false;
+
+      if (qtyInput) {
+        const maxQty = Math.min(sku.stock, 10);
+        qtyInput.max = maxQty;
+
+        if (parseInt(qtyInput.value) > maxQty) {
+          qtyInput.value = maxQty;
+        }
+      }
+    } else {
+      text.textContent = "Out of stock";
+
+      if (addBtn) addBtn.disabled = true;
+      if (buyBtn) buyBtn.disabled = true;
+
+      if (qtyInput) {
+        qtyInput.max = 1;
+        qtyInput.value = 1;
+      }
+    }
+  }
+
+  /* PRICE UPDATE (FIXED) */
+  function updatePrice(sku) {
+    let currentPrice = BASE_PRICE;
+    let currentOld = BASE_OLD_PRICE;
+
+    if (sku) {
+      const adj = parseFloat(sku.price_adjustment || 0);
+      currentPrice = BASE_PRICE + adj;
+      currentOld = BASE_OLD_PRICE ? BASE_OLD_PRICE + adj : 0;
+    }
 
     if (priceEl) {
       priceEl.textContent = formatRs(currentPrice);
     }
 
-    if (oldPriceEl && baseOldPrice) {
-      const currentOld = baseOldPrice + adjustment;
+    if (oldPriceEl && currentOld > 0) {
       oldPriceEl.textContent = formatRs(currentOld);
+    }
 
+    if (saveEl && currentOld > 0) {
       const save = currentOld - currentPrice;
-      if (saveEl) {
-        saveEl.textContent = "Save Rs " + save.toFixed(2);
-        saveEl.hidden = save <= 0;
-      }
+      saveEl.textContent = "Save Rs " + save.toFixed(2);
+      saveEl.hidden = save <= 0;
+    }
 
-      if (discountBadge && currentOld > 0 && save > 0) {
+    if (discountBadge && currentOld > 0) {
+      const save = currentOld - currentPrice;
+      if (save > 0) {
         const pct = Math.round((save / currentOld) * 100);
         discountBadge.textContent = "-" + pct + "% OFF";
         discountBadge.hidden = false;
-      } else if (discountBadge) {
+      } else {
         discountBadge.hidden = true;
       }
     }
   }
 
+  /* MAIN TRIGGER */
+  function onVariantChange() {
+    if (SKUS.length === 0) return;
+
+    const combo = hasVariants ? getSelectedCombo() : "";
+    const sku = findSKU(combo);
+
+    updatePrice(sku);
+    updateStockStatus(sku);
+  }
+
+  /* EVENTS */
   document.querySelectorAll(".variant-option").forEach((btn) => {
     btn.addEventListener("click", () => {
       const group = btn.closest(".variant-group");
+
       group.querySelectorAll(".variant-option").forEach((o) => {
         o.classList.remove("is-selected");
       });
+
       btn.classList.add("is-selected");
-      updatePrice();
+
+      onVariantChange();
     });
   });
+
+  /* INIT */
+  onVariantChange();
 
   /* ───────── QUANTITY ───────── */
   document.querySelector("[data-qty-minus]")?.addEventListener("click", () => {
@@ -247,13 +366,8 @@
 
   /* ───────── CART / BUY ───────── */
   function getVariantNote() {
-    const parts = [];
-    document.querySelectorAll(".variant-group").forEach((group) => {
-      const label = group.dataset.variantGroup;
-      const selected = group.querySelector(".variant-option.is-selected");
-      if (selected) parts.push(label + ": " + selected.dataset.value);
-    });
-    return parts.join(", ");
+    if (!hasVariants) return "";
+    return getSelectedCombo();
   }
 
   function buildCartPayload(productId) {

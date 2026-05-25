@@ -28,7 +28,9 @@
               <div class="cart-line__body">
                 <h3><a href="{% url 'products:detail' item.product.slug %}">{{ item.product.title }}</a></h3>
                 <p class="cart-line__meta">{{ item.product.category.name }}{% if item.product.brand %} · {{ item.product.brand.name }}{% endif %}</p>
-                {% if item.variant_note %}
+                {% if item.sku and item.sku.variant_combo %}
+                  <p class="cart-line__variant">{{ item.sku.display_name }}</p>
+                {% elif item.variant_note %}
                   <p class="cart-line__variant">{{ item.variant_note }}</p>
                 {% endif %}
                 <p class="cart-line__price">Rs {{ item.unit_price|floatformat:2 }} each</p>

@@ -1,4 +1,6 @@
 from collections import defaultdict
+from itertools import product
+import json
 
 from django.core.paginator import Paginator
 from django.db.models import Count, Prefetch
@@ -6,6 +8,8 @@ from django.shortcuts import get_object_or_404, render
 
 from .catalog import SORT_OPTIONS, build_catalog_queryset
 from .models import Brand, Category, Product, ProductVariantGroup, ProductVariantOption
+from django.core.serializers.json import DjangoJSONEncoder
+from .utils import format_variant_combo
 
 
 def _catalog_base_url(request, active_category=None, active_brand=None):
@@ -190,6 +194,16 @@ def product_detail(request, slug):
         .select_related("category", "brand")[:12]
     )
 
+    sku_data = [
+        {
+            "variant_combo": sku.variant_combo,
+            "display_combo": format_variant_combo(sku.variant_combo),
+            "stock": sku.stock,
+            "price_adjustment": sku.price_adjustment,
+        }
+        for sku in product.skus.all()
+    ]
+
     return render(
         request,
         "products/product_detail.html",
@@ -200,5 +214,6 @@ def product_detail(request, slug):
             "key_specs": key_specs,
             "variant_groups": variant_groups,
             "related_products": related_products,
+            "sku_data_json": json.dumps(sku_data, cls=DjangoJSONEncoder),
         },
     )

@@ -5,6 +5,9 @@
       {% if product.old_price %}
         <span class="discount-badge">-{{ product.discount_percent }}%</span>
       {% endif %}
+      {% if not product.is_in_stock %}
+        <span class="out-of-stock-badge">Out of Stock</span>
+      {% endif %}
       <img src="{{ product.image.url }}" alt="{{ product.title }}" loading="lazy">
     </a>
 
@@ -17,7 +20,7 @@
         {{ product.category.name }} · {{ product.brand.name|default:"No Brand" }}
       </p>
 
-      {% if product.stock %}
+      {% if product.is_in_stock %}
         <p class="stock"><i class="fas fa-check-circle"></i> In stock</p>
       {% else %}
         <p class="stock out">Out of stock</p>
@@ -30,7 +33,11 @@
         {% endif %}
       </div>
 
-      <a href="{% url 'products:detail' product.slug %}" class="btn-cart" data-id="{{ product.id }}">Add To Cart</a>
+      {% if product.is_in_stock %}
+        <a href="{% url 'products:detail' product.slug %}" class="btn-cart" data-id="{{ product.id }}">Add To Cart</a>
+      {% else %}
+        <a href="{% url 'products:detail' product.slug %}" class="btn-cart btn-cart--disabled">View Product</a>
+      {% endif %}
 
       {% if product.description %}
         <p class="card-desc">{{ product.description|truncatewords:18 }}</p>

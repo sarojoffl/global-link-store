@@ -3,7 +3,7 @@ import uuid
 from django.conf import settings
 from django.db import models
 
-from products.models import Product
+from products.models import Product, ProductSKU
 
 
 def generate_order_number():
@@ -30,6 +30,13 @@ class Cart(models.Model):
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="items")
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    sku = models.ForeignKey(
+        ProductSKU,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="cart_items",
+    )
     quantity = models.PositiveIntegerField(default=1)
     unit_price = models.DecimalField(max_digits=12, decimal_places=2)
     variant_note = models.CharField(max_length=255, blank=True)
@@ -114,6 +121,13 @@ class Order(models.Model):
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
     product = models.ForeignKey(Product, on_delete=models.PROTECT, null=True, blank=True)
+    sku = models.ForeignKey(
+        ProductSKU,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="order_items",
+    )
     product_title = models.CharField(max_length=255)
     variant_note = models.CharField(max_length=255, blank=True)
     quantity = models.PositiveIntegerField()

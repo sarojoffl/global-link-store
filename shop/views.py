@@ -12,7 +12,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
-from products.models import Product
+from products.models import Product, ProductSKU
 
 from .cart import (
     SHIPPING_COST,
@@ -115,7 +115,14 @@ def checkout(request):
         return redirect("shop:cart")
 
     for item in summary["items"]:
-        if not item.product.stock:
+        sku = item.sku
+        if sku and not sku.is_in_stock:
+            messages.error(
+                request,
+                f"{item.product.title} is out of stock. Remove it to continue.",
+            )
+            return redirect("shop:cart")
+        if not sku and not item.product.is_in_stock:
             messages.error(
                 request,
                 f"{item.product.title} is out of stock. Remove it to continue.",
@@ -162,6 +169,7 @@ def _create_order_items(order, items):
         OrderItem.objects.create(
             order=order,
             product=item.product,
+            sku=item.sku,
             product_title=item.product.title,
             variant_note=item.variant_note,
             quantity=item.quantity,
@@ -170,11 +178,29 @@ def _create_order_items(order, items):
         )
 
 
+def _deduct_order_stock(order):
+    """Reduce ProductSKU.stock for each line item. Raises ValueError if insufficient."""
+    from django.db.models import F
+
+    for item in order.items.select_related("sku").select_for_update():
+        if not item.sku:
+            continue
+        updated = ProductSKU.objects.filter(
+            pk=item.sku.pk,
+            stock__gte=item.quantity,
+        ).update(stock=F("stock") - item.quantity)
+        if not updated:
+            raise ValueError(
+                f"'{item.product_title}' ran out of stock during checkout."
+            )
+
+
 def _finalize_paid_order(request, order):
-    cart = get_cart(request)
-    clear_cart(cart)
-    order.status = Order.STATUS_CONFIRMED
-    order.save(update_fields=["status", "updated_at"])
+    with transaction.atomic():
+        _deduct_order_stock(order)
+        clear_cart(get_cart(request))
+        order.status = Order.STATUS_CONFIRMED
+        order.save(update_fields=["status", "updated_at"])
 
 
 def _initiate_khalti_payment(request, order, data):
@@ -259,9 +285,18 @@ def _place_order(request, cart, summary, form):
     data = form.cleaned_data
     payment_method = data["payment_method"]
 
-    with transaction.atomic():
-        order = _create_order(request, summary, data)
-        _create_order_items(order, summary["items"])
+    try:
+        with transaction.atomic():
+            order = _create_order(request, summary, data)
+            _create_order_items(order, summary["items"])
+
+            if payment_method == Order.PAYMENT_COD:
+                _deduct_order_stock(order)
+                order.status = Order.STATUS_CONFIRMED
+                order.save(update_fields=["status", "updated_at"])
+    except ValueError as exc:
+        messages.error(request, str(exc))
+        return redirect("shop:cart")
 
     if payment_method == Order.PAYMENT_KHALTI:
         return _initiate_khalti_payment(request, order, data)

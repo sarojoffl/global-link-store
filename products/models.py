@@ -4,28 +4,18 @@ from django.utils.text import slugify
 
 class Category(models.Model):
     name = models.CharField(max_length=120)
-
-    slug = models.SlugField(
-        unique=True,
-        blank=True
-    )
-
-    icon = models.CharField(
-        max_length=100,
-        blank=True
-    )
-
+    slug = models.SlugField(unique=True, blank=True)
+    icon = models.CharField(max_length=100, blank=True)
     is_popular = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
-
         if not self.slug:
             self.slug = slugify(self.name)
-
         super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
+
 
 class Brand(models.Model):
     name = models.CharField(max_length=120)
@@ -46,8 +36,8 @@ class Brand(models.Model):
             self.slug = slugify(self.name)
         super().save(*args, **kwargs)
 
-class Product(models.Model):
 
+class Product(models.Model):
     PRODUCT_TYPES = (
         ("featured", "Featured"),
         ("offer", "Best Offer"),
@@ -56,35 +46,27 @@ class Product(models.Model):
 
     title = models.CharField(max_length=255)
     slug = models.SlugField(unique=True, blank=True)
-
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True)
-
     price = models.DecimalField(max_digits=12, decimal_places=2)
     old_price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
-
     image = models.ImageField(upload_to="products/")
-
     description = models.TextField(blank=True)
-
-    stock = models.BooleanField(default=True)
-
-    product_type = models.CharField(
-        max_length=20,
-        choices=PRODUCT_TYPES,
-        blank=True
-    )
-
+    product_type = models.CharField(max_length=20, choices=PRODUCT_TYPES, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.title)
-
         super().save(*args, **kwargs)
 
     def __str__(self):
         return self.title
+
+    @property
+    def is_in_stock(self):
+        """True if any SKU has stock > 0."""
+        return self.skus.filter(stock__gt=0).exists()
 
     @property
     def discount_percent(self):
@@ -97,7 +79,8 @@ class Product(models.Model):
         if self.old_price and self.price:
             return self.old_price - self.price
         return 0
-    
+
+
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="images")
     image = models.ImageField(upload_to="products/gallery/")
@@ -105,20 +88,28 @@ class ProductImage(models.Model):
 
     def __str__(self):
         return f"{self.product.title} Image"
-    
+
+
 class ProductVariantGroup(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    name = models.CharField(max_length=100)  # Color / Storage
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f"{self.product.title} — {self.name}"
+
 
 class ProductVariantOption(models.Model):
     group = models.ForeignKey(ProductVariantGroup, on_delete=models.CASCADE)
     value = models.CharField(max_length=100)
-    price_adjustment = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    def __str__(self):
+        return f"{self.group.name}: {self.value}"
+
 
 class ProductSpecification(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="specs")
-    section = models.CharField(max_length=100)  # GENERAL, DISPLAY, etc
-    name = models.CharField(max_length=100)     # RAM, CPU, Battery
+    section = models.CharField(max_length=100)
+    name = models.CharField(max_length=100)
     value = models.CharField(max_length=255)
     is_key = models.BooleanField(
         default=False,
@@ -130,3 +121,35 @@ class ProductSpecification(models.Model):
 
     def __str__(self):
         return f"{self.name}: {self.value}"
+
+
+class ProductSKU(models.Model):
+    """
+    Represents a specific purchasable combination of variant options.
+    e.g. iPhone 16 — Color:Black,Storage:128GB
+
+    Products with no variants have a single SKU with variant_combo="".
+    """
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="skus")
+    variant_combo = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text='Comma-separated key:value pairs. e.g. "Color:Black,Storage:128GB"',
+    )
+    stock = models.PositiveIntegerField(default=0)
+    price_adjustment = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    class Meta:
+        unique_together = ["product", "variant_combo"]
+        ordering = ["variant_combo"]
+
+    @property
+    def is_in_stock(self):
+        return self.stock > 0
+
+    @property
+    def display_name(self):
+        return self.variant_combo.replace(",", " / ") if self.variant_combo else "Default"
+
+    def __str__(self):
+        return f"{self.product.title} — {self.display_name} (stock: {self.stock})"

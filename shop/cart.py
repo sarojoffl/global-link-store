@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from django.db import transaction
 
-from products.models import Product, ProductVariantOption
+from products.models import Product, ProductSKU
 
 from .models import Cart, CartItem
 
@@ -41,7 +41,7 @@ def merge_session_cart_into_user(request, user):
     user_cart, _ = Cart.objects.get_or_create(user=user, defaults={"session_key": ""})
 
     with transaction.atomic():
-        for item in session_cart.items.select_related("product"):
+        for item in session_cart.items.select_related("product", "sku"):
             existing = user_cart.items.filter(
                 product=item.product,
                 variant_note=item.variant_note,
@@ -55,52 +55,71 @@ def merge_session_cart_into_user(request, user):
         session_cart.delete()
 
 
-def calculate_unit_price(product, variant_note=""):
-    price = product.price
-    if not variant_note:
-        return price
+def normalize_combo(combo: str) -> str:
+    """Match frontend: sort comma-separated key:value pairs case-insensitively."""
+    parts = [p.strip().lower() for p in (combo or "").split(",") if p.strip()]
+    return ",".join(sorted(parts))
 
-    adjustments = Decimal("0")
-    for part in variant_note.split(","):
-        part = part.strip()
-        if ":" in part:
-            value = part.split(":", 1)[1].strip()
-            option = ProductVariantOption.objects.filter(
-                group__product=product,
-                value=value,
-            ).first()
-            if option:
-                adjustments += option.price_adjustment
-    return price + adjustments
+
+def resolve_sku(product, variant_combo):
+    normalized = normalize_combo(variant_combo or "")
+
+    for sku in ProductSKU.objects.filter(product=product):
+        if normalize_combo(sku.variant_combo) == normalized:
+            return sku
+
+    return None
+
+
+def calculate_unit_price(product, sku):
+    """Price is base product price + SKU adjustment."""
+    return product.price + sku.price_adjustment
 
 
 def add_to_cart(request, product_id, quantity=1, variant_note=""):
-    product = Product.objects.filter(pk=product_id, stock=True).first()
+    product = Product.objects.filter(pk=product_id).first()
     if not product:
-        return None, "Product is unavailable."
+        return None, "Product not found."
 
-    quantity = max(1, min(int(quantity), 10))
-    variant_note = (variant_note or "").strip()[:255]
-    unit_price = calculate_unit_price(product, variant_note)
+    variant_combo = (variant_note or "").strip()[:255]
+
+    sku = resolve_sku(product, variant_combo)
+    if not sku:
+        return None, "Invalid variant selected."
+
+    if not sku.is_in_stock:
+        return None, "This variant is out of stock."
+
+    # Cap quantity at available stock, max 10
+    max_qty = min(sku.stock, 10)
+    quantity = max(1, min(int(quantity), max_qty))
+
+    unit_price = calculate_unit_price(product, sku)
 
     cart = get_cart(request)
     item, created = CartItem.objects.get_or_create(
         cart=cart,
         product=product,
-        variant_note=variant_note,
-        defaults={"quantity": quantity, "unit_price": unit_price},
+        variant_note=variant_combo,
+        defaults={
+            "quantity": quantity,
+            "unit_price": unit_price,
+            "sku": sku,
+        },
     )
     if not created:
-        item.quantity = min(item.quantity + quantity, 10)
+        new_qty = min(item.quantity + quantity, max_qty)
+        item.quantity = new_qty
         item.unit_price = unit_price
-        item.save(update_fields=["quantity", "unit_price"])
+        item.sku = sku
+        item.save(update_fields=["quantity", "unit_price", "sku"])
 
     return item, None
 
 
 def update_cart_item(request, item_id, quantity):
     cart = get_cart(request)
-    item = cart.items.filter(pk=item_id).select_related("product").first()
+    item = cart.items.filter(pk=item_id).select_related("product", "sku").first()
     if not item:
         return None, "Item not found."
 
@@ -109,7 +128,13 @@ def update_cart_item(request, item_id, quantity):
         item.delete()
         return None, None
 
-    item.quantity = min(quantity, 10)
+    if item.sku:
+        max_qty = min(item.sku.stock, 10)
+        if quantity > item.sku.stock:
+            return None, f"Only {item.sku.stock} units available."
+        quantity = min(quantity, max_qty)
+
+    item.quantity = quantity
     item.save(update_fields=["quantity"])
     return item, None
 
@@ -121,7 +146,9 @@ def remove_cart_item(request, item_id):
 
 def get_cart_summary(cart):
     items = list(
-        cart.items.select_related("product", "product__brand", "product__category")
+        cart.items.select_related(
+            "product", "product__brand", "product__category", "sku"
+        )
     )
     subtotal = sum((i.line_total for i in items), Decimal("0"))
     item_count = sum(i.quantity for i in items)
