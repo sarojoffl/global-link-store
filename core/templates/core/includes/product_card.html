@@ -5,9 +5,6 @@
       {% if product.old_price %}
         <span class="discount-badge">-{{ product.discount_percent }}%</span>
       {% endif %}
-      {% if not product.is_in_stock %}
-        <span class="out-of-stock-badge">Out of Stock</span>
-      {% endif %}
       <img src="{{ product.image.url }}" alt="{{ product.title }}" loading="lazy">
     </a>
 

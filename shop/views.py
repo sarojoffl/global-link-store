@@ -14,7 +14,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from products.models import Product, ProductSKU
-from shop.tasks import send_order_confirmation_email
+from shop.tasks import send_admin_order_notification, send_order_confirmation_email
 
 from .cart import (
     SHIPPING_COST,
@@ -311,6 +311,7 @@ def _place_order(request, cart, summary, form):
         clear_cart(cart)
 
     send_order_confirmation_email.delay(order.id)
+    send_admin_order_notification.delay(order.id)
 
     messages.success(
         request,
@@ -371,6 +372,7 @@ def esewa_verify(request, order_id, status):
         order.payment_id = transaction_uuid
         _finalize_paid_order(request, order)
         send_order_confirmation_email.delay(order.id)
+        send_admin_order_notification.delay(order.id)
         messages.success(
             request,
             f"Payment received for order {order.order_number}. Thank you!",
@@ -414,6 +416,7 @@ def khalti_verify(request):
     if payment_status == "Completed":
         _finalize_paid_order(request, order)
         send_order_confirmation_email.delay(order.id)
+        send_admin_order_notification.delay(order.id)
         messages.success(
             request,
             f"Payment received for order {order.order_number}. Thank you!",

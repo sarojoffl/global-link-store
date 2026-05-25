@@ -163,6 +163,8 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
 
+ADMIN_ORDER_EMAIL = "ariaskye.creates@gmail.com"
+
 # Site URL (used for payment return URLs)
 SITE_URL = os.getenv("SITE_URL", "http://127.0.0.1:8000")
 

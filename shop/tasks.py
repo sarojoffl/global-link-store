@@ -1,6 +1,7 @@
 from celery import shared_task
-from django.core.mail import EmailMessage
+from django.core.mail import EmailMessage, send_mail
 from django.template.loader import render_to_string
+from django.conf import settings
 
 from .models import Order
 
@@ -12,10 +13,44 @@ def send_order_confirmation_email(order_id):
     except Order.DoesNotExist:
         return
 
-    mail_subject = f"Order Confirmed – {order.order_number}"
-    message = render_to_string("shop/emails/order_confirmation.html", {
-        "order": order,
-    })
-    email = EmailMessage(mail_subject, message, to=[order.email])
+    message = render_to_string("shop/emails/order_confirmation.html", {"order": order})
+    email = EmailMessage(
+        subject=f"Order Confirmed – {order.order_number}",
+        body=message,
+        to=[order.email],
+    )
     email.content_subtype = "html"
     email.send()
+
+
+@shared_task
+def send_admin_order_notification(order_id):
+    try:
+        order = Order.objects.prefetch_related("items").get(pk=order_id)
+    except Order.DoesNotExist:
+        return
+
+    lines = [
+        f"New order received: {order.order_number}",
+        f"Customer: {order.shipping_name} ({order.email})",
+        f"Phone: {order.shipping_phone}",
+        f"Payment: {order.get_payment_method_display()}",
+        f"Total: Rs {order.total}",
+        "",
+        "Items:",
+    ]
+    for item in order.items.all():
+        lines.append(f"  - {item.product_title} x{item.quantity} = Rs {item.line_total}")
+    lines += [
+        "",
+        f"Ship to: {order.shipping_street}, {order.shipping_city}",
+    ]
+    if order.notes:
+        lines.append(f"Notes: {order.notes}")
+
+    send_mail(
+        subject=f"[New Order] {order.order_number} – Rs {order.total}",
+        message="\n".join(lines),
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[settings.ADMIN_ORDER_EMAIL],
+    )
