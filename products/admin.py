@@ -19,6 +19,7 @@ class ProductImageInline(admin.TabularInline):
 class ProductSpecificationInline(admin.TabularInline):
     model = ProductSpecification
     extra = 2
+    fields = ("section", "name", "value", "is_key")
 
 
 class ProductVariantOptionInline(admin.TabularInline):

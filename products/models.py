@@ -120,4 +120,13 @@ class ProductSpecification(models.Model):
     section = models.CharField(max_length=100)  # GENERAL, DISPLAY, etc
     name = models.CharField(max_length=100)     # RAM, CPU, Battery
     value = models.CharField(max_length=255)
+    is_key = models.BooleanField(
+        default=False,
+        help_text="Show this spec in the key specs section on the product page.",
+    )
 
+    class Meta:
+        ordering = ["section", "name"]
+
+    def __str__(self):
+        return f"{self.name}: {self.value}"

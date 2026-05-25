@@ -80,19 +80,6 @@
     </section>
   {% endif %}
 
-  {% if latest_products %}
-    <section class="home-section home-section--alt container">
-      <div class="section-header">
-        <div class="section-heading">
-          <span class="section-eyebrow">Just in</span>
-          <h2>Latest Products</h2>
-        </div>
-        <a href="{% url 'products:list' %}" class="btn-more">View all <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
-      </div>
-      {% include 'core/includes/products_slider.html' with products=latest_products %}
-    </section>
-  {% endif %}
-
   {% if new_arrivals %}
     <section class="home-section container">
       <div class="section-header">
@@ -103,6 +90,19 @@
         <a href="{% url 'products:list' %}?type=new" class="btn-more">View all <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
       </div>
       {% include 'core/includes/products_slider.html' with products=new_arrivals %}
+    </section>
+  {% endif %}
+
+  {% if latest_products %}
+    <section class="home-section home-section--alt container">
+      <div class="section-header">
+        <div class="section-heading">
+          <span class="section-eyebrow">Just in</span>
+          <h2>Latest Products</h2>
+        </div>
+        <a href="{% url 'products:list' %}" class="btn-more">View all <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+      </div>
+      {% include 'core/includes/products_slider.html' with products=latest_products %}
     </section>
   {% endif %}
 

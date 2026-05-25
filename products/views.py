@@ -176,6 +176,12 @@ def product_detail(request, slug):
     for spec in product.specs.all().order_by("section", "name"):
         specs_by_section[spec.section].append(spec)
 
+    key_specs = list(
+        product.specs.filter(is_key=True).order_by("section", "name")[:6]
+    )
+    if not key_specs:
+        key_specs = list(product.specs.all().order_by("section", "name")[:6])
+
     variant_groups = list(product.productvariantgroup_set.all())
 
     related_products = (
@@ -191,6 +197,7 @@ def product_detail(request, slug):
             "product": product,
             "gallery": gallery,
             "specs_by_section": dict(specs_by_section),
+            "key_specs": key_specs,
             "variant_groups": variant_groups,
             "related_products": related_products,
         },
