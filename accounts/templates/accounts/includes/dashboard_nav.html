@@ -15,6 +15,9 @@
   <a href="{% url 'accounts:addresses' %}" class="dashboard-nav__link{% if active == 'addresses' %} is-active{% endif %}">
     <i class="fas fa-map-marker-alt" aria-hidden="true"></i> Address Book
   </a>
+  <a href="{% url 'accounts:change_password' %}" class="dashboard-nav__link{% if active == 'change_password' %} is-active{% endif %}">
+    <i class="fas fa-lock" aria-hidden="true"></i> Change Password
+  </a>
   <a href="{% url 'shop:cart' %}" class="dashboard-nav__link{% if active == 'cart' %} is-active{% endif %}">
     <i class="fas fa-shopping-cart" aria-hidden="true"></i> Cart
     {% if cart_count %}<span class="dashboard-nav__badge">{{ cart_count }}</span>{% endif %}

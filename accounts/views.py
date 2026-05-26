@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .forms import RegisterForm, LoginForm, ProfileForm, AddressForm
@@ -205,3 +206,19 @@ def password_reset_confirm_view(request, uidb64, token):
 
 def password_reset_complete_view(request):
     return render(request, 'accounts/password_reset_complete.html')
+
+
+@login_required
+def change_password_view(request):
+    form = PasswordChangeForm(request.user, request.POST or None)
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            update_session_auth_hash(request, form.user)  # keeps user logged in
+            return redirect('accounts:change_password_done')
+        messages.error(request, "Please correct the errors below.")
+    return render(request, 'accounts/change_password.html', {'form': form})
+
+@login_required
+def change_password_done_view(request):
+    return render(request, 'accounts/change_password_done.html')
