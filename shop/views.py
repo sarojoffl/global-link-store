@@ -508,6 +508,12 @@ def order_invoice(request, order_number):
 
 
 @login_required
+def order_tracking(request, order_number):
+    order = get_object_or_404(Order, order_number=order_number, user=request.user)
+    return render(request, "shop/order_tracking.html", {"order": order})
+
+
+@login_required
 def wishlist_view(request):
     items = (
         WishlistItem.objects.filter(user=request.user)

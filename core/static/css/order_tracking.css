@@ -1,0 +1,164 @@
+/* ==========================================================================
+   Order Tracking Page  —  order_tracking.css
+   ========================================================================== */
+
+.trk-card {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 28px 28px 20px;
+  max-width: 640px;
+}
+
+/* Header row */
+.trk-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 36px;
+}
+
+.trk-order-num {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 3px;
+}
+
+.trk-order-date {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+/* ── Steps row ── */
+.trk-steps {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 32px;
+}
+
+/* Each step: icon node + label stacked */
+.trk-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  position: relative;
+}
+
+/* Node = circle + the connecting line to the right */
+.trk-step__node {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  position: relative;
+}
+
+/* The circle */
+.trk-step__circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid #d1d5db;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #d1d5db;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+  transition: border-color 0.25s, background 0.25s, color 0.25s, box-shadow 0.25s;
+}
+
+/* The line stretching right from circle to next step */
+.trk-step__line {
+  flex: 1;
+  height: 2px;
+  background: #e5e7eb;
+  transition: background 0.25s;
+}
+
+/* No line on the last step */
+.trk-step:last-child .trk-step__line {
+  display: none;
+}
+
+/* Label */
+.trk-step__label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #9ca3af;
+  text-align: center;
+  white-space: nowrap;
+  transition: color 0.25s;
+  /* align label under the circle, not the full node width */
+  width: 40px;
+  align-self: center;
+}
+
+/* ── Done state ── */
+.trk-step.is-done .trk-step__circle {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
+.trk-step.is-done .trk-step__line {
+  background: var(--color-primary);
+}
+
+.trk-step.is-done .trk-step__label {
+  color: var(--color-text);
+}
+
+/* ── Final / delivered ── */
+.trk-step.is-final .trk-step__circle {
+  background: #16a34a;
+  border-color: #16a34a;
+  box-shadow: 0 0 0 4px #dcfce7;
+}
+
+.trk-step.is-final .trk-step__label {
+  color: #16a34a;
+  font-weight: 700;
+}
+
+/* ── Failed / cancelled ── */
+.trk-step.is-failed .trk-step__circle {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: #fff;
+}
+
+.trk-step.is-failed .trk-step__label {
+  color: #dc2626;
+}
+
+/* Footer */
+.trk-card__foot {
+  border-top: 1px solid var(--color-border);
+  padding-top: 18px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .trk-card {
+    padding: 20px 16px 16px;
+  }
+
+  .trk-step__label {
+    font-size: 10px;
+    width: 36px;
+  }
+
+  .trk-step__circle {
+    width: 34px;
+    height: 34px;
+    font-size: 12px;
+  }
+}

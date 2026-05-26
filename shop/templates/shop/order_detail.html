@@ -24,7 +24,10 @@
           <h1>{{ order.order_number }}</h1>
           <p>Placed on {{ order.created_at|date:"F j, Y \a\t g:i A" }}</p>
         </div>
-        <div style="display:flex; align-items:center; gap:12px;">
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+          <a href="{% url 'shop:order_tracking' order.order_number %}" class="btn btn-outline btn-sm">
+            <i class="fas fa-route"></i> Track Order
+          </a>
           <a href="{% url 'shop:order_invoice' order.order_number %}" class="btn btn-outline btn-sm">
             <i class="fas fa-download"></i> Invoice
           </a>

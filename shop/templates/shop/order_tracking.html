@@ -1,0 +1,102 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Track Order {{ order.order_number }} – Global Link Store{% endblock %}
+{% block body_class %} class="page-dashboard"{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/shop.css' %}">
+  <link rel="stylesheet" href="{% static 'css/order_tracking.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="shop-page">
+  <div class="container dashboard-layout">
+    {% include "accounts/includes/dashboard_nav.html" with active="orders" %}
+    <div class="dashboard-main">
+
+      <nav class="catalog-breadcrumb">
+        <a href="{% url 'shop:order_list' %}">My Orders</a>
+        <span class="bc-sep"><i class="fas fa-chevron-right"></i></span>
+        <a href="{% url 'shop:order_detail' order.order_number %}">{{ order.order_number }}</a>
+        <span class="bc-sep"><i class="fas fa-chevron-right"></i></span>
+        <span class="bc-current">Track</span>
+      </nav>
+
+      <div class="trk-card">
+
+        <div class="trk-card__head">
+          <div>
+            <p class="trk-order-num">{{ order.order_number }}</p>
+            <p class="trk-order-date">Placed {{ order.created_at|date:"d M Y" }}</p>
+          </div>
+          <span class="order-status order-status--{{ order.status }}">{{ order.get_status_display }}</span>
+        </div>
+
+        {% with s=order.status %}
+        <div class="trk-steps
+          {% if s == 'cancelled' or s == 'payment_failed' %}trk-steps--failed{% endif %}">
+
+          {# ── Step 1: Order Placed ── #}
+          <div class="trk-step is-done">
+            <div class="trk-step__node">
+              <div class="trk-step__circle">
+                <i class="fas fa-check"></i>
+              </div>
+              <div class="trk-step__line"></div>
+            </div>
+            <span class="trk-step__label">Order Placed</span>
+          </div>
+
+          {# ── Step 2: Confirmed ── #}
+          <div class="trk-step
+            {% if s == 'confirmed' or s == 'shipped' or s == 'delivered' %}is-done
+            {% elif s == 'cancelled' or s == 'payment_failed' %}is-failed{% endif %}">
+            <div class="trk-step__node">
+              <div class="trk-step__circle">
+                {% if s == 'cancelled' %}<i class="fas fa-times"></i>
+                {% elif s == 'payment_failed' %}<i class="fas fa-exclamation"></i>
+                {% else %}<i class="fas fa-check"></i>{% endif %}
+              </div>
+              <div class="trk-step__line"></div>
+            </div>
+            <span class="trk-step__label">
+              {% if s == 'cancelled' %}Cancelled
+              {% elif s == 'payment_failed' %}Failed
+              {% else %}Confirmed{% endif %}
+            </span>
+          </div>
+
+          {# ── Step 3: Shipped ── #}
+          {% if s != 'cancelled' and s != 'payment_failed' %}
+          <div class="trk-step {% if s == 'shipped' or s == 'delivered' %}is-done{% endif %}">
+            <div class="trk-step__node">
+              <div class="trk-step__circle"><i class="fas fa-check"></i></div>
+              <div class="trk-step__line"></div>
+            </div>
+            <span class="trk-step__label">Shipped</span>
+          </div>
+
+          {# ── Step 4: Delivered ── #}
+          <div class="trk-step {% if s == 'delivered' %}is-done is-final{% endif %}">
+            <div class="trk-step__node">
+              <div class="trk-step__circle"><i class="fas fa-check"></i></div>
+            </div>
+            <span class="trk-step__label">Delivered</span>
+          </div>
+          {% endif %}
+
+        </div>
+        {% endwith %}
+
+        <div class="trk-card__foot">
+          <a href="{% url 'shop:order_detail' order.order_number %}" class="btn-shop-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Order
+          </a>
+        </div>
+
+      </div>{# /.trk-card #}
+    </div>
+  </div>
+</div>
+{% endblock %}
