@@ -1,0 +1,45 @@
+{% extends "store_admin/base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>{{ title }}</h2>
+  {% if cancel_url %}
+    <a href="{{ cancel_url }}" class="btn btn-secondary">
+      <i class="fas fa-arrow-left me-1"></i> Back
+    </a>
+  {% endif %}
+</div>
+
+<div class="card" style="max-width: 720px;">
+  <div class="card-body">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      {% for field in form %}
+        <div class="mb-3">
+          {% if field.field.widget.input_type == "checkbox" %}
+            <div class="form-check">
+              {{ field }}
+              <label class="form-check-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            </div>
+          {% else %}
+            <label class="form-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+          {% endif %}
+          {% if field.help_text %}
+            <div class="form-text">{{ field.help_text }}</div>
+          {% endif %}
+          {% for error in field.errors %}
+            <div class="text-danger small">{{ error }}</div>
+          {% endfor %}
+        </div>
+      {% endfor %}
+      <button type="submit" class="btn btn-primary">
+        <i class="fas fa-save me-1"></i> Save
+      </button>
+      {% if cancel_url %}
+        <a href="{{ cancel_url }}" class="btn btn-secondary ms-2">Cancel</a>
+      {% endif %}
+    </form>
+  </div>
+</div>
+{% endblock %}

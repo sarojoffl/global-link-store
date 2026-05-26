@@ -126,7 +126,7 @@ class ProductSpecification(models.Model):
 class ProductSKU(models.Model):
     """
     Represents a specific purchasable combination of variant options.
-    e.g. iPhone 16 — Color:Black,Storage:128GB
+    e.g. iPhone 16 — Color:Black,Variant:8GB+128GB
 
     Products with no variants have a single SKU with variant_combo="".
     """
@@ -134,7 +134,7 @@ class ProductSKU(models.Model):
     variant_combo = models.CharField(
         max_length=255,
         blank=True,
-        help_text='Comma-separated key:value pairs. e.g. "Color:Black,Storage:128GB"',
+        help_text='Comma-separated key:value pairs. e.g. "Color:Black,Variant:8GB+128GB"',
     )
     stock = models.PositiveIntegerField(default=0)
     price_adjustment = models.DecimalField(max_digits=10, decimal_places=2, default=0)

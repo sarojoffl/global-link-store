@@ -51,4 +51,33 @@
       el.hidden = count <= 0;
     });
   };
+
+  const addressSelect = document.getElementById("id_address_id");
+  const saveAddressBlock = document.getElementById("checkout-save-address");
+  const saveAddressCheckbox = document.getElementById("id_save_address");
+  const saveAddressExtra = document.getElementById("checkout-save-address-extra");
+
+  function toggleSaveAddressUI() {
+    if (!saveAddressBlock || !addressSelect) return;
+    const usingSaved = Boolean(addressSelect.value);
+    saveAddressBlock.hidden = usingSaved;
+    if (usingSaved && saveAddressCheckbox) {
+      saveAddressCheckbox.checked = false;
+      if (saveAddressExtra) saveAddressExtra.hidden = true;
+    }
+  }
+
+  function toggleSaveAddressExtra() {
+    if (!saveAddressExtra || !saveAddressCheckbox) return;
+    saveAddressExtra.hidden = !saveAddressCheckbox.checked;
+  }
+
+  if (addressSelect) {
+    addressSelect.addEventListener("change", toggleSaveAddressUI);
+    toggleSaveAddressUI();
+  }
+  if (saveAddressCheckbox) {
+    saveAddressCheckbox.addEventListener("change", toggleSaveAddressExtra);
+    toggleSaveAddressExtra();
+  }
 })();

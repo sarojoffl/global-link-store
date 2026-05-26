@@ -1,0 +1,216 @@
+{% extends "store_admin/base.html" %}
+{% block title %}{{ product.title }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>{{ product.title }}</h2>
+  <div>
+    <a href="{% url 'store_admin:product_list' %}" class="btn btn-secondary btn-sm">
+      <i class="fas fa-arrow-left me-1"></i> Back
+    </a>
+    <a href="{% url 'store_admin:product_edit' product.pk %}" class="btn btn-warning btn-sm">Edit Product</a>
+    <a href="{% url 'store_admin:product_delete' product.pk %}" class="btn btn-danger btn-sm">Delete</a>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    {% if product.image %}
+      <img src="{{ product.image.url }}" class="img-fluid rounded border" alt="{{ product.title }}">
+    {% endif %}
+  </div>
+  <div class="col-md-9">
+    <table class="table table-sm table-bordered mb-0">
+      <tr><th style="width:140px;">Category</th><td>{{ product.category.name }}</td></tr>
+      <tr><th>Brand</th><td>{{ product.brand.name|default:"—" }}</td></tr>
+      <tr><th>Price</th><td>Rs {{ product.price }}{% if product.old_price %} <small class="text-muted text-decoration-line-through">Rs {{ product.old_price }}</small>{% endif %}</td></tr>
+      <tr><th>Type</th><td>{{ product.get_product_type_display|default:"—" }}</td></tr>
+      <tr><th>Stock status</th>
+        <td>
+          {% if product.is_in_stock %}
+            <span class="badge bg-success">In stock</span>
+          {% else %}
+            <span class="badge bg-danger">Out of stock</span>
+          {% endif %}
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+{# ── Variant Groups & Options ── #}
+<div class="card mb-4">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <strong><i class="fas fa-layer-group me-1"></i> Variant Structure</strong>
+    <a href="{% url 'store_admin:variant_group_add' product.pk %}" class="btn btn-success btn-sm">
+      <i class="fas fa-plus me-1"></i> Add Group
+    </a>
+  </div>
+  <div class="card-body">
+    <p class="text-muted mb-3">
+      Create groups like <strong>Color</strong> and <strong>Variant</strong>, then add options like
+      <strong>Black</strong> and <strong>8GB+128GB</strong>. Use these to build SKU combos such as
+      <strong>Color:Black,Variant:8GB+128GB</strong>.
+    </p>
+    <p class="mb-3"><code>Color:Black,Variant:8GB+128GB</code></p>
+    {% for group in variant_groups %}
+      <div class="border rounded p-3 mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h6 class="mb-0">{{ group.name }}</h6>
+          <div>
+            <a href="{% url 'store_admin:variant_option_add' group.pk %}" class="btn btn-success btn-sm">Add Option</a>
+            <a href="{% url 'store_admin:variant_group_edit' group.pk %}" class="btn btn-warning btn-sm">Edit Group</a>
+            <a href="{% url 'store_admin:variant_group_delete' group.pk %}" class="btn btn-danger btn-sm">Delete Group</a>
+          </div>
+        </div>
+        <table class="table table-sm mb-0">
+          <thead class="table-light">
+            <tr>
+              <th style="width: 60%;">Option</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for option in group.productvariantoption_set.all %}
+              <tr>
+                <td>{{ option.value }}</td>
+                <td>
+                  <a href="{% url 'store_admin:variant_option_edit' option.pk %}" class="btn btn-warning btn-sm">Edit</a>
+                  <a href="{% url 'store_admin:variant_option_delete' option.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="2" class="text-muted">No options yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% empty %}
+      <div class="text-muted">No variant groups yet.</div>
+    {% endfor %}
+  </div>
+</div>
+
+{# ── Inventory / Variants ── #}
+<div class="card mb-4">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <strong><i class="fas fa-boxes me-1"></i> Inventory &amp; Variants</strong>
+    <a href="{% url 'store_admin:sku_add' product.pk %}" class="btn btn-success btn-sm">
+      <i class="fas fa-plus me-1"></i> Add Variant
+    </a>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Variant</th>
+          <th>Stock</th>
+          <th>Price Adjustment</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for sku in skus %}
+          <tr>
+            <td>{{ sku.display_name }}</td>
+            <td>
+              {% if sku.stock == 0 %}
+                <span class="badge bg-danger">{{ sku.stock }}</span>
+              {% elif sku.stock <= 5 %}
+                <span class="badge bg-warning">{{ sku.stock }}</span>
+              {% else %}
+                <span class="badge bg-success">{{ sku.stock }}</span>
+              {% endif %}
+            </td>
+            <td>{% if sku.price_adjustment %}Rs {{ sku.price_adjustment }}{% else %}—{% endif %}</td>
+            <td>
+              <a href="{% url 'store_admin:sku_edit' sku.pk %}" class="btn btn-warning btn-sm">Edit</a>
+              <a href="{% url 'store_admin:sku_delete' sku.pk %}" class="btn btn-danger btn-sm">Delete</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4" class="text-center text-muted">No variants yet. A default SKU is created when you add a product.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{# ── Gallery Images ── #}
+<div class="card mb-4">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <strong><i class="fas fa-images me-1"></i> Gallery Images</strong>
+    <a href="{% url 'store_admin:product_image_add' product.pk %}" class="btn btn-success btn-sm">
+      <i class="fas fa-plus me-1"></i> Add Image
+    </a>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Preview</th>
+          <th>Order</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for img in images %}
+          <tr>
+            <td><img src="{{ img.image.url }}" height="48" style="object-fit:cover;border-radius:4px;"></td>
+            <td>{{ img.order }}</td>
+            <td>
+              <a href="{% url 'store_admin:product_image_delete' img.pk %}" class="btn btn-danger btn-sm">Delete</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="3" class="text-center text-muted">No gallery images yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{# ── Specifications ── #}
+<div class="card mb-4">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <strong><i class="fas fa-list me-1"></i> Specifications</strong>
+    <a href="{% url 'store_admin:product_spec_add' product.pk %}" class="btn btn-success btn-sm">
+      <i class="fas fa-plus me-1"></i> Add Spec
+    </a>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Section</th>
+          <th>Name</th>
+          <th>Value</th>
+          <th>Key Spec</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for spec in specs %}
+          <tr>
+            <td>{{ spec.section }}</td>
+            <td>{{ spec.name }}</td>
+            <td>{{ spec.value }}</td>
+            <td>
+              {% if spec.is_key %}
+                <span class="badge bg-primary">Yes</span>
+              {% else %}
+                <span class="text-muted">No</span>
+              {% endif %}
+            </td>
+            <td>
+              <a href="{% url 'store_admin:product_spec_edit' spec.pk %}" class="btn btn-warning btn-sm">Edit</a>
+              <a href="{% url 'store_admin:product_spec_delete' spec.pk %}" class="btn btn-danger btn-sm">Delete</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5" class="text-center text-muted">No specifications yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

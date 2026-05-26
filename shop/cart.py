@@ -84,16 +84,22 @@ def add_to_cart(request, product_id, quantity=1, variant_note=""):
     variant_combo = (variant_note or "").strip()[:255]
 
     sku = resolve_sku(product, variant_combo)
+
+    # If no SKU found and no variants exist, try the default blank SKU
+    if not sku and not product.productvariantgroup_set.exists():
+        sku = ProductSKU.objects.filter(
+            product=product,
+            variant_combo="",
+        ).first()
+
     if not sku:
         return None, "Invalid variant selected."
 
     if not sku.is_in_stock:
         return None, "This variant is out of stock."
 
-    # Cap quantity at available stock, max 10
     max_qty = min(sku.stock, 10)
     quantity = max(1, min(int(quantity), max_qty))
-
     unit_price = calculate_unit_price(product, sku)
 
     cart = get_cart(request)

@@ -71,6 +71,23 @@
             {{ form.postal_code }}
           </div>
 
+          <div class="form-group checkout-save-address" id="checkout-save-address"{% if form.address_id.value %} hidden{% endif %}>
+            <label class="form-check">
+              {{ form.save_address }}
+              <span>{{ form.save_address.label }}</span>
+            </label>
+            <div class="checkout-save-address__extra" id="checkout-save-address-extra" hidden>
+              <div class="form-group">
+                <label for="id_address_label">{{ form.address_label.label }}</label>
+                {{ form.address_label }}
+              </div>
+              <label class="form-check">
+                {{ form.set_as_default }}
+                <span>{{ form.set_as_default.label }}</span>
+              </label>
+            </div>
+          </div>
+
           <div class="form-group">
             <span class="form-label">Payment method</span>
             <div class="payment-options">

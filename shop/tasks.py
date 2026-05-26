@@ -23,6 +23,42 @@ def send_order_confirmation_email(order_id):
     email.send()
 
 
+def _send_order_status_email(order_id, subject, template_name):
+    try:
+        order = Order.objects.prefetch_related("items").get(pk=order_id)
+    except Order.DoesNotExist:
+        return
+
+    message = render_to_string(template_name, {"order": order})
+    email = EmailMessage(subject=subject, body=message, to=[order.email])
+    email.content_subtype = "html"
+    email.send()
+
+
+@shared_task
+def send_order_shipped_email(order_id):
+    order = Order.objects.filter(pk=order_id, status=Order.STATUS_SHIPPED).first()
+    if not order:
+        return
+    _send_order_status_email(
+        order_id,
+        f"Your order has shipped – {order.order_number}",
+        "shop/emails/order_shipped.html",
+    )
+
+
+@shared_task
+def send_order_delivered_email(order_id):
+    order = Order.objects.filter(pk=order_id, status=Order.STATUS_DELIVERED).first()
+    if not order:
+        return
+    _send_order_status_email(
+        order_id,
+        f"Your order was delivered – {order.order_number}",
+        "shop/emails/order_delivered.html",
+    )
+
+
 @shared_task
 def send_admin_order_notification(order_id):
     try:

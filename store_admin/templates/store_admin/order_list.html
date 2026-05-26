@@ -1,0 +1,50 @@
+{% extends "store_admin/base.html" %}
+{% load static %}
+{% block title %}Orders{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>Orders</h2>
+</div>
+
+<table class="table table-bordered table-hover" id="datatablesSimple">
+  <thead class="table-light">
+    <tr>
+      <th>#</th>
+      <th>Order</th>
+      <th>Customer</th>
+      <th>Email</th>
+      <th>Total</th>
+      <th>Payment</th>
+      <th>Status</th>
+      <th>Date</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for order in orders %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td><small>{{ order.order_number }}</small></td>
+        <td>{{ order.shipping_name }}</td>
+        <td><small>{{ order.email }}</small></td>
+        <td>Rs {{ order.total }}</td>
+        <td>{{ order.get_payment_method_display }}</td>
+        <td>
+          <span class="badge bg-{% if order.status == 'confirmed' %}success{% elif order.status == 'pending' %}warning{% elif order.status == 'shipped' %}info{% elif order.status == 'delivered' %}primary{% elif order.status == 'cancelled' or order.status == 'payment_failed' %}danger{% else %}secondary{% endif %}">
+            {{ order.get_status_display }}
+          </span>
+        </td>
+        <td><small>{{ order.created_at|date:"M d, Y H:i" }}</small></td>
+        <td>
+          <a href="{% url 'store_admin:order_detail' order.pk %}" class="btn btn-primary btn-sm">View</a>
+        </td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="9" class="text-center">No orders yet.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+{% block extra_js %}
+<script src="{% static 'admin/js/datatables-simple-demo.js' %}"></script>
+{% endblock %}

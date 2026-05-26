@@ -14,7 +14,12 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from products.models import Product, ProductSKU
-from shop.tasks import send_admin_order_notification, send_order_confirmation_email
+from accounts.models import Address
+
+from shop.tasks import (
+    send_admin_order_notification,
+    send_order_confirmation_email,
+)
 
 from .cart import (
     SHIPPING_COST,
@@ -146,6 +151,37 @@ def checkout(request):
             **summary,
             "shipping_free_threshold": SHIPPING_FREE_THRESHOLD,
         },
+    )
+
+
+def _maybe_save_address(user, data):
+    """Save a new delivery address to the customer's account when requested."""
+    if not data.get("save_address") or data.get("address_id"):
+        return
+
+    label = (data.get("address_label") or "").strip() or "Home"
+    exists = Address.objects.filter(
+        user=user,
+        full_name=data["full_name"],
+        phone=data["phone"],
+        street=data["street"],
+        city=data["city"],
+        province=data.get("province", ""),
+        postal_code=data.get("postal_code", ""),
+    ).exists()
+    if exists:
+        return
+
+    Address.objects.create(
+        user=user,
+        label=label,
+        full_name=data["full_name"],
+        phone=data["phone"],
+        street=data["street"],
+        city=data["city"],
+        province=data.get("province", ""),
+        postal_code=data.get("postal_code", ""),
+        is_default=bool(data.get("set_as_default")),
     )
 
 
@@ -301,6 +337,8 @@ def _place_order(request, cart, summary, form):
         messages.error(request, str(exc))
         return redirect("shop:cart")
 
+    _maybe_save_address(request.user, data)
+
     if payment_method == Order.PAYMENT_KHALTI:
         return _initiate_khalti_payment(request, order, data)
 
@@ -323,6 +361,10 @@ def _place_order(request, cart, summary, form):
 @csrf_exempt
 def esewa_verify(request, order_id, status):
     order = get_object_or_404(Order, pk=order_id)
+
+    if order.status == Order.STATUS_CONFIRMED:
+        messages.info(request, f"Order {order.order_number} is already confirmed.")
+        return redirect("shop:order_detail", order_number=order.order_number)
 
     # eSewa sends a base64-encoded JSON payload in the "data" param
     raw_data = request.GET.get("data")
@@ -394,6 +436,10 @@ def khalti_verify(request):
     order = Order.objects.filter(payment_id=pidx).first()
     if not order:
         return HttpResponse(f"Order with payment ID {pidx} not found", status=400)
+    
+    if order.status == Order.STATUS_CONFIRMED:
+        messages.info(request, f"Order {order.order_number} is already confirmed.")
+        return redirect("shop:order_detail", order_number=order.order_number)
 
     headers = {
         "Authorization": f"Key {settings.KHALTI_SECRET_KEY}",

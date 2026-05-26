@@ -41,7 +41,7 @@ class ProductSKUInline(admin.TabularInline):
     extra = 1
     fields = ("variant_combo", "stock", "price_adjustment")
     help_texts = {
-        "variant_combo": 'e.g. "Color:Black,Storage:128GB" — leave blank for products with no variants'
+        "variant_combo": 'e.g. "Color:Black,Variant:8GB+128GB" — leave blank for products with no variants'
     }
 
 

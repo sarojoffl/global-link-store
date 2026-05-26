@@ -31,17 +31,33 @@ class CheckoutForm(forms.Form):
         required=False,
         label="Order notes (optional)",
     )
+    save_address = forms.BooleanField(
+        required=False,
+        label="Save this address for future orders",
+    )
+    set_as_default = forms.BooleanField(
+        required=False,
+        label="Set as my default address",
+    )
+    address_label = forms.CharField(
+        max_length=50,
+        required=False,
+        label="Address label (optional)",
+    )
 
     def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
         input_class = {"class": "shop-input"}
         for name in (
             "full_name", "phone", "email", "street", "city",
-            "province", "postal_code", "notes",
+            "province", "postal_code", "notes", "address_label",
         ):
             if name in self.fields:
                 self.fields[name].widget.attrs.update(input_class)
         self.fields["address_id"].widget.attrs.update(input_class)
+        self.fields["address_label"].widget.attrs.setdefault(
+            "placeholder", "e.g. Home, Office"
+        )
         self.fields["address_id"].queryset = Address.objects.filter(user=user)
         if user.email:
             self.fields["email"].initial = user.email
@@ -70,4 +86,6 @@ class CheckoutForm(forms.Form):
             cleaned["city"] = address.city
             cleaned["province"] = address.province
             cleaned["postal_code"] = address.postal_code
+            cleaned["save_address"] = False
+            cleaned["set_as_default"] = False
         return cleaned

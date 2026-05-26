@@ -10,5 +10,6 @@ urlpatterns = [
     path('', include('shop.urls', namespace='shop')),
     path('auth/', include('social_django.urls', namespace='social')),    
     path('accounts/', include('accounts.urls', namespace='accounts')),
+    path("store-admin/", include("store_admin.urls", namespace="store_admin")),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

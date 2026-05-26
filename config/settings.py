@@ -27,12 +27,14 @@ INSTALLED_APPS = [
     'accounts',
     "products",
     "shop",
+    "store_admin",
     "social_django",
 ]
 
 # Middleware
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -48,7 +50,7 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -94,12 +96,15 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 
+# Site URL (used for payment return URLs)
+SITE_URL = os.getenv("SITE_URL", "http://127.0.0.1:8000")
+
 # Google OAuth2 settings
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.getenv("SOCIAL_AUTH_GOOGLE_OAUTH2_KEY")
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.getenv("SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET")
 
 # This is the URL that Google will redirect to after authentication
-SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI = 'http://127.0.0.1:8000/auth/complete/google-oauth2/'
+SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI = f"{SITE_URL}/auth/complete/google-oauth2/"
 
 # Social auth pipeline
 SOCIAL_AUTH_PIPELINE = (
@@ -129,6 +134,8 @@ STATIC_URL = "static/"
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
+
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Media files
 MEDIA_URL = "/media/"
@@ -165,9 +172,6 @@ DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
 
 ADMIN_ORDER_EMAIL = "ariaskye.creates@gmail.com"
 
-# Site URL (used for payment return URLs)
-SITE_URL = os.getenv("SITE_URL", "http://127.0.0.1:8000")
-
 # eSewa payment gateway
 ESEWA_SECRET_KEY = os.getenv("ESEWA_SECRET_KEY", "")
 ESEWA_PRODUCT_CODE = os.getenv("ESEWA_PRODUCT_CODE", "EPAYTEST")
@@ -188,3 +192,17 @@ KHALTI_LOOKUP_URL = os.getenv(
     "https://a.khalti.com/api/v2/epayment/lookup/",
 )
 KHALTI_RETURN_URL = os.getenv("KHALTI_RETURN_URL", f"{SITE_URL}/payment/khalti/verify/")
+
+# Security headers — only active when DEBUG=False
+if not DEBUG:
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = "DENY"
+
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"

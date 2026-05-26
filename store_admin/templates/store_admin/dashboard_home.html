@@ -1,0 +1,117 @@
+{% extends "store_admin/base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h2 class="mb-4">Dashboard</h2>
+
+<div class="row g-3 mb-4">
+  <div class="col-xl-3 col-md-6">
+    <div class="card bg-primary text-white">
+      <div class="card-body d-flex justify-content-between align-items-center">
+        <div>
+          <div class="small text-white-50">Total Orders</div>
+          <div class="fs-4 fw-bold">{{ total_orders }}</div>
+        </div>
+        <i class="fas fa-shopping-bag fa-2x text-white-50"></i>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-3 col-md-6">
+    <div class="card bg-warning text-white">
+      <div class="card-body d-flex justify-content-between align-items-center">
+        <div>
+          <div class="small text-white-50">Pending Orders</div>
+          <div class="fs-4 fw-bold">{{ pending_orders }}</div>
+        </div>
+        <i class="fas fa-clock fa-2x text-white-50"></i>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-3 col-md-6">
+    <div class="card bg-danger text-white">
+      <div class="card-body d-flex justify-content-between align-items-center">
+        <div>
+          <div class="small text-white-50">Out of Stock SKUs</div>
+          <div class="fs-4 fw-bold">{{ out_of_stock_skus }}</div>
+        </div>
+        <i class="fas fa-exclamation-triangle fa-2x text-white-50"></i>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-3 col-md-6">
+    <div class="card bg-success text-white">
+      <div class="card-body d-flex justify-content-between align-items-center">
+        <div>
+          <div class="small text-white-50">Low Stock SKUs</div>
+          <div class="fs-4 fw-bold">{{ low_stock_skus|length }}</div>
+        </div>
+        <i class="fas fa-box fa-2x text-white-50"></i>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <strong>Recent Orders</strong>
+        <a href="{% url 'store_admin:order_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Order</th>
+              <th>Customer</th>
+              <th>Total</th>
+              <th>Payment</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for order in recent_orders %}
+              <tr style="cursor:pointer;" onclick="window.location='{% url 'store_admin:order_detail' order.pk %}'">
+                <td><small>{{ order.order_number }}</small></td>
+                <td>{{ order.shipping_name }}</td>
+                <td>Rs {{ order.total }}</td>
+                <td>{{ order.get_payment_method_display }}</td>
+                <td>
+                  <span class="badge bg-{% if order.status == 'confirmed' %}success{% elif order.status == 'pending' %}warning{% elif order.status == 'cancelled' %}danger{% else %}secondary{% endif %}">
+                    {{ order.get_status_display }}
+                  </span>
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="5" class="text-center text-muted">No orders yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header"><strong>Low Stock Alert</strong></div>
+      <div class="card-body p-0">
+        <table class="table table-sm mb-0">
+          <thead class="table-light">
+            <tr><th>Product</th><th>Variant</th><th>Stock</th></tr>
+          </thead>
+          <tbody>
+            {% for sku in low_stock_skus %}
+              <tr style="cursor:pointer;" onclick="window.location='{% url 'store_admin:sku_edit' sku.pk %}'">
+                <td><small>{{ sku.product.title|truncatewords:4 }}</small></td>
+                <td><small>{{ sku.display_name }}</small></td>
+                <td><span class="badge bg-warning">{{ sku.stock }}</span></td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="3" class="text-center text-muted">All good!</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
