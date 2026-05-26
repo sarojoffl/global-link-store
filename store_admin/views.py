@@ -579,18 +579,26 @@ def order_detail(request, pk):
         Order.objects.select_related("user").prefetch_related("items"),
         pk=pk,
     )
-    form = OrderStatusForm(request.POST or None, instance=order)
-    if request.method == "POST" and form.is_valid():
+
+    if request.method == "POST":
         old_status = order.status
-        form.save()
-        order.refresh_from_db()
-        if old_status != order.status:
-            if order.status == Order.STATUS_SHIPPED:
-                send_order_shipped_email.delay(order.pk)
-            elif order.status == Order.STATUS_DELIVERED:
-                send_order_delivered_email.delay(order.pk)
-        messages.success(request, "Order updated.")
-        return redirect("store_admin:order_detail", pk=order.pk)
+        form = OrderStatusForm(request.POST, instance=order)
+        if form.is_valid():
+            form.save()
+            order.refresh_from_db()
+            new_status = order.status
+
+            if old_status != new_status:
+                if new_status == Order.STATUS_SHIPPED:
+                    send_order_shipped_email.delay(order.pk)
+                elif new_status == Order.STATUS_DELIVERED:
+                    send_order_delivered_email.delay(order.pk)
+
+            messages.success(request, "Order updated.")
+            return redirect("store_admin:order_detail", pk=order.pk)
+    else:
+        form = OrderStatusForm(instance=order)
+
     return render(request, "store_admin/order_detail.html", {
         "order": order,
         "form": form,
