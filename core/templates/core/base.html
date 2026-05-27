@@ -14,6 +14,8 @@
   {% block extra_css %}{% endblock %}
 </head>
 <body{% block body_class %}{% endblock %}>
+  {# CSRF token available on every page for forms + AJAX #}
+  <form id="csrf-form" hidden aria-hidden="true">{% csrf_token %}</form>
 
   <header class="site-header" id="site-header">
     <div class="top-bar">
@@ -307,14 +309,52 @@
       <div class="footer-col">
         <h4>Useful Links</h4>
         <ul>
-          <li><a href="#">Our contacts</a></li>
+          <li><a href="{% url 'core:contact' %}">Contact Us</a></li>
           <li><a href="#">About Us</a></li>
           <li><a href="#">Blog</a></li>
           <li><a href="#">Refund &amp; Return Policy</a></li>
           <li><a href="#">Terms and Conditions</a></li>
         </ul>
+
       </div>
     </div>
+
+    <section class="footer-newsletter-bar" aria-label="Newsletter signup">
+      <div class="footer-newsletter-bar__inner">
+        <div class="footer-newsletter-bar__copy">
+          <span class="footer-newsletter-bar__eyebrow">Stay in the loop</span>
+          <h3>Subscribe to our newsletter</h3>
+          <p>Get new arrivals, deals, and store updates delivered to your inbox.</p>
+        </div>
+        <form
+          method="post"
+          action="{% url 'core:newsletter_subscribe' %}"
+          class="footer-newsletter-bar__form"
+          data-newsletter-form
+          novalidate
+        >
+          <div class="footer-newsletter-bar__field">
+            <label class="visually-hidden" for="newsletter-email">Email address</label>
+            <i class="fas fa-envelope footer-newsletter-bar__icon" aria-hidden="true"></i>
+            <input
+              type="email"
+              id="newsletter-email"
+              name="email"
+              placeholder="you@example.com"
+              inputmode="email"
+              autocomplete="email"
+              required
+            >
+          </div>
+          <button type="submit" class="footer-newsletter-bar__btn" data-newsletter-submit>
+            <i class="fas fa-paper-plane" aria-hidden="true"></i>
+            <span>Subscribe</span>
+          </button>
+        </form>
+        <p class="footer-newsletter-bar__note" data-newsletter-feedback hidden></p>
+      </div>
+    </section>
+
     <div class="footer-bottom">
       <p>Copyright &copy; 2025 | Global Link Store.</p>
       <div class="payment-icons" aria-label="Accepted payment methods">

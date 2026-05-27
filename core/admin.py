@@ -1,5 +1,11 @@
 from django.contrib import admin
-from .models import AboutSection, HeroSlide, HomePageSettings
+from .models import (
+    AboutSection,
+    ContactMessage,
+    HeroSlide,
+    HomePageSettings,
+    NewsletterSubscriber,
+)
 
 
 @admin.register(HeroSlide)
@@ -64,3 +70,18 @@ class AboutSectionAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+@admin.register(ContactMessage)
+class ContactMessageAdmin(admin.ModelAdmin):
+    list_display = ("id", "subject", "email", "status", "created_at", "user")
+    list_filter = ("status", "created_at")
+    search_fields = ("name", "email", "subject", "message")
+    readonly_fields = ("created_at", "updated_at", "ip_address")
+
+
+@admin.register(NewsletterSubscriber)
+class NewsletterSubscriberAdmin(admin.ModelAdmin):
+    list_display = ("email", "name", "is_active", "subscribed_at", "last_subscribed_at")
+    list_filter = ("is_active", "subscribed_at")
+    search_fields = ("email", "name")

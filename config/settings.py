@@ -13,7 +13,26 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 
 DEBUG = os.getenv("DEBUG") == "True"
 
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h.strip()]
+
+# CSRF — allow posts from configured hosts (fixes 403 when host/port differs)
+_csrf_origins = os.getenv("CSRF_TRUSTED_ORIGINS", "").strip()
+if _csrf_origins:
+    CSRF_TRUSTED_ORIGINS = [o.strip() for o in _csrf_origins.split(",") if o.strip()]
+else:
+    CSRF_TRUSTED_ORIGINS = []
+    for host in ALLOWED_HOSTS:
+        if host.startswith("."):
+            continue
+        CSRF_TRUSTED_ORIGINS.append(f"http://{host}")
+        CSRF_TRUSTED_ORIGINS.append(f"https://{host}")
+    if DEBUG:
+        CSRF_TRUSTED_ORIGINS.extend([
+            "http://127.0.0.1:8000",
+            "http://localhost:8000",
+            "http://127.0.0.1",
+            "http://localhost",
+        ])
 
 # Installed apps
 INSTALLED_APPS = [

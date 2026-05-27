@@ -73,4 +73,14 @@ urlpatterns = [
     path("customers/<int:user_pk>/addresses/add/", views.customer_address_add, name="customer_address_add"),
     path("customer-addresses/<int:pk>/edit/", views.customer_address_edit, name="customer_address_edit"),
     path("customer-addresses/<int:pk>/delete/", views.customer_address_delete, name="customer_address_delete"),
+
+    # ── Support (Contact + Newsletter) ──
+    path("contact-messages/", views.contact_message_list, name="contact_message_list"),
+    path("contact-messages/<int:pk>/", views.contact_message_detail, name="contact_message_detail"),
+    path("contact-messages/<int:pk>/mark-read/", views.contact_message_mark_read, name="contact_message_mark_read"),
+    path("contact-messages/<int:pk>/delete/", views.contact_message_delete, name="contact_message_delete"),
+
+    path("newsletter-subscribers/", views.newsletter_subscriber_list, name="newsletter_subscriber_list"),
+    path("newsletter-subscribers/<int:pk>/toggle-active/", views.newsletter_subscriber_toggle_active, name="newsletter_subscriber_toggle_active"),
+    path("newsletter-subscribers/<int:pk>/delete/", views.newsletter_subscriber_delete, name="newsletter_subscriber_delete"),
 ]

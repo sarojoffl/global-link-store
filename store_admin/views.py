@@ -7,7 +7,13 @@ from django.urls import reverse
 
 from accounts.models import Address, UserProfile
 
-from core.models import HeroSlide, HomePageSettings, AboutSection
+from core.models import (
+    AboutSection,
+    ContactMessage,
+    HeroSlide,
+    HomePageSettings,
+    NewsletterSubscriber,
+)
 from products.models import (
     Category, Brand, Product, ProductImage, ProductSKU, ProductSpecification,
     ProductVariantGroup, ProductVariantOption,
@@ -711,4 +717,93 @@ def customer_address_delete(request, pk):
     return render(request, "store_admin/confirm_delete.html", {
         "object": address,
         "cancel_url": reverse("store_admin:customer_detail", kwargs={"pk": user_pk}),
+    })
+
+
+# ── SUPPORT (CONTACT + NEWSLETTER) ──
+
+
+@login_required
+@staff_required
+def contact_message_list(request):
+    contact_messages = ContactMessage.objects.select_related("user").all()
+    return render(request, "store_admin/contact_message_list.html", {
+        "contact_messages": contact_messages,
+    })
+
+
+@login_required
+@staff_required
+def contact_message_detail(request, pk):
+    contact_msg = get_object_or_404(
+        ContactMessage.objects.select_related("user"),
+        pk=pk,
+    )
+    if contact_msg.status == ContactMessage.STATUS_NEW:
+        contact_msg.status = ContactMessage.STATUS_READ
+        contact_msg.save(update_fields=["status", "updated_at"])
+    return render(request, "store_admin/contact_message_detail.html", {
+        "contact_msg": contact_msg,
+    })
+
+
+@login_required
+@staff_required
+def contact_message_mark_read(request, pk):
+    contact_msg = get_object_or_404(ContactMessage, pk=pk)
+    if request.method == "POST":
+        contact_msg.status = ContactMessage.STATUS_READ
+        contact_msg.save(update_fields=["status"])
+        messages.success(request, "Message marked as read.")
+    return redirect("store_admin:contact_message_list")
+
+
+@login_required
+@staff_required
+def contact_message_delete(request, pk):
+    contact_msg = get_object_or_404(ContactMessage, pk=pk)
+    if request.method == "POST":
+        contact_msg.delete()
+        messages.success(request, "Message deleted.")
+        return redirect("store_admin:contact_message_list")
+    return render(request, "store_admin/confirm_delete.html", {
+        "object": contact_msg,
+        "cancel_url": reverse("store_admin:contact_message_list"),
+    })
+
+
+@login_required
+@staff_required
+def newsletter_subscriber_list(request):
+    subscribers = NewsletterSubscriber.objects.all().order_by("-subscribed_at")
+    return render(request, "store_admin/newsletter_subscriber_list.html", {
+        "subscribers": subscribers,
+    })
+
+
+@login_required
+@staff_required
+def newsletter_subscriber_toggle_active(request, pk):
+    subscriber = get_object_or_404(NewsletterSubscriber, pk=pk)
+    if request.method == "POST":
+        subscriber.is_active = not subscriber.is_active
+        subscriber.save(update_fields=["is_active"])
+        messages.success(
+            request,
+            "Subscriber activated." if subscriber.is_active else "Subscriber deactivated.",
+        )
+    return redirect("store_admin:newsletter_subscriber_list")
+
+
+@login_required
+@staff_required
+def newsletter_subscriber_delete(request, pk):
+    subscriber = get_object_or_404(NewsletterSubscriber, pk=pk)
+    if request.method == "POST":
+        subscriber.delete()
+        messages.success(request, "Subscriber deleted.")
+        return redirect("store_admin:newsletter_subscriber_list")
+    return render(request, "store_admin/confirm_delete.html", {
+        "object": subscriber,
+        "cancel_url": reverse("store_admin:newsletter_subscriber_list"),
     })

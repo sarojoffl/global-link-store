@@ -1,0 +1,69 @@
+{% extends "store_admin/base.html" %}
+
+{% block title %}Message — {{ contact_msg.subject }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>Contact Message</h2>
+  <a href="{% url 'store_admin:contact_message_list' %}" class="btn btn-secondary btn-sm">
+    <i class="fas fa-arrow-left me-1"></i> Back to Inbox
+  </a>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-5">
+    <div class="card h-100">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <strong>Sender</strong>
+        {% if contact_msg.status == "new" %}
+          <span class="badge bg-primary">New</span>
+        {% elif contact_msg.status == "read" %}
+          <span class="badge bg-success">Read</span>
+        {% else %}
+          <span class="badge bg-secondary">Archived</span>
+        {% endif %}
+      </div>
+      <div class="card-body">
+        <table class="table table-sm mb-0">
+          <tr><th style="width:100px;">Name</th><td>{{ contact_msg.name }}</td></tr>
+          <tr><th>Email</th><td><a href="mailto:{{ contact_msg.email }}">{{ contact_msg.email }}</a></td></tr>
+          <tr><th>Phone</th><td>{% if contact_msg.phone %}<a href="tel:{{ contact_msg.phone }}">{{ contact_msg.phone }}</a>{% else %}—{% endif %}</td></tr>
+          <tr><th>Subject</th><td>{{ contact_msg.subject }}</td></tr>
+          <tr><th>Received</th><td>{{ contact_msg.created_at|date:"M d, Y H:i" }}</td></tr>
+          {% if contact_msg.user %}
+            <tr><th>Account</th><td>{{ contact_msg.user.username }}</td></tr>
+          {% endif %}
+          {% if contact_msg.ip_address %}
+            <tr><th>IP</th><td><small class="text-muted">{{ contact_msg.ip_address }}</small></td></tr>
+          {% endif %}
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    <div class="card h-100">
+      <div class="card-header"><strong>Message</strong></div>
+      <div class="card-body">
+        <div class="contact-message-body">{{ contact_msg.message|linebreaks }}</div>
+      </div>
+      <div class="card-footer d-flex flex-wrap gap-2">
+        <a href="mailto:{{ contact_msg.email }}?subject=Re: {{ contact_msg.subject|urlencode }}" class="btn btn-primary btn-sm">
+          <i class="fas fa-reply me-1"></i> Reply by Email
+        </a>
+        {% if contact_msg.status != "read" %}
+          <form method="post" action="{% url 'store_admin:contact_message_mark_read' contact_msg.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-primary btn-sm">
+              <i class="fas fa-eye me-1"></i> Mark Read
+            </button>
+          </form>
+        {% endif %}
+        <a href="{% url 'store_admin:contact_message_delete' contact_msg.pk %}" class="btn btn-outline-danger btn-sm">
+          <i class="fas fa-trash me-1"></i> Delete
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

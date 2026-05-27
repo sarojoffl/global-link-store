@@ -82,4 +82,67 @@
     saveAddressCheckbox.addEventListener("change", toggleSaveAddressExtra);
     toggleSaveAddressExtra();
   }
+
+  /* ───────── Newsletter (footer) ───────── */
+  document.querySelectorAll("[data-newsletter-form]").forEach((form) => {
+    const feedback = form.parentElement?.querySelector("[data-newsletter-feedback]");
+    const submitBtn = form.querySelector("[data-newsletter-submit]");
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const emailInput = form.querySelector('input[name="email"]');
+      const email = (emailInput?.value || "").trim();
+      if (!email) {
+        showNewsletterFeedback(feedback, "Please enter your email address.", false);
+        return;
+      }
+
+      if (submitBtn) submitBtn.disabled = true;
+      showNewsletterFeedback(feedback, "", false, true);
+
+      fetch(form.action, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "X-Requested-With": "XMLHttpRequest",
+          "X-CSRFToken": getCsrfToken(),
+        },
+        body: new URLSearchParams({ email }).toString(),
+      })
+        .then((r) => r.json().then((data) => ({ ok: r.ok, data })))
+        .then(({ ok, data }) => {
+          if (ok && data.ok) {
+            if (emailInput) emailInput.value = "";
+            showNewsletterFeedback(feedback, data.message, true);
+          } else {
+            showNewsletterFeedback(
+              feedback,
+              data.error || "Could not subscribe. Please try again.",
+              false,
+            );
+          }
+        })
+        .catch(() => {
+          showNewsletterFeedback(feedback, "Could not subscribe. Please try again.", false);
+        })
+        .finally(() => {
+          if (submitBtn) submitBtn.disabled = false;
+        });
+    });
+  });
+
+  function showNewsletterFeedback(el, text, success, hide) {
+    if (!el) return;
+    if (hide || !text) {
+      el.hidden = true;
+      el.textContent = "";
+      el.classList.remove("is-success", "is-error");
+      return;
+    }
+    el.hidden = false;
+    el.textContent = text;
+    el.classList.toggle("is-success", success);
+    el.classList.toggle("is-error", !success);
+  }
 })();

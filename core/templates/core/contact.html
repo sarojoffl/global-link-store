@@ -1,0 +1,82 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Contact Us – Global Link Store{% endblock %}
+{% block body_class %} class="page-contact"{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/contact.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="contact-page">
+  <div class="container">
+    <div class="contact-layout">
+      <section class="contact-card">
+        <h1>Contact Us</h1>
+        <p class="contact-subtitle">Send us your questions and we will get back to you.</p>
+
+        {% if form.non_field_errors %}
+          <div class="form-errors">
+            {{ form.non_field_errors }}
+          </div>
+        {% endif %}
+
+        <form method="post" class="contact-form">
+          {% csrf_token %}
+          {{ form.bot_field }}
+
+          <div class="contact-grid">
+            <div class="contact-field">
+              <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+              {{ form.name }}
+              {% for err in form.name.errors %}<div class="form-error">{{ err }}</div>{% endfor %}
+            </div>
+
+            <div class="contact-field">
+              <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+              {{ form.email }}
+              {% for err in form.email.errors %}<div class="form-error">{{ err }}</div>{% endfor %}
+            </div>
+
+            <div class="contact-field">
+              <label for="{{ form.phone.id_for_label }}">{{ form.phone.label }}</label>
+              {{ form.phone }}
+              {% for err in form.phone.errors %}<div class="form-error">{{ err }}</div>{% endfor %}
+            </div>
+
+            <div class="contact-field contact-field--span">
+              <label for="{{ form.subject.id_for_label }}">{{ form.subject.label }}</label>
+              {{ form.subject }}
+              {% for err in form.subject.errors %}<div class="form-error">{{ err }}</div>{% endfor %}
+            </div>
+          </div>
+
+          <div class="contact-field">
+            <label for="{{ form.message.id_for_label }}">{{ form.message.label }}</label>
+            {{ form.message }}
+            {% for err in form.message.errors %}<div class="form-error">{{ err }}</div>{% endfor %}
+          </div>
+
+          <div class="contact-actions">
+            <button type="submit" class="btn-contact-submit">
+              <i class="fas fa-paper-plane me-1" aria-hidden="true"></i>
+              Send Message
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <aside class="contact-side">
+        <div class="contact-side__card">
+          <h3>Support</h3>
+          <p><strong>Phone:</strong> <a href="tel:+9779851402916">+977-9851402916</a></p>
+          <p><strong>Email:</strong> <a href="mailto:shop@globallinkstore.com">shop@globallinkstore.com</a></p>
+          <p class="contact-side__hint">We typically respond within 24–48 hours.</p>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

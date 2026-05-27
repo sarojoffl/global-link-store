@@ -80,6 +80,16 @@
             All Customers
           </a>
 
+          <div class="sb-sidenav-menu-heading">Support</div>
+          <a class="nav-link" href="{% url 'store_admin:contact_message_list' %}">
+            <div class="sb-nav-link-icon"><i class="fas fa-envelope"></i></div>
+            Contact Messages
+          </a>
+          <a class="nav-link" href="{% url 'store_admin:newsletter_subscriber_list' %}">
+            <div class="sb-nav-link-icon"><i class="fas fa-bullhorn"></i></div>
+            Newsletter Subscribers
+          </a>
+
           <div class="sb-sidenav-menu-heading">Homepage</div>
           <a class="nav-link" href="{% url 'store_admin:heroslide_list' %}">
             <div class="sb-nav-link-icon"><i class="fas fa-images"></i></div>
