@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404, render
 from django.views.decorators.csrf import ensure_csrf_cookie
 
 from .catalog import SORT_OPTIONS, build_catalog_queryset
+from .compare_utils import build_comparison_rows, get_compare_products, parse_compare_ids
 from .models import Brand, Category, Product, ProductVariantGroup, ProductVariantOption
 from django.core.serializers.json import DjangoJSONEncoder
 from .utils import format_variant_combo
@@ -206,6 +207,12 @@ def product_detail(request, slug):
         for sku in product.skus.all()
     ]
 
+    product_in_wishlist = False
+    if request.user.is_authenticated:
+        product_in_wishlist = request.user.wishlist_items.filter(
+            product=product
+        ).exists()
+
     return render(
         request,
         "products/product_detail.html",
@@ -217,5 +224,22 @@ def product_detail(request, slug):
             "variant_groups": variant_groups,
             "related_products": related_products,
             "sku_data_json": json.dumps(sku_data, cls=DjangoJSONEncoder),
+            "product_in_wishlist": product_in_wishlist,
+        },
+    )
+
+
+def product_compare(request):
+    id_list = parse_compare_ids(request.GET.get("ids", ""))
+    products = get_compare_products(id_list)
+    rows = build_comparison_rows(products)
+
+    return render(
+        request,
+        "products/compare.html",
+        {
+            "products": products,
+            "rows": rows,
+            "compare_ids": ",".join(str(p.pk) for p in products),
         },
     )

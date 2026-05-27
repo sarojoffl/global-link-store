@@ -6,6 +6,8 @@ app_name = "core"
 urlpatterns = [
     path('', views.index, name='index'),
     path("contact/", views.contact, name="contact"),
+    path("refund-policy/", views.refund_policy, name="refund_policy"),
+    path("terms/", views.terms, name="terms"),
     path(
         "newsletter/subscribe/",
         views.newsletter_subscribe,

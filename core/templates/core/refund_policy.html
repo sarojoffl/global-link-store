@@ -1,0 +1,74 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Refund &amp; Return Policy – Global Link Store{% endblock %}
+{% block body_class %} class="page-policy"{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/pages.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="policy-page">
+  <div class="container">
+    <article class="policy-card">
+      <h1>Refund &amp; Return Policy</h1>
+      <p class="policy-updated">Last updated: {% now "F j, Y" %}</p>
+
+      <p>
+        At Global Link Store we want you to be satisfied with your purchase. Please read this policy
+        before placing an order. If you have questions, <a href="{% url 'core:contact' %}">contact us</a>
+        or call <a href="tel:+9779851402916">+977-9851402916</a>.
+      </p>
+
+      <h2>7-day return window</h2>
+      <p>
+        You may request a return within <strong>7 calendar days</strong> of delivery for most items
+        that are unused, in original packaging, and include all accessories, manuals, and warranty cards.
+      </p>
+
+      <h2>Eligible items</h2>
+      <ul>
+        <li>Products in resalable condition with no physical damage caused by the customer</li>
+        <li>Items with proof of purchase (order number or invoice)</li>
+        <li>Defective or wrong items received — contact us within 48 hours of delivery with photos</li>
+      </ul>
+
+      <h2>Non-returnable items</h2>
+      <ul>
+        <li>Software licenses, digital downloads, or activated products</li>
+        <li>Items with broken seals where seal is required for warranty (unless defective)</li>
+        <li>Customized or special-order products (unless faulty)</li>
+        <li>Products damaged due to misuse, liquid exposure, or unauthorized repair</li>
+      </ul>
+
+      <h2>How to request a return</h2>
+      <ul>
+        <li>Email <a href="mailto:shop@globallinkstore.com">shop@globallinkstore.com</a> with your order number and reason</li>
+        <li>Our team will confirm eligibility and provide return instructions</li>
+        <li>Pack the item securely in its original box where possible</li>
+      </ul>
+
+      <h2>Refunds</h2>
+      <p>
+        Approved refunds are processed within <strong>5–10 business days</strong> after we receive
+        and inspect the returned item. Refunds are issued to the original payment method where
+        possible (eSewa, Khalti, or bank transfer for COD orders). Shipping fees are non-refundable
+        unless the return is due to our error or a defective product.
+      </p>
+
+      <h2>Exchanges</h2>
+      <p>
+        If you received a defective unit, we will arrange a replacement when stock is available.
+        Otherwise we may offer repair under manufacturer warranty or a refund as appropriate.
+      </p>
+
+      <h2>Warranty</h2>
+      <p>
+        Manufacturer warranty applies to eligible electronics as stated on the product page or
+        invoice. Warranty claims are handled per the brand’s terms after the return period.
+      </p>
+    </article>
+  </div>
+</div>
+{% endblock %}

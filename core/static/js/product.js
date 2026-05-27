@@ -440,10 +440,6 @@
       });
   });
 
-  document.querySelector("[data-compare]")?.addEventListener("click", function () {
-    alert("Compare list coming soon.");
-  });
-
   /* ───────── SHARE ───────── */
   document.querySelector('[data-share="copy"]')?.addEventListener("click", async function () {
     const url = window.location.href;

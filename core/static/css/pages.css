@@ -1,0 +1,59 @@
+/* Static policy / legal pages */
+body.page-policy {
+  background: var(--color-bg);
+}
+
+.policy-page {
+  padding: 28px 0 56px;
+}
+
+.policy-card {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 28px 24px;
+  box-shadow: var(--shadow-sm);
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.policy-card h1 {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.policy-updated {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  margin-bottom: 24px;
+}
+
+.policy-card h2 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 24px 0 10px;
+  color: var(--color-text);
+}
+
+.policy-card p,
+.policy-card li {
+  font-size: 14px;
+  color: var(--color-text-muted);
+  line-height: 1.75;
+}
+
+.policy-card ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+  margin-bottom: 12px;
+}
+
+.policy-card a {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.policy-card a:hover {
+  text-decoration: underline;
+}

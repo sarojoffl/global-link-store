@@ -1,0 +1,101 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Compare Products – Global Link Store{% endblock %}
+{% block body_class %} class="page-compare"{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/compare.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="compare-page">
+  <div class="container">
+    <header class="compare-header">
+      <div>
+        <h1>Compare Products</h1>
+        <p>Compare up to 3 products by price and specifications.</p>
+      </div>
+      <a href="{% url 'products:list' %}" class="btn-compare-shop">
+        <i class="fas fa-th-large" aria-hidden="true"></i> Browse products
+      </a>
+    </header>
+
+    {% if products %}
+      <div class="compare-table-wrap">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th class="compare-table__label-col" scope="col">Product</th>
+              {% for product in products %}
+                <th scope="col" class="compare-table__product-col">
+                  <article class="compare-product-card">
+                    <button
+                      type="button"
+                      class="compare-remove"
+                      data-compare-remove="{{ product.id }}"
+                      aria-label="Remove {{ product.title }} from compare"
+                    >
+                      <i class="fas fa-times" aria-hidden="true"></i>
+                    </button>
+                    <a href="{% url 'products:detail' product.slug %}" class="compare-product-card__image">
+                      <img src="{{ product.image.url }}" alt="{{ product.title }}">
+                    </a>
+                    <h2>
+                      <a href="{% url 'products:detail' product.slug %}">{{ product.title }}</a>
+                    </h2>
+                    <p class="compare-product-card__meta">
+                      {{ product.category.name }}{% if product.brand %} · {{ product.brand.name }}{% endif %}
+                    </p>
+                    <p class="compare-product-card__price">Rs {{ product.price|floatformat:2 }}</p>
+                    {% if product.is_in_stock %}
+                      <a href="{% url 'products:detail' product.slug %}" class="btn-compare-cart">View &amp; buy</a>
+                    {% else %}
+                      <span class="compare-out-stock">Out of stock</span>
+                    {% endif %}
+                  </article>
+                </th>
+              {% endfor %}
+              {% if products|length < 3 %}
+                <th scope="col" class="compare-table__empty-col">
+                  <div class="compare-slot-empty">
+                    <i class="fas fa-plus" aria-hidden="true"></i>
+                    <p>Add another product from any product page using <strong>Compare</strong>.</p>
+                  </div>
+                </th>
+              {% endif %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in rows %}
+              <tr>
+                <th scope="row" class="compare-table__label-col">{{ row.label }}</th>
+                {% for value in row.values %}
+                  <td>{{ value }}</td>
+                {% endfor %}
+                {% if products|length < 3 %}
+                  <td class="compare-table__empty-col">—</td>
+                {% endif %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p class="compare-hint">
+        <button type="button" class="btn-text-link" data-compare-clear>Clear all</button>
+      </p>
+    {% else %}
+      <div class="compare-empty">
+        <i class="fas fa-exchange-alt" aria-hidden="true"></i>
+        <h2>No products to compare</h2>
+        <p>Open a product and click <strong>Compare</strong> to add it here (maximum 3).</p>
+        <a href="{% url 'products:list' %}" class="btn-compare-shop">Start shopping</a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/compare.js' %}" defer></script>
+{% endblock %}

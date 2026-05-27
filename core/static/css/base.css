@@ -881,12 +881,11 @@ body.mobile-nav-open {
 
 .footer-bottom p { font-size: 13px; color: var(--color-text-muted); }
 
-.payment-icons { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.payment-icons i { font-size: 28px; color: #9ca3af; }
-.payment-icons .fa-cc-visa      { color: #1a1f71; }
-.payment-icons .fa-cc-mastercard { color: #eb001b; }
-.payment-icons .fa-cc-paypal    { color: #003087; }
-.payment-icons .fa-cc-amex      { color: #006fcf; }
+.secondary-action.is-active {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
 
 /* ───────── Footer Newsletter Bar ───────── */
 .footer-newsletter-bar {

@@ -1,0 +1,85 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Terms and Conditions – Global Link Store{% endblock %}
+{% block body_class %} class="page-policy"{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/pages.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="policy-page">
+  <div class="container">
+    <article class="policy-card">
+      <h1>Terms and Conditions</h1>
+      <p class="policy-updated">Last updated: {% now "F j, Y" %}</p>
+
+      <p>
+        By using the Global Link Store website and placing orders, you agree to these terms.
+        Please read them carefully. If you do not agree, do not use our services.
+      </p>
+
+      <h2>General</h2>
+      <p>
+        Global Link Store operates an online retail platform for electronics and related products
+        in Nepal. We reserve the right to update these terms at any time. Continued use of the
+        site after changes constitutes acceptance.
+      </p>
+
+      <h2>Accounts</h2>
+      <ul>
+        <li>You must provide accurate registration and checkout information</li>
+        <li>You are responsible for keeping your login credentials secure</li>
+        <li>We may suspend accounts involved in fraud, abuse, or policy violations</li>
+      </ul>
+
+      <h2>Orders &amp; pricing</h2>
+      <ul>
+        <li>Product prices and availability are subject to change without notice</li>
+        <li>We may cancel orders due to stock errors, pricing mistakes, or suspected fraud</li>
+        <li>Order confirmation email does not guarantee shipment until payment is verified (for online payments)</li>
+      </ul>
+
+      <h2>Payment</h2>
+      <p>
+        We accept <strong>Cash on Delivery (COD)</strong>, <strong>eSewa</strong>, and <strong>Khalti</strong>
+        as shown at checkout. You agree to pay the full order amount including applicable shipping charges.
+      </p>
+
+      <h2>Shipping &amp; delivery</h2>
+      <p>
+        Delivery times are estimates and may vary by location. Risk of loss passes to you upon
+        delivery to the address you provide. See product pages and our contact page for support.
+      </p>
+
+      <h2>Returns</h2>
+      <p>
+        Returns and refunds are governed by our
+        <a href="{% url 'core:refund_policy' %}">Refund &amp; Return Policy</a>.
+      </p>
+
+      <h2>Product information</h2>
+      <p>
+        We strive for accurate descriptions and images. Minor variations in color or specification
+        may occur. Manufacturer specifications on product pages prevail for technical details.
+      </p>
+
+      <h2>Limitation of liability</h2>
+      <p>
+        To the extent permitted by law, Global Link Store is not liable for indirect or consequential
+        damages arising from use of the site or products. Our liability for any order is limited to
+        the amount you paid for that order.
+      </p>
+
+      <h2>Contact</h2>
+      <p>
+        Questions about these terms:
+        <a href="{% url 'core:contact' %}">Contact form</a>,
+        <a href="mailto:shop@globallinkstore.com">shop@globallinkstore.com</a>,
+        or <a href="tel:+9779851402916">+977-9851402916</a>.
+      </p>
+    </article>
+  </div>
+</div>
+{% endblock %}

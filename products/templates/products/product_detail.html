@@ -215,8 +215,11 @@
           {% if user.is_authenticated %}
             <form method="post" action="{% url 'shop:wishlist_toggle' product.id %}" class="wishlist-toggle-form" data-wishlist-form>
               {% csrf_token %}
-              <button type="submit" class="secondary-action" data-wishlist-btn>
-                <i class="far fa-heart" aria-hidden="true"></i> Wishlist
+              <button type="submit" 
+                class="secondary-action {% if product_in_wishlist %}is-active{% endif %}" 
+                data-wishlist-btn>
+                <i class="{% if product_in_wishlist %}fas{% else %}far{% endif %} fa-heart" 
+                  aria-hidden="true"></i> Wishlist
               </button>
             </form>
           {% else %}
@@ -224,7 +227,15 @@
               <i class="far fa-heart" aria-hidden="true"></i> Wishlist
             </a>
           {% endif %}
-          <button type="button" class="secondary-action" data-compare>
+          <button
+            type="button"
+            class="secondary-action"
+            data-compare
+            data-product-id="{{ product.id }}"
+            data-product-slug="{{ product.slug }}"
+            data-product-title="{{ product.title }}"
+            aria-pressed="false"
+          >
             <i class="fas fa-exchange-alt" aria-hidden="true"></i> Compare
           </button>
           <div class="share-group">
@@ -410,16 +421,17 @@
             <ul>
               <li>Standard delivery within Kathmandu valley: 1–2 business days</li>
               <li>Outside valley: 3–7 business days depending on location</li>
-              <li>Order tracking shared via SMS after dispatch</li>
+              <li>Order tracking and updates sent to your email after dispatch</li>
             </ul>
             <h3>Returns &amp; Refunds</h3>
             <ul>
               <li>7-day return for unused items in original packaging</li>
               <li>Defective items replaced within warranty period</li>
+              <li>See our <a href="{% url 'core:refund_policy' %}">Refund &amp; Return Policy</a> for full details</li>
               <li>Contact <a href="tel:+9779851402916">+977-9851402916</a> or <a href="mailto:shop@globallinkstore.com">shop@globallinkstore.com</a></li>
             </ul>
             <h3>Payment Methods</h3>
-            <p>We accept cash on delivery, eSewa, Khalti, and major cards (Visa, Mastercard).</p>
+            <p>We accept <strong>Cash on Delivery</strong>, <strong>eSewa</strong>, and <strong>Khalti</strong>.</p>
           </div>
         </div>
       </div>
@@ -460,5 +472,6 @@
 {% endblock %}
 
 {% block extra_js %}
+  <script src="{% static 'js/compare.js' %}" defer></script>
   <script src="{% static 'js/product.js' %}" defer></script>
 {% endblock %}

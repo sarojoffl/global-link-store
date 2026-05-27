@@ -79,6 +79,14 @@ def contact(request):
     return render(request, "core/contact.html", {"form": form})
 
 
+def refund_policy(request):
+    return render(request, "core/refund_policy.html")
+
+
+def terms(request):
+    return render(request, "core/terms.html")
+
+
 @require_POST
 @ensure_csrf_cookie
 def newsletter_subscribe(request):

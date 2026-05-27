@@ -146,6 +146,11 @@
             </div>
           {% endif %}
 
+          <a href="{% url 'products:compare' %}" class="nav-icon-btn" title="Compare products" aria-label="Compare products" data-compare-link>
+            <i class="fas fa-exchange-alt" aria-hidden="true"></i>
+            <span class="badge" data-compare-count hidden>0</span>
+          </a>
+
           {% if user.is_authenticated %}
             <a href="{% url 'shop:wishlist' %}" class="nav-icon-btn" title="Wishlist" aria-label="Wishlist">
               <i class="fas fa-heart" aria-hidden="true"></i>
@@ -310,10 +315,9 @@
         <h4>Useful Links</h4>
         <ul>
           <li><a href="{% url 'core:contact' %}">Contact Us</a></li>
-          <li><a href="#">About Us</a></li>
-          <li><a href="#">Blog</a></li>
-          <li><a href="#">Refund &amp; Return Policy</a></li>
-          <li><a href="#">Terms and Conditions</a></li>
+          <li><a href="{% url 'products:compare' %}">Compare Products</a></li>
+          <li><a href="{% url 'core:refund_policy' %}">Refund &amp; Return Policy</a></li>
+          <li><a href="{% url 'core:terms' %}">Terms and Conditions</a></li>
         </ul>
 
       </div>
@@ -357,13 +361,6 @@
 
     <div class="footer-bottom">
       <p>Copyright &copy; 2025 | Global Link Store.</p>
-      <div class="payment-icons" aria-label="Accepted payment methods">
-        <i class="fab fa-cc-visa" title="Visa"></i>
-        <i class="fab fa-cc-mastercard" title="Mastercard"></i>
-        <i class="fab fa-cc-paypal" title="PayPal"></i>
-        <i class="fab fa-cc-amex" title="American Express"></i>
-        <i class="fab fa-cc-discover" title="Discover"></i>
-      </div>
     </div>
   </footer>
 
@@ -373,6 +370,7 @@
 
   <script src="{% static 'js/base.js' %}" defer></script>
   <script src="{% static 'js/shop.js' %}" defer></script>
+  <script src="{% static 'js/compare.js' %}" defer></script>
   {% block extra_js %}{% endblock %}
 </body>
 </html>
