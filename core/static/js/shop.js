@@ -1,14 +1,14 @@
 (function () {
   "use strict";
 
-  document.querySelectorAll("[data-qty-minus]").forEach((btn) => {
+  document.querySelectorAll(".cart-qty-form [data-qty-minus]").forEach((btn) => {
     btn.addEventListener("click", () => {
       const input = btn.parentElement?.querySelector(".qty-input");
       if (input) input.value = Math.max(1, parseInt(input.value, 10) - 1);
     });
   });
 
-  document.querySelectorAll("[data-qty-plus]").forEach((btn) => {
+  document.querySelectorAll(".cart-qty-form [data-qty-plus]").forEach((btn) => {
     btn.addEventListener("click", () => {
       const input = btn.parentElement?.querySelector(".qty-input");
       const max = parseInt(input?.max, 10) || 10;
@@ -17,6 +17,8 @@
   });
 
   function getCsrfToken() {
+    const input = document.querySelector("input[name=csrfmiddlewaretoken]");
+    if (input) return input.value;
     const match = document.cookie.match(/csrftoken=([^;]+)/);
     return match ? match[1] : "";
   }

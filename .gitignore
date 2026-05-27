@@ -23,4 +23,5 @@ db.sqlite3
 Thumbs.db
 
 # Env files
-.envdump.rdb
+.env
+dump.rdb

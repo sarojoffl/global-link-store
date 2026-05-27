@@ -5,6 +5,7 @@ import json
 from django.core.paginator import Paginator
 from django.db.models import Count, Prefetch
 from django.shortcuts import get_object_or_404, render
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 from .catalog import SORT_OPTIONS, build_catalog_queryset
 from .models import Brand, Category, Product, ProductVariantGroup, ProductVariantOption
@@ -155,6 +156,7 @@ def product_list(request, category_slug=None, brand_slug=None):
     return render(request, "products/product_list.html", context)
 
 
+@ensure_csrf_cookie
 def product_detail(request, slug):
     variant_groups_qs = ProductVariantGroup.objects.prefetch_related(
         Prefetch(

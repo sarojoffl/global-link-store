@@ -443,6 +443,8 @@
   </div>
 </div>
 
+<form id="csrf-form" hidden>{% csrf_token %}</form>
+
 <script>
   window.GLS_SKUS = {{ sku_data_json|safe }};
   window.GLS_BASE_PRICE = {{ product.price }};
@@ -459,5 +461,4 @@
 
 {% block extra_js %}
   <script src="{% static 'js/product.js' %}" defer></script>
-  <script src="{% static 'js/home.js' %}" defer></script>
 {% endblock %}
