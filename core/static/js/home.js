@@ -501,18 +501,4 @@
 
   initAboutCounters();
 
-  /* =========================================================
-     PRODUCT ACTIONS
-  ========================================================= */
-  const cartButtons = document.querySelectorAll(".btn-cart");
-
-  cartButtons.forEach((btn) => {
-    btn.addEventListener("click", function (e) {
-      e.preventDefault();
-      const productCard = this.closest(".product-card");
-      const title = productCard?.querySelector(".title")?.innerText;
-      alert(title + " added to cart!");
-    });
-  });
-
 })();

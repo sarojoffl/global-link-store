@@ -30,11 +30,7 @@
         {% endif %}
       </div>
 
-      {% if product.is_in_stock %}
-        <a href="{% url 'products:detail' product.slug %}" class="btn-cart" data-id="{{ product.id }}">Add To Cart</a>
-      {% else %}
-        <a href="{% url 'products:detail' product.slug %}" class="btn-cart btn-cart--disabled">View Product</a>
-      {% endif %}
+      <a href="{% url 'products:detail' product.slug %}" class="btn-cart">View Product</a>
 
       {% if product.description %}
         <p class="card-desc">{{ product.description|truncatewords:18 }}</p>
