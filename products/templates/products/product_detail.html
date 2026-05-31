@@ -1,5 +1,5 @@
 {% extends "core/base.html" %}
-{% load static %}
+{% load static product_tags %}
 
 {% block title %}{{ product.title }} – Global Link Store{% endblock %}
 {% block body_class %} class="page-product"{% endblock %}
@@ -31,7 +31,7 @@
     </nav>
 
     {# ── MAIN PRODUCT SECTION ── #}
-    <section class="product-main" aria-label="Product overview">
+    <section class="product-main" data-product-main aria-label="Product overview">
 
       {# ── GALLERY ── #}
       <div class="product-gallery">
@@ -60,7 +60,6 @@
             >
             <div class="zoom-lens" hidden aria-hidden="true"></div>
           </div>
-          <div class="zoom-result" hidden aria-hidden="true"></div>
         </div>
 
         {% if gallery|length > 1 %}
@@ -82,6 +81,9 @@
 
       {# ── INFO PANEL ── #}
       <div class="product-info">
+        <aside class="product-zoom-overlay" data-zoom-pane hidden aria-label="Image zoom preview">
+          <div class="zoom-result" hidden aria-hidden="true"></div>
+        </aside>
 
         {# Meta: brand + SKU #}
         <div class="product-info__meta">
@@ -101,17 +103,19 @@
 
         {# Rating #}
         <div class="product-rating" aria-label="Product rating">
-          <div class="stars" aria-hidden="true">
-            <i class="fas fa-star"></i>
-            <i class="fas fa-star"></i>
-            <i class="fas fa-star"></i>
-            <i class="fas fa-star"></i>
-            <i class="fas fa-star-half-alt"></i>
-          </div>
-          <span class="rating-value">4.5</span>
-          <a href="#reviews" class="rating-count">(12 reviews)</a>
-          <span class="rating-divider" aria-hidden="true">|</span>
-          <span class="rating-sold"><i class="fas fa-shopping-bag"></i> 48 sold</span>
+          {% if review_count %}
+            {% star_rating avg_rating size="sm" %}
+            <span class="rating-value">{{ avg_rating }}</span>
+            <a href="#reviews" class="rating-count" data-tab-jump="reviews">({{ review_count }} review{{ review_count|pluralize }})</a>
+          {% else %}
+            {% star_rating 0 size="sm" %}
+            <span class="rating-value rating-value--empty">No ratings yet</span>
+            <a href="#reviews" class="rating-count" data-tab-jump="reviews">Be the first to review</a>
+          {% endif %}
+          {% if sold_count %}
+            <span class="rating-divider" aria-hidden="true">|</span>
+            <span class="rating-sold"><i class="fas fa-shopping-bag"></i> {{ sold_count }} sold</span>
+          {% endif %}
         </div>
 
         {# Price #}
@@ -304,7 +308,7 @@
     </section>
 
     {# ── TABS ── #}
-    <section class="product-tabs-section home-section" aria-label="Product details">
+    <section class="product-tabs-section home-section" aria-label="Product details" id="reviews">
       <div class="product-tabs" role="tablist">
         <button type="button" class="tab-btn is-active" role="tab" aria-selected="true" data-tab="description">
           <i class="fas fa-align-left" style="margin-right:6px;opacity:.7"></i>Description
@@ -312,8 +316,8 @@
         <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="specifications" id="specifications">
           <i class="fas fa-list-ul" style="margin-right:6px;opacity:.7"></i>Specifications
         </button>
-        <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="reviews" id="reviews">
-          <i class="fas fa-star" style="margin-right:6px;opacity:.7"></i>Reviews
+        <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="reviews" id="reviews-tab">
+          <i class="fas fa-star" style="margin-right:6px;opacity:.7"></i>Reviews{% if review_count %} <span class="tab-count">{{ review_count }}</span>{% endif %}
         </button>
         <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="shipping">
           <i class="fas fa-truck" style="margin-right:6px;opacity:.7"></i>Shipping &amp; Returns
@@ -355,82 +359,109 @@
         </div>
 
         {# Reviews #}
-        <div class="tab-panel" id="tab-reviews" role="tabpanel" hidden>
-          <div class="reviews-summary">
-            <div class="reviews-score">
-              <span class="reviews-score__value">4.5</span>
-              <div class="stars" aria-hidden="true">
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star-half-alt"></i>
+        <div class="tab-panel" id="tab-reviews" role="tabpanel" hidden data-reviews-panel>
+          {% if review_count %}
+            <div class="reviews-summary">
+              <div class="reviews-score">
+                <span class="reviews-score__value">{{ avg_rating }}</span>
+                {% star_rating avg_rating %}
+                <span class="reviews-score__count">Based on {{ review_count }} review{{ review_count|pluralize }}</span>
               </div>
-              <span class="reviews-score__count">Based on 12 reviews</span>
-            </div>
-            <div class="reviews-bars">
-              <div class="review-bar"><span>5 ★</span><div class="bar"><span style="width:70%"></span></div><span>8</span></div>
-              <div class="review-bar"><span>4 ★</span><div class="bar"><span style="width:20%"></span></div><span>2</span></div>
-              <div class="review-bar"><span>3 ★</span><div class="bar"><span style="width:8%"></span></div><span>1</span></div>
-              <div class="review-bar"><span>2 ★</span><div class="bar"><span style="width:0%"></span></div><span>0</span></div>
-              <div class="review-bar"><span>1 ★</span><div class="bar"><span style="width:8%"></span></div><span>1</span></div>
-            </div>
-          </div>
-
-          <div class="reviews-list">
-            <article class="review-card">
-              <div class="review-card__header">
-                <div class="review-avatar">RK</div>
-                <div>
-                  <strong>Rajesh K.</strong>
-                  <span class="review-verified"><i class="fas fa-check-circle"></i> Verified Purchase</span>
-                </div>
-                <time datetime="2025-04-12">12 Apr 2025</time>
-              </div>
-              <div class="review-stars" aria-label="5 out of 5 stars">
-                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-              </div>
-              <h4>Excellent product, fast delivery</h4>
-              <p>Exactly as described. Packaging was secure and the product works perfectly. Global Link Store support was very helpful.</p>
-            </article>
-            <article class="review-card">
-              <div class="review-card__header">
-                <div class="review-avatar">SP</div>
-                <div>
-                  <strong>Sunita P.</strong>
-                  <span class="review-verified"><i class="fas fa-check-circle"></i> Verified Purchase</span>
-                </div>
-                <time datetime="2025-03-28">28 Mar 2025</time>
-              </div>
-              <div class="review-stars" aria-label="4 out of 5 stars">
-                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i>
-              </div>
-              <h4>Great value for money</h4>
-              <p>Good quality at this price point. Would recommend to anyone looking for reliable electronics in Nepal.</p>
-            </article>
-          </div>
-
-          <form class="review-form" aria-label="Write a review">
-            <h3>Write a Review</h3>
-            <p class="review-form-note">Share your experience with this product. Reviews are moderated before publishing.</p>
-            <div class="review-form__stars">
-              <label>Your rating</label>
-              <div class="star-input" role="group" aria-label="Rate from 1 to 5 stars">
-                {% for i in "12345" %}
-                  <button type="button" class="star-input__btn" data-rating="{{ i }}" aria-label="{{ i }} star">
-                    <i class="far fa-star" aria-hidden="true"></i>
-                  </button>
+              <div class="reviews-bars">
+                {% for row in rating_distribution %}
+                  <div class="review-bar">
+                    <span>{{ row.star }} ★</span>
+                    <div class="bar"><span style="width:{{ row.percent }}%"></span></div>
+                    <span>{{ row.count }}</span>
+                  </div>
                 {% endfor %}
               </div>
             </div>
-            <label for="review-title">Review title</label>
-            <input type="text" id="review-title" placeholder="Summarize your experience" disabled>
-            <label for="review-body">Your review</label>
-            <textarea id="review-body" rows="4" placeholder="What did you like or dislike?" disabled></textarea>
-            <button type="button" class="btn-review-submit" disabled>
-              <i class="fas fa-paper-plane" style="margin-right:6px"></i>Submit Review (coming soon)
-            </button>
-          </form>
+          {% else %}
+            <div class="reviews-empty">
+              <i class="fas fa-star" aria-hidden="true"></i>
+              <h3>No reviews yet</h3>
+              <p>Be the first to share your experience with this product.</p>
+            </div>
+          {% endif %}
+
+          <div class="reviews-list" id="reviews-list">
+            {% for item in reviews %}
+              {% with review=item.review %}
+                <article class="review-card">
+                  <div class="review-card__header">
+                    <div class="review-avatar" aria-hidden="true">
+                      {{ review.user.first_name|default:review.user.username|slice:":1"|upper }}{% if review.user.last_name %}{{ review.user.last_name|slice:":1"|upper }}{% else %}{{ review.user.username|slice:"1:2"|upper }}{% endif %}
+                    </div>
+                    <div>
+                      <strong>{{ review.user.get_full_name|default:review.user.username }}</strong>
+                      {% if item.is_verified %}
+                        <span class="review-verified"><i class="fas fa-check-circle"></i> Verified Purchase</span>
+                      {% endif %}
+                    </div>
+                    <time datetime="{{ review.created_at|date:'Y-m-d' }}">{{ review.created_at|date:"d M Y" }}</time>
+                  </div>
+                  <div class="review-stars" aria-label="{{ review.rating }} out of 5 stars">
+                    {% star_rating review.rating size="sm" %}
+                  </div>
+                  <h4>{{ review.title }}</h4>
+                  <p>{{ review.body|linebreaksbr }}</p>
+                </article>
+              {% endwith %}
+            {% empty %}
+              {% if review_count == 0 %}
+                {# empty state handled above #}
+              {% endif %}
+            {% endfor %}
+          </div>
+
+          {% if user.is_authenticated %}
+            {% if user_has_reviewed %}
+              <div class="review-form review-form--done">
+                <h3>Thanks for your review</h3>
+                <p class="review-form-note">You have already shared your feedback for this product.</p>
+              </div>
+            {% else %}
+              <form
+                class="review-form"
+                id="review-form"
+                method="post"
+                action="{% url 'products:submit_review' product.slug %}"
+                aria-label="Write a review"
+                data-review-form
+              >
+                {% csrf_token %}
+                <h3>Write a Review</h3>
+                <p class="review-form-note">Share your experience with this product. Reviews appear immediately after submission.</p>
+                <div class="review-form__stars">
+                  <label for="review-rating">Your rating</label>
+                  <div class="star-input" role="group" aria-label="Rate from 1 to 5 stars">
+                    {% for i in "12345" %}
+                      <button type="button" class="star-input__btn" data-rating="{{ i }}" aria-label="{{ i }} star">
+                        <i class="far fa-star" aria-hidden="true"></i>
+                      </button>
+                    {% endfor %}
+                  </div>
+                  <input type="hidden" name="rating" id="review-rating" value="">
+                </div>
+                <label for="review-title">Review title</label>
+                <input type="text" id="review-title" name="title" placeholder="Summarize your experience" maxlength="120" required>
+                <label for="review-body">Your review</label>
+                <textarea id="review-body" name="body" rows="4" placeholder="What did you like or dislike?" required></textarea>
+                <p class="review-form-feedback" data-review-feedback hidden></p>
+                <button type="submit" class="btn-review-submit" data-review-submit>
+                  <i class="fas fa-paper-plane" style="margin-right:6px"></i>Submit Review
+                </button>
+              </form>
+            {% endif %}
+          {% else %}
+            <div class="review-form review-form--guest">
+              <h3>Write a Review</h3>
+              <p class="review-form-note">
+                <a href="{% url 'accounts:login' %}?next={{ request.path }}#reviews">Log in</a> to share your experience with this product.
+              </p>
+            </div>
+          {% endif %}
         </div>
 
         {# Shipping & Returns #}

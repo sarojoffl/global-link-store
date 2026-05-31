@@ -164,46 +164,40 @@
           .then(data => {
             resultsContainer.innerHTML = "";
             const items = data.results || [];
-            
+
             if (items.length === 0) {
-              const empty = document.createElement("div");
-              empty.className = "autocomplete-no-results";
-              empty.textContent = "No products found";
-              resultsContainer.appendChild(empty);
-            } else {
-              items.forEach(function (item) {
-                const a = document.createElement("a");
-                a.className = "autocomplete-item";
-                a.href = item.url;
-                
-                const img = document.createElement("img");
-                img.src = item.image ? item.image : "/static/img/placeholder.png";
-                img.alt = item.title;
-                a.appendChild(img);
-
-                const info = document.createElement("div");
-                info.className = "autocomplete-item-info";
-                
-                const title = document.createElement("span");
-                title.className = "autocomplete-item-title";
-                title.textContent = item.title;
-                info.appendChild(title);
-
-                const meta = document.createElement("span");
-                meta.className = "autocomplete-item-meta";
-                meta.textContent = (item.brand ? item.brand + " · " : "") + item.category;
-                info.appendChild(meta);
-                
-                a.appendChild(info);
-
-                const price = document.createElement("span");
-                price.className = "autocomplete-item-price";
-                price.textContent = "Rs " + parseFloat(item.price).toFixed(2);
-                a.appendChild(price);
-
-                resultsContainer.appendChild(a);
-              });
+              resultsContainer.hidden = true;
+              return;
             }
+
+            items.forEach(function (item) {
+              const a = document.createElement("a");
+              a.className = "autocomplete-item";
+              a.href = item.url;
+
+              const img = document.createElement("img");
+              img.src = item.image ? item.image : "/static/img/placeholder.png";
+              img.alt = item.title;
+              a.appendChild(img);
+
+              const info = document.createElement("div");
+              info.className = "autocomplete-item-info";
+
+              const title = document.createElement("span");
+              title.className = "autocomplete-item-title";
+              title.textContent = item.title;
+              info.appendChild(title);
+
+              const meta = document.createElement("span");
+              meta.className = "autocomplete-item-meta";
+              meta.textContent = (item.brand ? item.brand + " · " : "") + item.category;
+              info.appendChild(meta);
+
+              a.appendChild(info);
+
+              resultsContainer.appendChild(a);
+            });
+
             resultsContainer.hidden = false;
           })
           .catch(err => {

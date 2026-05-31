@@ -62,8 +62,8 @@ body.page-product .main-content {
 /* ───────── MAIN LAYOUT ───────── */
 .product-main {
   display: grid;
-  grid-template-columns: 520px 1fr;
-  gap: 40px;
+  grid-template-columns: minmax(420px, 520px) minmax(0, 1fr);
+  gap: 32px 40px;
   align-items: start;
   background: #fff;
   border: 1px solid #e8edf5;
@@ -87,12 +87,12 @@ body.page-product .main-content {
   background: linear-gradient(145deg, #f8fafc 0%, #eef4ff 100%);
   border-radius: 18px;
   border: 1px solid #e2eaf8;
-  padding: 36px 28px;
-  min-height: 420px;
+  padding: 28px 22px;
+  min-height: 480px;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: visible;
+  overflow: hidden;
   transition: background .3s;
 }
 
@@ -106,15 +106,11 @@ body.page-product .main-content {
 }
 
 .gallery-zoom-wrap img {
-  max-height: 340px;
+  max-height: 440px;
   width: 100%;
   object-fit: contain;
-  transition: opacity .25s ease, transform .4s cubic-bezier(.34,1.56,.64,1);
+  transition: opacity .25s ease;
   transform-origin: center;
-}
-
-.gallery-main:hover .gallery-zoom-wrap img {
-  transform: scale(1.02);
 }
 
 .gallery-main.is-zooming .gallery-zoom-wrap {
@@ -123,8 +119,8 @@ body.page-product .main-content {
 
 .zoom-lens {
   position: absolute;
-  width: 120px;
-  height: 120px;
+  width: 105px;
+  height: 105px;
   border: 2px solid var(--color-primary, #2b65e2);
   background: rgba(43,101,226,.1);
   border-radius: 6px;
@@ -132,28 +128,70 @@ body.page-product .main-content {
   z-index: 3;
 }
 
-.zoom-result {
-  /* Fixed to viewport so it never overlaps the info panel */
-  position: fixed;
-  top: 50%;
-  transform: translateY(-50%);
-  /* JS will set left dynamically; this is the fallback */
-  left: auto;
-  width: 380px;
-  height: 380px;
-  background-color: #fff;
-  background-repeat: no-repeat;
+/* ───────── ZOOM OVERLAY (over product info on hover) ───────── */
+.product-info {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.product-zoom-overlay {
+  display: none;
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: min(360px, 52%);
+  height: min(360px, 52%);
+  max-width: 100%;
+  z-index: 20;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fff;
   border: 1px solid #dde6f5;
-  border-radius: 18px;
-  box-shadow: 0 12px 48px rgba(15,23,42,.16);
-  z-index: 200;
+  box-shadow: 0 8px 28px rgba(15, 23, 42, 0.12);
   pointer-events: none;
 }
 
-.gallery-main.is-zooming .zoom-result { display: block !important; }
+.product-zoom-overlay.is-zooming {
+  display: block;
+}
+
+.product-zoom-overlay.is-zooming::before {
+  content: "Zoom";
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.72);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.zoom-result {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #fff;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+.product-zoom-overlay.is-zooming .zoom-result {
+  display: block !important;
+}
 
 @media (max-width: 1280px) {
-  .zoom-result,
+  .product-zoom-overlay {
+    display: none !important;
+  }
+
   .zoom-lens { display: none !important; }
   .gallery-zoom-wrap { cursor: default; }
 }
@@ -255,11 +293,7 @@ body.page-product .main-content {
   box-shadow: 0 0 0 3px rgba(43,101,226,.15);
 }
 
-/* ───────── PRODUCT INFO ───────── */
-.product-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
+/* ───────── PRODUCT INFO (meta, title, price…) ───────── */
 }
 
 .product-info__meta {
@@ -331,17 +365,27 @@ body.page-product .main-content {
   border: 1px solid #eef2f7;
 }
 
-.product-rating .stars {
+.product-rating .stars,
+.stars {
   display: flex;
   gap: 2px;
   color: #f59e0b;
   font-size: 13px;
 }
 
+.stars--sm { font-size: 13px; }
+.stars--md { font-size: 16px; }
+
 .rating-value {
   font-weight: 800;
   color: #1e293b;
   font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.rating-value--empty {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #64748b;
 }
 
 .rating-count {
@@ -960,6 +1004,34 @@ body.page-product .main-content {
   margin: 8px 0 6px;
 }
 
+.reviews-empty {
+  text-align: center;
+  padding: 36px 24px;
+  margin-bottom: 28px;
+  background: linear-gradient(135deg, #fafbff 0%, #f0f5ff 100%);
+  border: 1px dashed #dde9ff;
+  border-radius: 16px;
+  color: #64748b;
+}
+
+.reviews-empty i {
+  font-size: 2rem;
+  color: #cbd5e1;
+  margin-bottom: 12px;
+}
+
+.reviews-empty h3 {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin-bottom: 6px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.reviews-empty p {
+  font-size: 14px;
+}
+
 .reviews-score__count {
   font-size: 12px;
   color: #94a3b8;
@@ -1156,8 +1228,68 @@ body.page-product .main-content {
   font-size: 13px;
   font-weight: 700;
   font-family: 'Plus Jakarta Sans', sans-serif;
-  opacity: .5;
+  transition: background .2s, transform .2s;
+}
+
+.btn-review-submit:hover:not(:disabled) {
+  background: var(--color-primary-dark, #1a4fc4);
+  transform: translateY(-1px);
+}
+
+.btn-review-submit:disabled {
+  opacity: .65;
   cursor: not-allowed;
+  transform: none;
+}
+
+.review-form-feedback {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.review-form-feedback.is-success {
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
+.review-form-feedback.is-error {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.review-form--done,
+.review-form--guest {
+  text-align: center;
+}
+
+.review-form--guest a {
+  color: var(--color-primary, #2b65e2);
+  font-weight: 700;
+}
+
+.tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  margin-left: 4px;
+  border-radius: 99px;
+  background: rgba(43, 101, 226, 0.12);
+  color: var(--color-primary, #2b65e2);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.tab-btn.is-active .tab-count {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
 }
 
 /* ───────── SHIPPING TAB ───────── */
@@ -1338,8 +1470,16 @@ body.page-product .main-content {
 /* ───────── RESPONSIVE ───────── */
 @media (max-width: 1200px) {
   .product-main {
-    grid-template-columns: 460px 1fr;
+    grid-template-columns: minmax(420px, 520px) 1fr;
     gap: 32px;
+  }
+
+  .gallery-main {
+    min-height: 420px;
+  }
+
+  .gallery-zoom-wrap img {
+    max-height: 380px;
   }
 }
 
@@ -1366,9 +1506,17 @@ body.page-product .main-content {
   }
 
   .gallery-main {
-    min-height: 280px;
+    min-height: 320px;
     padding: 24px 18px;
     border-radius: 14px;
+  }
+
+  .gallery-zoom-wrap img {
+    max-height: 300px;
+  }
+
+  .zoom-result {
+    min-height: 320px;
   }
 
   .product-tabs-section {

@@ -10,5 +10,6 @@ urlpatterns = [
     path("brand/<slug:brand_slug>/", views.product_list, name="brand"),
     path("compare/", views.product_compare, name="compare"),
     path("search/autocomplete/", views.search_autocomplete, name="search_autocomplete"),
+    path("<slug:slug>/reviews/", views.submit_review, name="submit_review"),
     path("<slug:slug>/", views.product_detail, name="detail"),
 ]

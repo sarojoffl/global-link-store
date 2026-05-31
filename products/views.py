@@ -6,11 +6,15 @@ from django.core.paginator import Paginator
 from django.db.models import Count, Prefetch
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 
 from .catalog import SORT_OPTIONS, build_catalog_queryset
 from .compare_utils import build_comparison_rows, get_compare_products, parse_compare_ids
-from .models import Brand, Category, Product, ProductVariantGroup, ProductVariantOption
+from .forms import ProductReviewForm
+from .models import Brand, Category, Product, ProductReview, ProductVariantGroup, ProductVariantOption
+from .review_utils import get_product_review_context
 from django.core.serializers.json import DjangoJSONEncoder
 from .utils import format_variant_combo
 
@@ -209,10 +213,17 @@ def product_detail(request, slug):
     ]
 
     product_in_wishlist = False
+    user_has_reviewed = False
     if request.user.is_authenticated:
         product_in_wishlist = request.user.wishlist_items.filter(
             product=product
         ).exists()
+        user_has_reviewed = ProductReview.objects.filter(
+            product=product,
+            user=request.user,
+        ).exists()
+
+    review_context = get_product_review_context(product)
 
     return render(
         request,
@@ -226,7 +237,42 @@ def product_detail(request, slug):
             "related_products": related_products,
             "sku_data_json": json.dumps(sku_data, cls=DjangoJSONEncoder),
             "product_in_wishlist": product_in_wishlist,
+            "user_has_reviewed": user_has_reviewed,
+            "review_form": ProductReviewForm(),
+            **review_context,
         },
+    )
+
+
+@login_required
+@require_POST
+def submit_review(request, slug):
+    product = get_object_or_404(Product, slug=slug)
+
+    if ProductReview.objects.filter(product=product, user=request.user).exists():
+        return JsonResponse(
+            {"ok": False, "error": "You have already reviewed this product."},
+            status=400,
+        )
+
+    form = ProductReviewForm(request.POST)
+    if not form.is_valid():
+        first_error = next(iter(form.errors.values()))[0]
+        return JsonResponse({"ok": False, "error": first_error}, status=400)
+
+    review = form.save(commit=False)
+    review.product = product
+    review.user = request.user
+    review.save()
+
+    stats = get_product_review_context(product)
+    return JsonResponse(
+        {
+            "ok": True,
+            "message": "Thank you! Your review has been published.",
+            "review_count": stats["review_count"],
+            "avg_rating": stats["avg_rating"],
+        }
     )
 
 

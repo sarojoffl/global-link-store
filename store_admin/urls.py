@@ -62,6 +62,13 @@ urlpatterns = [
     path("product-specs/<int:pk>/edit/", views.product_spec_edit, name="product_spec_edit"),
     path("product-specs/<int:pk>/delete/", views.product_spec_delete, name="product_spec_delete"),
 
+    # Product Reviews
+    path("product-reviews/", views.product_review_list, name="product_review_list"),
+    path("product-reviews/<int:pk>/", views.product_review_detail, name="product_review_detail"),
+    path("product-reviews/<int:pk>/edit/", views.product_review_edit, name="product_review_edit"),
+    path("product-reviews/<int:pk>/toggle-publish/", views.product_review_toggle_publish, name="product_review_toggle_publish"),
+    path("product-reviews/<int:pk>/delete/", views.product_review_delete, name="product_review_delete"),
+
     # Orders
     path("orders/", views.order_list, name="order_list"),
     path("orders/<int:pk>/", views.order_detail, name="order_detail"),

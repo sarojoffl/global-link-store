@@ -36,18 +36,19 @@
 
   /* ───────── IMAGE HOVER ZOOM (magnifier) ───────── */
   function initImageZoom() {
+    const zoomPane = document.querySelector("[data-zoom-pane]");
     const galleryMain = document.querySelector(".gallery-main");
     const wrap   = document.querySelector("[data-zoom-wrap]");
     const lens   = document.querySelector(".zoom-lens");
     const result = document.querySelector(".zoom-result");
-    if (!galleryMain || !wrap || !lens || !result || !mainImg) return;
+    if (!zoomPane || !galleryMain || !wrap || !lens || !result || !mainImg) return;
 
-    const ZOOM     = 2.2;
-    const lensSize = 120;
+    const ZOOM     = 2;
+    const lensSize = 105;
 
     function canZoom() {
       return (
-        window.matchMedia("(hover: hover) and (min-width: 1181px)").matches &&
+        window.matchMedia("(hover: hover) and (min-width: 1281px)").matches &&
         mainImg.complete &&
         mainImg.naturalWidth > 0
       );
@@ -64,6 +65,8 @@
       lens.hidden   = true;
       result.hidden = true;
       galleryMain.classList.remove("is-zooming");
+      zoomPane.classList.remove("is-zooming");
+      zoomPane.hidden = true;
     }
 
     wrap.addEventListener("mouseenter", () => {
@@ -71,7 +74,9 @@
       refreshZoomBackground();
       lens.hidden   = false;
       result.hidden = false;
+      zoomPane.hidden = false;
       galleryMain.classList.add("is-zooming");
+      zoomPane.classList.add("is-zooming");
     });
 
     wrap.addEventListener("mouseleave", hideZoom);
@@ -112,7 +117,7 @@
       result.style.backgroundPosition = `-${clampedX * bgW}px -${clampedY * bgH}px`;
     });
 
-    mainImg.addEventListener("load",  refreshZoomBackground);
+    mainImg.addEventListener("load", refreshZoomBackground);
     window.addEventListener("resize", hideZoom);
   }
 
@@ -126,8 +131,20 @@
 
       mainImg.style.opacity = "0";
       setTimeout(() => {
+        const refreshZoomIfActive = () => {
+          mainImg.style.opacity = "1";
+          const result = document.querySelector(".zoom-result");
+          if (result && document.querySelector(".gallery-main")?.classList.contains("is-zooming")) {
+            const w = mainImg.offsetWidth;
+            const h = mainImg.offsetHeight;
+            result.style.backgroundImage = `url("${mainImg.src}")`;
+            result.style.backgroundSize = `${w * 2}px ${h * 2}px`;
+          }
+        };
+
+        mainImg.onload = refreshZoomIfActive;
         mainImg.src = url;
-        mainImg.style.opacity = "1";
+        if (mainImg.complete) refreshZoomIfActive();
       }, 150);
 
       thumbs.forEach((t) => t.classList.remove("is-active"));
@@ -328,17 +345,33 @@
     });
   }
 
+  function goToTabSection(tabName) {
+    activateTab(tabName);
+    document.querySelector(".product-tabs-section")?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }
+
   tabBtns.forEach((btn) => {
     btn.addEventListener("click", () => activateTab(btn.dataset.tab));
   });
 
-  /* "View all specs" link jumps to the specifications tab */
+  if (window.location.hash === "#reviews") {
+    goToTabSection("reviews");
+  }
+
+  window.addEventListener("hashchange", () => {
+    if (window.location.hash === "#reviews") {
+      goToTabSection("reviews");
+    }
+  });
+
+  /* Tab jump links (specs, reviews, etc.) */
   document.querySelectorAll("[data-tab-jump]").forEach((link) => {
     link.addEventListener("click", (e) => {
       e.preventDefault();
-      const target = link.dataset.tabJump;
-      activateTab(target);
-      document.querySelector(".product-tabs-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      goToTabSection(link.dataset.tabJump);
     });
   });
 
@@ -437,9 +470,15 @@
     }
   });
 
-  /* ───────── REVIEW STARS (UI only) ───────── */
-  document.querySelectorAll(".star-input__btn").forEach((btn, index, all) => {
+  /* ───────── REVIEW STARS + SUBMIT ───────── */
+  const reviewForm = document.querySelector("[data-review-form]");
+  const ratingInput = document.getElementById("review-rating");
+  const starButtons = document.querySelectorAll(".star-input__btn");
+
+  starButtons.forEach((btn, index, all) => {
     btn.addEventListener("click", () => {
+      const rating = btn.dataset.rating;
+      if (ratingInput) ratingInput.value = rating;
       all.forEach((b, i) => {
         b.classList.toggle("is-active", i <= index);
         const icon = b.querySelector("i");
@@ -449,6 +488,63 @@
         }
       });
     });
+  });
+
+  reviewForm?.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const feedback = this.querySelector("[data-review-feedback]");
+    const submitBtn = this.querySelector("[data-review-submit]");
+
+    if (!ratingInput?.value) {
+      if (feedback) {
+        feedback.hidden = false;
+        feedback.textContent = "Please select a star rating.";
+        feedback.className = "review-form-feedback is-error";
+      }
+      return;
+    }
+
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting…';
+    }
+
+    fetch(this.action, {
+      method: "POST",
+      body: new FormData(this),
+      headers: { "X-Requested-With": "XMLHttpRequest" },
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.ok) {
+          showToast(data.message || "Review submitted!");
+          window.location.hash = "reviews";
+          window.location.reload();
+          return;
+        }
+
+        if (feedback) {
+          feedback.hidden = false;
+          feedback.textContent = data.error || "Could not submit review.";
+          feedback.className = "review-form-feedback is-error";
+        }
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-paper-plane" style="margin-right:6px"></i>Submit Review';
+        }
+      })
+      .catch(() => {
+        if (feedback) {
+          feedback.hidden = false;
+          feedback.textContent = "Could not submit review. Please try again.";
+          feedback.className = "review-form-feedback is-error";
+        }
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-paper-plane" style="margin-right:6px"></i>Submit Review';
+        }
+      });
   });
 
 })();

@@ -15,8 +15,8 @@ from core.models import (
     NewsletterSubscriber,
 )
 from products.models import (
-    Category, Brand, Product, ProductImage, ProductSKU, ProductSpecification,
-    ProductVariantGroup, ProductVariantOption,
+    Category, Brand, Product, ProductImage, ProductReview, ProductSKU,
+    ProductSpecification, ProductVariantGroup, ProductVariantOption,
 )
 from shop.models import Order
 from shop.tasks import send_order_delivered_email, send_order_shipped_email
@@ -25,7 +25,7 @@ from .forms import (
     CategoryForm, BrandForm, ProductForm, ProductSKUForm,
     ProductImageForm, ProductSpecificationForm, OrderStatusForm,
     ProductVariantGroupForm, ProductVariantOptionForm,
-    CustomerForm, CustomerAddressForm,
+    CustomerForm, CustomerAddressForm, ProductReviewAdminForm,
 )
 
 staff_required = user_passes_test(lambda u: u.is_active and u.is_staff)
@@ -290,7 +290,10 @@ def product_edit(request, pk):
 @staff_required
 def product_detail(request, pk):
     product = get_object_or_404(
-        Product.objects.select_related("category", "brand").prefetch_related("productvariantgroup_set__productvariantoption_set"),
+        Product.objects.select_related("category", "brand").prefetch_related(
+            "productvariantgroup_set__productvariantoption_set",
+            "reviews__user",
+        ),
         pk=pk,
     )
     return render(request, "store_admin/product_detail.html", {
@@ -299,6 +302,7 @@ def product_detail(request, pk):
         "images": product.images.all(),
         "specs": product.specs.all(),
         "variant_groups": product.productvariantgroup_set.all(),
+        "reviews": product.reviews.select_related("user").order_by("-created_at"),
     })
 
 
@@ -793,6 +797,82 @@ def newsletter_subscriber_toggle_active(request, pk):
             "Subscriber activated." if subscriber.is_active else "Subscriber deactivated.",
         )
     return redirect("store_admin:newsletter_subscriber_list")
+
+
+# ── PRODUCT REVIEWS ──
+
+
+@login_required
+@staff_required
+def product_review_list(request):
+    reviews = ProductReview.objects.select_related("product", "user").order_by("-created_at")
+    product_id = request.GET.get("product")
+    if product_id:
+        reviews = reviews.filter(product_id=product_id)
+    return render(request, "store_admin/product_review_list.html", {
+        "reviews": reviews,
+        "filter_product_id": product_id,
+    })
+
+
+@login_required
+@staff_required
+def product_review_detail(request, pk):
+    review = get_object_or_404(
+        ProductReview.objects.select_related("product", "user"),
+        pk=pk,
+    )
+    return render(request, "store_admin/product_review_detail.html", {
+        "review": review,
+    })
+
+
+@login_required
+@staff_required
+def product_review_edit(request, pk):
+    review = get_object_or_404(
+        ProductReview.objects.select_related("product", "user"),
+        pk=pk,
+    )
+    form = ProductReviewAdminForm(request.POST or None, instance=review)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Review updated successfully.")
+        return redirect("store_admin:product_review_detail", pk=review.pk)
+    return render(request, "store_admin/generic_form.html", {
+        "form": form,
+        "title": f"Edit Review — {review.product.title}",
+        "cancel_url": reverse("store_admin:product_review_detail", kwargs={"pk": review.pk}),
+    })
+
+
+@login_required
+@staff_required
+def product_review_toggle_publish(request, pk):
+    review = get_object_or_404(ProductReview, pk=pk)
+    if request.method == "POST":
+        review.is_published = not review.is_published
+        review.save(update_fields=["is_published", "updated_at"])
+        status = "published" if review.is_published else "hidden"
+        messages.success(request, f"Review is now {status}.")
+    next_url = request.POST.get("next")
+    if next_url:
+        return redirect(next_url)
+    return redirect("store_admin:product_review_detail", pk=review.pk)
+
+
+@login_required
+@staff_required
+def product_review_delete(request, pk):
+    review = get_object_or_404(ProductReview.objects.select_related("product"), pk=pk)
+    if request.method == "POST":
+        review.delete()
+        messages.success(request, "Review deleted.")
+        return redirect("store_admin:product_review_list")
+    return render(request, "store_admin/confirm_delete.html", {
+        "object": review,
+        "cancel_url": reverse("store_admin:product_review_detail", kwargs={"pk": review.pk}),
+    })
 
 
 @login_required

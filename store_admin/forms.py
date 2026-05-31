@@ -4,8 +4,8 @@ from django.contrib.auth.models import User
 from accounts.models import Address
 from core.models import HeroSlide, HomePageSettings, AboutSection
 from products.models import (
-    Category, Brand, Product, ProductImage, ProductSKU, ProductSpecification,
-    ProductVariantGroup, ProductVariantOption,
+    Category, Brand, Product, ProductImage, ProductReview, ProductSKU,
+    ProductSpecification, ProductVariantGroup, ProductVariantOption,
 )
 from shop.models import Order
 
@@ -177,4 +177,15 @@ class CustomerAddressForm(BaseAdminForm):
             "city": forms.TextInput(attrs={"placeholder": "City"}),
             "province": forms.TextInput(attrs={"placeholder": "Province"}),
             "postal_code": forms.TextInput(attrs={"placeholder": "Postal code"}),
+        }
+
+
+class ProductReviewAdminForm(BaseAdminForm):
+    class Meta:
+        model = ProductReview
+        fields = ["rating", "title", "body", "is_published"]
+        widgets = {
+            "rating": forms.NumberInput(attrs={"min": 1, "max": 5}),
+            "title": forms.TextInput(attrs={"placeholder": "Review title"}),
+            "body": forms.Textarea(attrs={"rows": 5}),
         }

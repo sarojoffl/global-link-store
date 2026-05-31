@@ -6,6 +6,7 @@ from .models import (
     Category,
     Product,
     ProductImage,
+    ProductReview,
     ProductSKU,
     ProductSpecification,
     ProductVariantGroup,
@@ -82,3 +83,11 @@ class ProductSKUAdmin(admin.ModelAdmin):
 
 admin.site.register(Category)
 admin.site.register(Brand)
+
+
+@admin.register(ProductReview)
+class ProductReviewAdmin(admin.ModelAdmin):
+    list_display = ("product", "user", "rating", "title", "is_published", "created_at")
+    list_filter = ("is_published", "rating", "created_at")
+    search_fields = ("product__title", "user__username", "title", "body")
+    readonly_fields = ("created_at", "updated_at")
