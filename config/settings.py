@@ -13,7 +13,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 
 DEBUG = os.getenv("DEBUG") == "True"
 
-MAINTENANCE_MODE = os.getenv("MAINTENANCE_MODE", "True") == "True"
+MAINTENANCE_MODE = os.getenv("MAINTENANCE_MODE", "False") == "True"
 
 ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h.strip()]
 

@@ -5,6 +5,10 @@
 {% block body_class %} class="page-product"{% endblock %}
 
 {% block extra_css %}
+  {# Font imports — add these to base.html <head> for best performance #}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;1,9..40,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/product.css' %}">
   <link rel="stylesheet" href="{% static 'css/home.css' %}">
 {% endblock %}
@@ -13,23 +17,23 @@
 <div class="product-page">
   <div class="container">
 
+    {# ── BREADCRUMB ── #}
     <nav class="product-breadcrumb" aria-label="Breadcrumb">
-      <a href="{% url 'core:index' %}">Home</a>
+      <a href="{% url 'core:index' %}"><i class="fas fa-home" style="font-size:11px"></i> Home</a>
       <span class="bc-sep" aria-hidden="true"><i class="fas fa-chevron-right"></i></span>
-      <a href="{% url 'products:category' product.category.slug %}">
-        {{ product.category.name }}
-      </a>
+      <a href="{% url 'products:category' product.category.slug %}">{{ product.category.name }}</a>
       {% if product.brand %}
         <span class="bc-sep" aria-hidden="true"><i class="fas fa-chevron-right"></i></span>
-        <a href="{% url 'products:brand' product.brand.slug %}">
-          {{ product.brand.name }}
-        </a>
+        <a href="{% url 'products:brand' product.brand.slug %}">{{ product.brand.name }}</a>
       {% endif %}
       <span class="bc-sep" aria-hidden="true"><i class="fas fa-chevron-right"></i></span>
       <span class="bc-current" aria-current="page">{{ product.title|truncatewords:8 }}</span>
     </nav>
 
+    {# ── MAIN PRODUCT SECTION ── #}
     <section class="product-main" aria-label="Product overview">
+
+      {# ── GALLERY ── #}
       <div class="product-gallery">
         <div class="gallery-main">
           {% if product.old_price %}
@@ -42,9 +46,11 @@
           {% elif product.product_type == "offer" %}
             <span class="product-badge product-badge--offer">Best Offer</span>
           {% endif %}
+
           <button type="button" class="gallery-zoom" aria-label="View full image" data-gallery-zoom>
             <i class="fas fa-expand" aria-hidden="true"></i>
           </button>
+
           <div class="gallery-zoom-wrap" data-zoom-wrap>
             <img
               id="gallery-main-img"
@@ -56,6 +62,7 @@
           </div>
           <div class="zoom-result" hidden aria-hidden="true"></div>
         </div>
+
         {% if gallery|length > 1 %}
           <div class="gallery-thumbs" role="list">
             {% for item in gallery %}
@@ -73,13 +80,13 @@
         {% endif %}
       </div>
 
+      {# ── INFO PANEL ── #}
       <div class="product-info">
+
+        {# Meta: brand + SKU #}
         <div class="product-info__meta">
           {% if product.brand %}
-            
-            <a href="{% url 'products:category' product.category.slug %}?brand={{ product.brand.slug }}"
-              class="product-brand"
-            >
+            <a href="{% url 'products:category' product.category.slug %}?brand={{ product.brand.slug }}" class="product-brand">
               {% if product.brand.logo %}
                 <img src="{{ product.brand.logo.url }}" alt="{{ product.brand.name }}" class="product-brand__logo">
               {% endif %}
@@ -89,8 +96,10 @@
           <span class="product-sku">SKU: GLS-{{ product.id|stringformat:"05d" }}</span>
         </div>
 
+        {# Title #}
         <h1 class="product-title">{{ product.title }}</h1>
 
+        {# Rating #}
         <div class="product-rating" aria-label="Product rating">
           <div class="stars" aria-hidden="true">
             <i class="fas fa-star"></i>
@@ -101,10 +110,11 @@
           </div>
           <span class="rating-value">4.5</span>
           <a href="#reviews" class="rating-count">(12 reviews)</a>
-          <span class="rating-divider">|</span>
+          <span class="rating-divider" aria-hidden="true">|</span>
           <span class="rating-sold"><i class="fas fa-shopping-bag"></i> 48 sold</span>
         </div>
 
+        {# Price #}
         <div class="product-price-block">
           <div class="price-row">
             <span class="price" id="product-price" data-base-price="{{ product.price }}">
@@ -114,14 +124,12 @@
               <span class="price-old" id="product-old-price" data-base-old-price="{{ product.old_price }}">
                 Rs {{ product.old_price|floatformat:2 }}
               </span>
-              <span class="price-save" id="product-save" data-base-save="{{ product.save_amount }}">
-                Save Rs {{ product.save_amount|floatformat:2 }}
-              </span>
             {% endif %}
           </div>
           <p class="price-note"><i class="fas fa-info-circle"></i> Price includes VAT. Delivery charges may apply.</p>
         </div>
 
+        {# Stock #}
         <p class="product-stock{% if product.is_in_stock %} in-stock{% else %} out-of-stock{% endif %}" id="product-stock-status">
           {% if product.is_in_stock %}
             <i class="fas fa-check-circle"></i> <span>In stock — ready to ship</span>
@@ -130,6 +138,7 @@
           {% endif %}
         </p>
 
+        {# Variants #}
         {% if variant_groups %}
           <div class="product-variants">
             {% for group in variant_groups %}
@@ -151,10 +160,11 @@
           </div>
         {% endif %}
 
+        {# Key Specs #}
         {% if key_specs %}
           <div class="product-key-specs">
             <div class="product-key-specs__head">
-              <h2 class="product-key-specs__title">Key Specifications</h2>
+              <h2 class="product-key-specs__title"><i class="fas fa-list-ul" style="margin-right:6px;opacity:.6"></i>Key Specifications</h2>
               <a href="#specifications" class="product-key-specs__link" data-tab-jump="specifications">
                 View all <i class="fas fa-arrow-right" aria-hidden="true"></i>
               </a>
@@ -170,6 +180,7 @@
           </div>
         {% endif %}
 
+        {# Quantity + Add to Cart + Buy Now #}
         <div class="product-actions">
           <div class="qty-selector" aria-label="Quantity">
             <button type="button" class="qty-btn qty-btn--minus" aria-label="Decrease quantity" data-qty-minus>
@@ -200,6 +211,7 @@
             <i class="fas fa-shopping-cart" aria-hidden="true"></i>
             Add to Cart
           </button>
+
           <button
             type="button"
             class="btn-buy-now"
@@ -207,19 +219,21 @@
             data-product-id="{{ product.id }}"
             {% if not product.is_in_stock %}disabled{% endif %}
           >
+            <i class="fas fa-bolt" aria-hidden="true"></i>
             Buy Now
           </button>
         </div>
 
+        {# Secondary: Wishlist / Compare / Share #}
         <div class="product-secondary-actions">
           {% if user.is_authenticated %}
             <form method="post" action="{% url 'shop:wishlist_toggle' product.id %}" class="wishlist-toggle-form" data-wishlist-form>
               {% csrf_token %}
-              <button type="submit" 
-                class="secondary-action {% if product_in_wishlist %}is-active{% endif %}" 
+              <button type="submit"
+                class="secondary-action {% if product_in_wishlist %}is-active{% endif %}"
                 data-wishlist-btn>
-                <i class="{% if product_in_wishlist %}fas{% else %}far{% endif %} fa-heart" 
-                  aria-hidden="true"></i> Wishlist
+                <i class="{% if product_in_wishlist %}fas{% else %}far{% endif %} fa-heart" aria-hidden="true"></i>
+                Wishlist
               </button>
             </form>
           {% else %}
@@ -227,6 +241,7 @@
               <i class="far fa-heart" aria-hidden="true"></i> Wishlist
             </a>
           {% endif %}
+
           <button
             type="button"
             class="secondary-action"
@@ -238,45 +253,40 @@
           >
             <i class="fas fa-exchange-alt" aria-hidden="true"></i> Compare
           </button>
+
           <div class="share-group">
             <span class="share-label">Share:</span>
             <button type="button" class="share-btn" data-share="copy" aria-label="Copy link">
               <i class="fas fa-link" aria-hidden="true"></i>
             </button>
-            
             <a href="https://wa.me/?text={{ product.title|urlencode }}%20{{ request.build_absolute_uri|urlencode }}"
               class="share-btn share-btn--whatsapp"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Share on WhatsApp"
-            >
+              target="_blank" rel="noopener noreferrer"
+              aria-label="Share on WhatsApp">
               <i class="fab fa-whatsapp" aria-hidden="true"></i>
             </a>
-            
             <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri|urlencode }}"
               class="share-btn share-btn--facebook"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Share on Facebook"
-            >
+              target="_blank" rel="noopener noreferrer"
+              aria-label="Share on Facebook">
               <i class="fab fa-facebook-f" aria-hidden="true"></i>
             </a>
           </div>
         </div>
 
+        {# Trust Signals #}
         <ul class="product-trust">
-          <li><i class="fas fa-truck" aria-hidden="true"></i> Free delivery in Kathmandu valley</li>
-          <li><i class="fas fa-shield-alt" aria-hidden="true"></i> Genuine product warranty</li>
-          <li><i class="fas fa-undo" aria-hidden="true"></i> 7-day easy return policy</li>
-          <li><i class="fas fa-headset" aria-hidden="true"></i> 24/7 customer support</li>
+          <li><i class="fas fa-truck"></i> Free delivery in Kathmandu valley</li>
+          <li><i class="fas fa-shield-alt"></i> Genuine product warranty</li>
+          <li><i class="fas fa-undo"></i> 7-day easy return policy</li>
+          <li><i class="fas fa-headset"></i> 24/7 customer support</li>
         </ul>
 
+        {# Highlights: category / brand / availability #}
         <dl class="product-highlights">
           <div class="highlight-item">
             <dt>Category</dt>
-            <dd>
-              <a href="{% url 'products:category' product.category.slug %}">{{ product.category.name }}</a>
-            </dd>
+            <dd><a href="{% url 'products:category' product.category.slug %}">{{ product.category.name }}</a></dd>
           </div>
           {% if product.brand %}
             <div class="highlight-item">
@@ -289,34 +299,39 @@
             <dd>{% if product.is_in_stock %}In Stock{% else %}Out of Stock{% endif %}</dd>
           </div>
         </dl>
-      </div>
+
+      </div>{# end .product-info #}
     </section>
 
+    {# ── TABS ── #}
     <section class="product-tabs-section home-section" aria-label="Product details">
       <div class="product-tabs" role="tablist">
         <button type="button" class="tab-btn is-active" role="tab" aria-selected="true" data-tab="description">
-          Description
+          <i class="fas fa-align-left" style="margin-right:6px;opacity:.7"></i>Description
         </button>
-        <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="specifications">
-          Specifications
+        <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="specifications" id="specifications">
+          <i class="fas fa-list-ul" style="margin-right:6px;opacity:.7"></i>Specifications
         </button>
         <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="reviews" id="reviews">
-          Reviews
+          <i class="fas fa-star" style="margin-right:6px;opacity:.7"></i>Reviews
         </button>
         <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="shipping">
-          Shipping &amp; Returns
+          <i class="fas fa-truck" style="margin-right:6px;opacity:.7"></i>Shipping &amp; Returns
         </button>
       </div>
 
       <div class="tab-panels">
+
+        {# Description #}
         <div class="tab-panel is-active" id="tab-description" role="tabpanel">
           {% if product.description %}
             <div class="product-description">{{ product.description|linebreaks }}</div>
           {% else %}
-            <p class="tab-empty">No description available for this product yet.</p>
+            <p class="tab-empty"><i class="fas fa-file-alt" style="font-size:2rem;display:block;margin-bottom:8px;opacity:.3"></i>No description available for this product yet.</p>
           {% endif %}
         </div>
 
+        {# Specifications #}
         <div class="tab-panel" id="tab-specifications" role="tabpanel" hidden>
           {% if specs_by_section %}
             {% for section, specs in specs_by_section.items %}
@@ -335,10 +350,11 @@
               </div>
             {% endfor %}
           {% else %}
-            <p class="tab-empty">Specifications will be added soon.</p>
+            <p class="tab-empty"><i class="fas fa-clipboard-list" style="font-size:2rem;display:block;margin-bottom:8px;opacity:.3"></i>Specifications will be added soon.</p>
           {% endif %}
         </div>
 
+        {# Reviews #}
         <div class="tab-panel" id="tab-reviews" role="tabpanel" hidden>
           <div class="reviews-summary">
             <div class="reviews-score">
@@ -353,11 +369,11 @@
               <span class="reviews-score__count">Based on 12 reviews</span>
             </div>
             <div class="reviews-bars">
-              <div class="review-bar"><span>5</span><div class="bar"><span style="width: 70%"></span></div><span>8</span></div>
-              <div class="review-bar"><span>4</span><div class="bar"><span style="width: 20%"></span></div><span>2</span></div>
-              <div class="review-bar"><span>3</span><div class="bar"><span style="width: 8%"></span></div><span>1</span></div>
-              <div class="review-bar"><span>2</span><div class="bar"><span style="width: 0%"></span></div><span>0</span></div>
-              <div class="review-bar"><span>1</span><div class="bar"><span style="width: 8%"></span></div><span>1</span></div>
+              <div class="review-bar"><span>5 ★</span><div class="bar"><span style="width:70%"></span></div><span>8</span></div>
+              <div class="review-bar"><span>4 ★</span><div class="bar"><span style="width:20%"></span></div><span>2</span></div>
+              <div class="review-bar"><span>3 ★</span><div class="bar"><span style="width:8%"></span></div><span>1</span></div>
+              <div class="review-bar"><span>2 ★</span><div class="bar"><span style="width:0%"></span></div><span>0</span></div>
+              <div class="review-bar"><span>1 ★</span><div class="bar"><span style="width:8%"></span></div><span>1</span></div>
             </div>
           </div>
 
@@ -411,10 +427,13 @@
             <input type="text" id="review-title" placeholder="Summarize your experience" disabled>
             <label for="review-body">Your review</label>
             <textarea id="review-body" rows="4" placeholder="What did you like or dislike?" disabled></textarea>
-            <button type="button" class="btn-review-submit" disabled>Submit Review (coming soon)</button>
+            <button type="button" class="btn-review-submit" disabled>
+              <i class="fas fa-paper-plane" style="margin-right:6px"></i>Submit Review (coming soon)
+            </button>
           </form>
         </div>
 
+        {# Shipping & Returns #}
         <div class="tab-panel" id="tab-shipping" role="tabpanel" hidden>
           <div class="shipping-info">
             <h3>Delivery</h3>
@@ -423,6 +442,7 @@
               <li>Outside valley: 3–7 business days depending on location</li>
               <li>Order tracking and updates sent to your email after dispatch</li>
             </ul>
+
             <h3>Returns &amp; Refunds</h3>
             <ul>
               <li>7-day return for unused items in original packaging</li>
@@ -430,13 +450,20 @@
               <li>See our <a href="{% url 'core:refund_policy' %}">Refund &amp; Return Policy</a> for full details</li>
               <li>Contact <a href="tel:+9779851402916">+977-9851402916</a> or <a href="mailto:shop@globallinkstore.com">shop@globallinkstore.com</a></li>
             </ul>
+
             <h3>Payment Methods</h3>
-            <p>We accept <strong>Cash on Delivery</strong>, <strong>eSewa</strong>, and <strong>Khalti</strong>.</p>
+            <div class="payment-methods">
+              <span class="payment-badge cod"><i class="fas fa-money-bill-wave"></i> Cash on Delivery</span>
+              <span class="payment-badge esewa"><i class="fas fa-wallet"></i> eSewa</span>
+              <span class="payment-badge khalti"><i class="fas fa-mobile-alt"></i> Khalti</span>
+            </div>
           </div>
         </div>
-      </div>
+
+      </div>{# end .tab-panels #}
     </section>
 
+    {# ── RELATED PRODUCTS ── #}
     {% if related_products %}
       <section class="home-section home-section--alt" aria-labelledby="related-heading">
         <div class="section-header">
@@ -455,20 +482,22 @@
   </div>
 </div>
 
+{# CSRF helper for AJAX #}
 <form id="csrf-form" hidden>{% csrf_token %}</form>
 
-<script>
-  window.GLS_SKUS = {{ sku_data_json|safe }};
-  window.GLS_BASE_PRICE = {{ product.price }};
-  window.GLS_BASE_OLD_PRICE = {{ product.old_price|default:0 }};
-</script>
-
+{# Lightbox #}
 <div class="gallery-lightbox" id="gallery-lightbox" hidden aria-hidden="true">
   <button type="button" class="lightbox-close" aria-label="Close">
     <i class="fas fa-times" aria-hidden="true"></i>
   </button>
   <img src="" alt="{{ product.title }}" id="lightbox-img">
 </div>
+
+<script>
+  window.GLS_SKUS        = {{ sku_data_json|safe }};
+  window.GLS_BASE_PRICE     = {{ product.price }};
+  window.GLS_BASE_OLD_PRICE = {{ product.old_price|default:0 }};
+</script>
 {% endblock %}
 
 {% block extra_js %}
