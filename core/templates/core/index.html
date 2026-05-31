@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}Home – Global Link Store{% endblock %}
-{% block body_class %} class="page-home"{% endblock %}
+{% block body_class %} class="page-home{% if home_settings.top_zone_background %} page-home--hero{% endif %}"{% endblock %}
 
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/home.css' %}">

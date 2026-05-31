@@ -31,19 +31,22 @@
       </a>
 
       <div class="search-wrapper">
-        <form method="get" action="{% url 'products:list' %}" role="search">
+        <form method="get" action="{% url 'products:list' %}" role="search" class="search-form">
           <label for="search-input" class="visually-hidden">Search for products</label>
-          <input
-            id="search-input"
-            type="search"
-            name="q"
-            placeholder="Search products"
-            value="{{ request.GET.q|default:'' }}"
-            autocomplete="off"
-          >
-          <button type="submit" class="search-btn" aria-label="Search">
-            <i class="fas fa-search" aria-hidden="true"></i>
-          </button>
+          <div class="search-field">
+            <i class="fas fa-search search-field__icon" aria-hidden="true"></i>
+            <input
+              id="search-input"
+              type="search"
+              name="q"
+              placeholder="Search products…"
+              value="{{ request.GET.q|default:'' }}"
+              autocomplete="off"
+            >
+            <button type="submit" class="search-field__submit" aria-label="Search">
+              <i class="fas fa-arrow-right" aria-hidden="true"></i>
+            </button>
+          </div>
         </form>
         <div id="search-autocomplete-results" class="autocomplete-results" hidden></div>
       </div>

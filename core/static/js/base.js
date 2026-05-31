@@ -12,20 +12,31 @@
   const menuOverlay = document.querySelector(".mobile-nav-overlay");
 
   let headerOffset = 0;
+  const isHomePage = document.body.classList.contains("page-home");
+  const scrollThreshold = 48;
 
   /* ───────── STICKY HEADER ───────── */
   function updateHeaderOffset() {
     if (!siteHeader) return;
     headerOffset = siteHeader.offsetHeight;
+    document.documentElement.style.setProperty("--site-header-height", headerOffset + "px");
   }
 
   function onScroll() {
     const scrollY = window.scrollY;
 
     if (siteHeader) {
-      const isSticky = scrollY > 0;
-      siteHeader.classList.toggle("is-sticky", isSticky);
-      document.body.style.paddingTop = isSticky ? headerOffset + "px" : "";
+      if (isHomePage) {
+        const isScrolled = scrollY > scrollThreshold;
+        siteHeader.classList.toggle("is-scrolled", isScrolled);
+        siteHeader.classList.add("is-overlay");
+        document.body.style.paddingTop = "";
+      } else {
+        const isSticky = scrollY > 0;
+        siteHeader.classList.toggle("is-sticky", isSticky);
+        siteHeader.classList.toggle("is-scrolled", isSticky);
+        document.body.style.paddingTop = isSticky ? headerOffset + "px" : "";
+      }
     }
 
     if (backToTop) {
@@ -246,7 +257,7 @@
 
   /* ───────── EVENTS ───────── */
   window.addEventListener("resize", function () {
-    const wasSticky = siteHeader && siteHeader.classList.contains("is-sticky");
+    const wasSticky = siteHeader && siteHeader.classList.contains("is-sticky") && !isHomePage;
     if (wasSticky) {
       document.body.style.paddingTop = "";
       siteHeader.classList.remove("is-sticky");

@@ -11,6 +11,10 @@ body.page-home .main-content {
   padding-bottom: 8px;
 }
 
+body.page-home .home-top-zone {
+  padding-top: var(--site-header-height, 128px);
+}
+
 .home-page {
   width: 100%;
 }
@@ -35,8 +39,9 @@ body.page-home .main-content {
   inset: 0;
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.15) 0%,
-    rgba(255, 255, 255, 0.55) 70%,
+    rgba(15, 23, 42, 0.42) 0%,
+    rgba(15, 23, 42, 0.28) 35%,
+    rgba(255, 255, 255, 0.45) 72%,
     rgba(255, 255, 255, 0.92) 100%
   );
   pointer-events: none;
