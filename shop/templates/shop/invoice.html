@@ -69,15 +69,32 @@
     </div>
   </div>
 
-  <div class="address-block">
-    <label>Bill To / Ship To</label>
-    {{ order.shipping_name }}<br>
-    {{ order.shipping_street }}<br>
-    {{ order.shipping_city }}{% if order.shipping_province %}, {{ order.shipping_province }}{% endif %}
-    {% if order.shipping_postal_code %} {{ order.shipping_postal_code }}{% endif %}<br>
-    {{ order.shipping_phone }}<br>
-    {{ order.email }}
-  </div>
+  <table style="width: 100%; border: none; margin-bottom: 24px;">
+    <tr>
+      <td style="width: 50%; padding: 0 10px 0 0; vertical-align: top; border: none; background: transparent;">
+        <div class="address-block" style="margin-bottom: 0; min-height: 140px;">
+          <label>Shipping Address</label>
+          <strong>{{ order.shipping_name }}</strong><br>
+          {{ order.shipping_street }}<br>
+          {{ order.shipping_city }}{% if order.shipping_province %}, {{ order.shipping_province }}{% endif %}
+          {% if order.shipping_postal_code %} {{ order.shipping_postal_code }}{% endif %}<br>
+          <strong>Area:</strong> {{ order.get_shipping_area_display }}<br>
+          <strong>Phone:</strong> {{ order.shipping_phone }}<br>
+          <strong>Email:</strong> {{ order.email }}
+        </div>
+      </td>
+      <td style="width: 50%; padding: 0 0 0 10px; vertical-align: top; border: none; background: transparent;">
+        <div class="address-block" style="margin-bottom: 0; min-height: 140px;">
+          <label>Billing Address</label>
+          <strong>{{ order.billing_name|default:order.shipping_name }}</strong><br>
+          {{ order.billing_street|default:order.shipping_street }}<br>
+          {{ order.billing_city|default:order.shipping_city }}{% if order.billing_province or order.shipping_province %}, {{ order.billing_province|default:order.shipping_province }}{% endif %}
+          {% if order.billing_postal_code or order.shipping_postal_code %} {{ order.billing_postal_code|default:order.shipping_postal_code }}{% endif %}<br>
+          <strong>Phone:</strong> {{ order.billing_phone|default:order.shipping_phone }}
+        </div>
+      </td>
+    </tr>
+  </table>
 
   <table>
     <thead>

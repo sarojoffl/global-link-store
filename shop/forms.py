@@ -10,6 +10,14 @@ class CheckoutForm(forms.Form):
         label="Saved address",
         empty_label="Enter a new address",
     )
+    shipping_area = forms.ChoiceField(
+        choices=[
+            ("inside_valley", "Inside Kathmandu Valley"),
+            ("outside_valley", "Outside Kathmandu Valley"),
+        ],
+        initial="inside_valley",
+        label="Shipping Area",
+    )
     full_name = forms.CharField(max_length=120)
     phone = forms.CharField(max_length=20)
     email = forms.EmailField()
@@ -17,6 +25,19 @@ class CheckoutForm(forms.Form):
     city = forms.CharField(max_length=100)
     province = forms.CharField(max_length=100, required=False)
     postal_code = forms.CharField(max_length=20, required=False, label="Postal code")
+
+    billing_same_as_shipping = forms.BooleanField(
+        required=False,
+        initial=True,
+        label="Billing address same as shipping address",
+    )
+    billing_name = forms.CharField(max_length=120, required=False, label="Billing full name")
+    billing_phone = forms.CharField(max_length=20, required=False, label="Billing phone")
+    billing_street = forms.CharField(max_length=255, required=False, label="Billing street address")
+    billing_city = forms.CharField(max_length=100, required=False, label="Billing city")
+    billing_province = forms.CharField(max_length=100, required=False, label="Billing province")
+    billing_postal_code = forms.CharField(max_length=20, required=False, label="Billing postal code")
+
     payment_method = forms.ChoiceField(
         choices=[
             ("cod", "Cash on Delivery"),
@@ -51,9 +72,12 @@ class CheckoutForm(forms.Form):
         for name in (
             "full_name", "phone", "email", "street", "city",
             "province", "postal_code", "notes", "address_label",
+            "billing_name", "billing_phone", "billing_street", "billing_city",
+            "billing_province", "billing_postal_code",
         ):
             if name in self.fields:
                 self.fields[name].widget.attrs.update(input_class)
+        self.fields["shipping_area"].widget.attrs.update(input_class)
         self.fields["address_id"].widget.attrs.update(input_class)
         self.fields["address_label"].widget.attrs.setdefault(
             "placeholder", "e.g. Home, Office"
@@ -88,4 +112,19 @@ class CheckoutForm(forms.Form):
             cleaned["postal_code"] = address.postal_code
             cleaned["save_address"] = False
             cleaned["set_as_default"] = False
+
+        billing_same = cleaned.get("billing_same_as_shipping")
+        if not billing_same:
+            for field in ("billing_name", "billing_phone", "billing_street", "billing_city"):
+                val = cleaned.get(field)
+                if not val or not val.strip():
+                    self.add_error(field, "This field is required when billing address differs.")
+        else:
+            cleaned["billing_name"] = cleaned.get("full_name")
+            cleaned["billing_phone"] = cleaned.get("phone")
+            cleaned["billing_street"] = cleaned.get("street")
+            cleaned["billing_city"] = cleaned.get("city")
+            cleaned["billing_province"] = cleaned.get("province", "")
+            cleaned["billing_postal_code"] = cleaned.get("postal_code", "")
+
         return cleaned

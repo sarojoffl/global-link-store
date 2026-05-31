@@ -6,6 +6,7 @@ from django.core.paginator import Paginator
 from django.db.models import Count, Prefetch
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.csrf import ensure_csrf_cookie
+from django.http import JsonResponse
 
 from .catalog import SORT_OPTIONS, build_catalog_queryset
 from .compare_utils import build_comparison_rows, get_compare_products, parse_compare_ids
@@ -243,3 +244,21 @@ def product_compare(request):
             "compare_ids": ",".join(str(p.pk) for p in products),
         },
     )
+
+
+def search_autocomplete(request):
+    query = request.GET.get("q", "").strip()
+    results = []
+    if len(query) >= 2:
+        products = Product.objects.filter(title__icontains=query).select_related("category", "brand")[:8]
+        for p in products:
+            results.append({
+                "id": p.id,
+                "title": p.title,
+                "price": str(p.price),
+                "url": f"/products/{p.slug}/",
+                "image": p.image.url if p.image else "",
+                "category": p.category.name,
+                "brand": p.brand.name if p.brand else "",
+            })
+    return JsonResponse({"results": results})

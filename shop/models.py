@@ -96,12 +96,20 @@ class Order(models.Model):
     payment_id = models.CharField(max_length=255, blank=True)
 
     email = models.EmailField()
+    shipping_area = models.CharField(max_length=50, choices=[('inside_valley', 'Inside Kathmandu Valley'), ('outside_valley', 'Outside Kathmandu Valley')], default='inside_valley')
     shipping_name = models.CharField(max_length=120)
     shipping_phone = models.CharField(max_length=20)
     shipping_street = models.CharField(max_length=255)
     shipping_city = models.CharField(max_length=100)
     shipping_province = models.CharField(max_length=100, blank=True)
     shipping_postal_code = models.CharField(max_length=20, blank=True)
+
+    billing_name = models.CharField(max_length=120, blank=True)
+    billing_phone = models.CharField(max_length=20, blank=True)
+    billing_street = models.CharField(max_length=255, blank=True)
+    billing_city = models.CharField(max_length=100, blank=True)
+    billing_province = models.CharField(max_length=100, blank=True)
+    billing_postal_code = models.CharField(max_length=20, blank=True)
 
     subtotal = models.DecimalField(max_digits=12, decimal_places=2)
     shipping_cost = models.DecimalField(max_digits=12, decimal_places=2, default=0)

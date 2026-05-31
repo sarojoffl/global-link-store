@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Global Link Store — Under Maintenance</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root {
+      --primary:       #2b65e2;
+      --primary-light: #e8f0fe;
+      --accent:        #f97316;
+      --text:          #1f2937;
+      --muted:         #6b7280;
+      --border:        #e5e7eb;
+      --bg:            #f5f7fa;
+      --white:         #ffffff;
+      --font: "Poppins", system-ui, sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+      padding: 48px 40px;
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+      animation: up 0.5s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    @keyframes up {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Logo */
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+
+    .logo-icon {
+      position: relative;
+      width: 44px; height: 44px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .logo-icon i { color: #fff; font-size: 18px; }
+
+    .logo-icon .check {
+      position: absolute;
+      top: -2px; right: -4px;
+      width: 16px; height: 16px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid #fff;
+    }
+
+    .logo-icon .check i { font-size: 7px; color: #fff; }
+
+    .logo-text {
+      text-align: left;
+    }
+
+    .logo-text .brand { font-size: 13px; font-weight: 800; color: var(--primary); letter-spacing: 0.3px; }
+    .logo-text .tag   { font-size: 9px;  color: var(--muted); letter-spacing: 1.6px; text-transform: uppercase; }
+
+    /* Gear icon */
+    .gear-wrap {
+      position: relative;
+      width: 72px; height: 72px;
+      margin: 0 auto 24px;
+    }
+
+    .gear-main {
+      font-size: 48px;
+      color: var(--primary);
+      animation: spin 12s linear infinite;
+      display: block;
+    }
+
+    .gear-sub {
+      position: absolute;
+      font-size: 24px;
+      color: var(--accent);
+      bottom: 0; right: 0;
+      animation: spin-r 8s linear infinite;
+    }
+
+    @keyframes spin   { to { transform: rotate(360deg);  } }
+    @keyframes spin-r { to { transform: rotate(-360deg); } }
+
+    /* Badge */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--primary-light);
+      color: var(--primary);
+      border: 1px solid rgba(43,101,226,0.2);
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.6px;
+      margin-bottom: 20px;
+    }
+
+    .badge .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--primary);
+      animation: blink 1.6s infinite ease-in-out;
+    }
+
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.25} }
+
+    h1 { font-size: 22px; font-weight: 700; margin-bottom: 10px; }
+
+    p  { font-size: 14px; color: var(--muted); line-height: 1.65; margin-bottom: 28px; }
+
+    /* Divider */
+    hr { border: none; border-top: 1px solid var(--border); margin-bottom: 20px; }
+
+    /* Contact */
+    .contacts { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .contact-item i { color: var(--primary); font-size: 13px; }
+    .contact-item a { color: var(--text); font-weight: 500; text-decoration: none; }
+    .contact-item a:hover { color: var(--primary); }
+
+    /* Social icons */
+    .socials { display: flex; justify-content: center; gap: 10px; }
+
+    .socials a {
+      width: 36px; height: 36px;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--muted);
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .socials a:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    @media (max-width: 480px) {
+      .card { padding: 36px 24px; }
+      h1 { font-size: 19px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+
+    <div class="logo">
+      <div class="logo-icon">
+        <i class="fas fa-shopping-cart"></i>
+        <div class="check"><i class="fas fa-check"></i></div>
+      </div>
+      <div class="logo-text">
+        <div class="brand">GLOBAL LINK STORE</div>
+        <div class="tag">Your Online Store</div>
+      </div>
+    </div>
+
+    <div class="gear-wrap">
+      <i class="fas fa-cog gear-main"></i>
+      <i class="fas fa-cog gear-sub"></i>
+    </div>
+
+    <div class="badge"><span class="dot"></span> Under Maintenance</div>
+
+    <h1>We'll Be Back Soon</h1>
+    <p>We're upgrading our systems to improve your shopping experience. Thank you for your patience!</p>
+
+    <hr>
+
+    <div class="contacts">
+      <div class="contact-item">
+        <i class="fas fa-phone-alt"></i>
+        <a href="tel:+9779851402916">+977-9851402916</a>
+      </div>
+      <div class="contact-item">
+        <i class="fas fa-envelope"></i>
+        <a href="mailto:shop@globallinkstore.com">shop@globallinkstore.com</a>
+      </div>
+    </div>
+
+    <div class="socials">
+      <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+      <a href="#" aria-label="X"><i class="fab fa-x-twitter"></i></a>
+      <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+      <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+    </div>
+
+  </div>
+</body>
+</html>

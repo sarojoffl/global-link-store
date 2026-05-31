@@ -18,6 +18,7 @@
           <tr><th>Email</th><td>{{ order.email }}</td></tr>
           <tr><th>Phone</th><td>{{ order.shipping_phone }}</td></tr>
           <tr><th>Address</th><td>{{ order.shipping_street }}, {{ order.shipping_city }}{% if order.shipping_province %}, {{ order.shipping_province }}{% endif %}{% if order.shipping_postal_code %} {{ order.shipping_postal_code }}{% endif %}</td></tr>
+          <tr><th>Area</th><td>{{ order.get_shipping_area_display }}</td></tr>
           {% if order.user %}
             <tr><th>Account</th>
               <td>
@@ -25,6 +26,14 @@
               </td>
             </tr>
           {% endif %}
+        </table>
+
+        <hr class="my-3">
+        <h6 class="fw-bold mb-2 text-primary">Billing Address</h6>
+        <table class="table table-sm mb-0">
+          <tr><th style="width:120px;">Name</th><td>{{ order.billing_name|default:order.shipping_name }}</td></tr>
+          <tr><th>Phone</th><td>{{ order.billing_phone|default:order.shipping_phone }}</td></tr>
+          <tr><th>Address</th><td>{{ order.billing_street|default:order.shipping_street }}, {{ order.billing_city|default:order.shipping_city }}{% if order.billing_province or order.shipping_province %}, {{ order.billing_province|default:order.shipping_province }}{% endif %}{% if order.billing_postal_code or order.shipping_postal_code %} {{ order.billing_postal_code|default:order.shipping_postal_code }}{% endif %}</td></tr>
         </table>
       </div>
     </div>

@@ -22,6 +22,12 @@
         <form method="post" class="checkout-form" novalidate>
           {% csrf_token %}
 
+          <div class="form-group">
+            <label for="id_shipping_area">Shipping Area</label>
+            {{ form.shipping_area }}
+            {% if form.shipping_area.errors %}<span class="form-error">{{ form.shipping_area.errors.0 }}</span>{% endif %}
+          </div>
+
           {% if form.address_id.field.queryset.exists %}
             <div class="form-group">
               <label for="id_address_id">Saved address</label>
@@ -88,6 +94,50 @@
             </div>
           </div>
 
+          <!-- Billing address fields -->
+          <div class="form-group">
+            <label class="form-check">
+              {{ form.billing_same_as_shipping }}
+              <span>{{ form.billing_same_as_shipping.label }}</span>
+            </label>
+          </div>
+
+          <div id="billing-address-section" class="shop-card" style="background: rgba(0, 0, 0, 0.02); border: 1px solid var(--color-border); padding: 18px; border-radius: var(--radius-md); margin-bottom: 20px; {% if form.billing_same_as_shipping.value != False %}display: none;{% endif %}">
+            <h3 style="margin-bottom: 15px; font-size: 15px; font-weight: 600; color: var(--color-primary);">Billing Address Details</h3>
+            <div class="form-row-2">
+              <div class="form-group">
+                <label for="id_billing_name">Full name</label>
+                {{ form.billing_name }}
+                {% if form.billing_name.errors %}<span class="form-error">{{ form.billing_name.errors.0 }}</span>{% endif %}
+              </div>
+              <div class="form-group">
+                <label for="id_billing_phone">Phone</label>
+                {{ form.billing_phone }}
+                {% if form.billing_phone.errors %}<span class="form-error">{{ form.billing_phone.errors.0 }}</span>{% endif %}
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="id_billing_street">Street address</label>
+              {{ form.billing_street }}
+              {% if form.billing_street.errors %}<span class="form-error">{{ form.billing_street.errors.0 }}</span>{% endif %}
+            </div>
+            <div class="form-row-2">
+              <div class="form-group">
+                <label for="id_billing_city">City</label>
+                {{ form.billing_city }}
+                {% if form.billing_city.errors %}<span class="form-error">{{ form.billing_city.errors.0 }}</span>{% endif %}
+              </div>
+              <div class="form-group">
+                <label for="id_billing_province">Province</label>
+                {{ form.billing_province }}
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="id_billing_postal_code">Postal code</label>
+              {{ form.billing_postal_code }}
+            </div>
+          </div>
+
           <div class="form-group">
             <span class="form-label">Payment method</span>
             <div class="payment-options">
@@ -100,7 +150,7 @@
             {{ form.notes }}
           </div>
 
-          <button type="submit" class="btn-shop-primary btn-shop-primary--lg">
+          <button type="submit" class="btn-shop-primary btn-shop-primary--lg" id="checkout-submit-btn">
             Place Order — Rs {{ total|floatformat:2 }}
           </button>
         </form>
@@ -120,13 +170,11 @@
           {% endfor %}
         </ul>
         <dl class="summary-rows">
-          <div><dt>Subtotal</dt><dd>Rs {{ subtotal|floatformat:2 }}</dd></div>
-          <div><dt>Shipping</dt><dd>{% if shipping == 0 %}Free{% else %}Rs {{ shipping|floatformat:2 }}{% endif %}</dd></div>
-          <div class="summary-total"><dt>Total</dt><dd>Rs {{ total|floatformat:2 }}</dd></div>
+          <div><dt>Subtotal</dt><dd id="checkout-subtotal">Rs {{ subtotal|floatformat:2 }}</dd></div>
+          <div><dt>Shipping</dt><dd id="checkout-shipping">{% if shipping == 0 %}Free{% else %}Rs {{ shipping|floatformat:2 }}{% endif %}</dd></div>
+          <div class="summary-total"><dt>Total</dt><dd id="checkout-total">Rs {{ total|floatformat:2 }}</dd></div>
         </dl>
-        {% if subtotal < shipping_free_threshold %}
-          <p class="summary-hint">Free shipping on orders over Rs {{ shipping_free_threshold|floatformat:0 }}</p>
-        {% endif %}
+        <p class="summary-hint" id="shipping-hint">Free shipping in valley on orders over Rs {{ shipping_free_threshold|floatformat:0 }}</p>
       </aside>
     </div>
   </div>
@@ -135,4 +183,70 @@
 
 {% block extra_js %}
   <script src="{% static 'js/shop.js' %}" defer></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const shippingAreaSelect = document.getElementById("id_shipping_area");
+      const subtotalVal = parseFloat("{{ subtotal }}");
+      const shippingEl = document.getElementById("checkout-shipping");
+      const totalEl = document.getElementById("checkout-total");
+      const submitBtn = document.getElementById("checkout-submit-btn");
+      const shippingHint = document.getElementById("shipping-hint");
+
+      function updateOrderSummary() {
+        if (!shippingAreaSelect) return;
+        const area = shippingAreaSelect.value;
+        let shippingCharge = 0;
+        
+        if (area === "outside_valley") {
+          shippingCharge = 200;
+          if (shippingHint) {
+            shippingHint.textContent = "Outside Kathmandu Valley: Rs 200 compulsory shipping charge applies.";
+          }
+        } else {
+          // inside_valley
+          if (subtotalVal >= 5000) {
+            shippingCharge = 0;
+          } else {
+            shippingCharge = 100;
+          }
+          if (shippingHint) {
+            shippingHint.textContent = "Inside Kathmandu Valley: Free shipping on orders over Rs 5000.";
+          }
+        }
+
+        const total = subtotalVal + shippingCharge;
+
+        if (shippingCharge === 0) {
+          shippingEl.textContent = "Free";
+        } else {
+          shippingEl.textContent = "Rs " + shippingCharge.toFixed(2);
+        }
+
+        totalEl.textContent = "Rs " + total.toFixed(2);
+        if (submitBtn) {
+          submitBtn.innerHTML = `Place Order — Rs ${total.toFixed(2)}`;
+        }
+      }
+
+      if (shippingAreaSelect) {
+        shippingAreaSelect.addEventListener("change", updateOrderSummary);
+        // Run once on load to ensure initial state is synced
+        updateOrderSummary();
+      }
+
+      // Toggle billing address section
+      const billingSameCheckbox = document.getElementById("id_billing_same_as_shipping");
+      const billingSection = document.getElementById("billing-address-section");
+
+      if (billingSameCheckbox && billingSection) {
+        billingSameCheckbox.addEventListener("change", function() {
+          if (billingSameCheckbox.checked) {
+            billingSection.style.display = "none";
+          } else {
+            billingSection.style.display = "block";
+          }
+        });
+      }
+    });
+  </script>
 {% endblock %}

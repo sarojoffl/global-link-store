@@ -1028,14 +1028,16 @@ body.mobile-nav-open {
 @media (max-width: 992px) {
   .top-bar {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-columns: auto 1fr auto;
+    grid-template-rows: auto auto;
     align-items: center;
-    gap: 8px;
-    padding: 10px var(--container-padding);
+    gap: 12px 16px;
+    padding: 12px var(--container-padding);
   }
 
   .logo {
     grid-column: 1;
+    grid-row: 1;
     margin-right: 0;
     gap: 8px;
     max-width: 100%;
@@ -1056,8 +1058,13 @@ body.mobile-nav-open {
     display: none;
   }
 
+  .top-bar .nav-icons {
+    display: none !important; /* Hide to prevent cluttering the mobile header since they are already inside the hamburger menu slideout! */
+  }
+
   .search-wrapper {
-    grid-column: 2;
+    grid-column: 1 / -1;
+    grid-row: 2;
     flex: none;
     width: 100%;
     min-width: 0;
@@ -1077,8 +1084,12 @@ body.mobile-nav-open {
 
   .mobile-menu-toggle {
     grid-column: 3;
+    grid-row: 1;
     display: flex;
-    margin-left: 0;
+    margin-left: auto;
+    width: 38px;
+    height: 38px;
+    font-size: 16px;
   }
 
   .navbar {
@@ -1150,3 +1161,106 @@ body.mobile-nav-open {
   .footer-main { grid-template-columns: 1fr; }
   .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
 }
+
+/* ───────── HEADER NAV ICONS REVAMP ───────── */
+.top-bar .nav-icons {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ───────── SEARCH AUTOCOMPLETE SUGGESTIONS ───────── */
+.search-wrapper {
+  position: relative;
+}
+
+.autocomplete-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--color-border);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  box-shadow: var(--shadow-md);
+  z-index: 1000;
+  max-height: 420px;
+  overflow-y: auto;
+  padding: 6px 0;
+  display: flex;
+  flex-direction: column;
+  margin-top: 2px;
+}
+
+.autocomplete-results[hidden] {
+  display: none !important;
+}
+
+.autocomplete-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background var(--transition);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.autocomplete-item:last-child {
+  border-bottom: none;
+}
+
+.autocomplete-item:hover,
+.autocomplete-item.highlighted {
+  background: var(--color-primary-light);
+}
+
+.autocomplete-item img {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  background: #f3f4f6;
+  border: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.autocomplete-item-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.autocomplete-item-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.autocomplete-item-meta {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.autocomplete-item-price {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.autocomplete-no-results {
+  padding: 16px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+

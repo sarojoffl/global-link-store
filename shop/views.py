@@ -116,7 +116,13 @@ def cart_remove(request, item_id):
 @login_required
 def checkout(request):
     cart = get_cart(request)
-    summary = get_cart_summary(cart)
+    
+    # Determine the selected shipping area for dynamic calculation
+    shipping_area = "inside_valley"
+    if request.method == "POST":
+        shipping_area = request.POST.get("shipping_area", "inside_valley")
+        
+    summary = get_cart_summary(cart, shipping_area=shipping_area)
 
     if not summary["items"]:
         messages.warning(request, "Your cart is empty.")
@@ -140,6 +146,9 @@ def checkout(request):
     form = CheckoutForm(request.user, request.POST or None)
 
     if request.method == "POST" and form.is_valid():
+        # Re-calculate summary with verified cleaned_data shipping_area to guarantee accuracy
+        cleaned_shipping_area = form.cleaned_data.get("shipping_area", "inside_valley")
+        summary = get_cart_summary(cart, shipping_area=cleaned_shipping_area)
         return _place_order(request, cart, summary, form)
 
     return render(
@@ -189,12 +198,21 @@ def _create_order(request, summary, data):
     return Order.objects.create(
         user=request.user,
         email=data["email"],
+        shipping_area=data.get("shipping_area", "inside_valley"),
         shipping_name=data["full_name"],
         shipping_phone=data["phone"],
         shipping_street=data["street"],
         shipping_city=data["city"],
         shipping_province=data.get("province", ""),
         shipping_postal_code=data.get("postal_code", ""),
+        
+        billing_name=data.get("billing_name", data["full_name"]),
+        billing_phone=data.get("billing_phone", data["phone"]),
+        billing_street=data.get("billing_street", data["street"]),
+        billing_city=data.get("billing_city", data["city"]),
+        billing_province=data.get("billing_province", data.get("province", "")),
+        billing_postal_code=data.get("billing_postal_code", data.get("postal_code", "")),
+        
         payment_method=data["payment_method"],
         subtotal=summary["subtotal"],
         shipping_cost=summary["shipping"],

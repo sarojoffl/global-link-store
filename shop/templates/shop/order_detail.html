@@ -69,15 +69,26 @@
         </section>
 
         <aside class="shop-card">
-          <h2>Delivery</h2>
+          <h2>Shipping Address</h2>
           <address class="order-address">
             <strong>{{ order.shipping_name }}</strong><br>
             {{ order.shipping_street }}<br>
             {{ order.shipping_city }}{% if order.shipping_province %}, {{ order.shipping_province }}{% endif %}
             {% if order.shipping_postal_code %} {{ order.shipping_postal_code }}{% endif %}<br>
-            <a href="tel:{{ order.shipping_phone }}">{{ order.shipping_phone }}</a><br>
-            <a href="mailto:{{ order.email }}">{{ order.email }}</a>
+            <strong>Area:</strong> {{ order.get_shipping_area_display }}<br>
+            <strong>Phone:</strong> <a href="tel:{{ order.shipping_phone }}">{{ order.shipping_phone }}</a><br>
+            <strong>Email:</strong> <a href="mailto:{{ order.email }}">{{ order.email }}</a>
           </address>
+
+          <h2>Billing Address</h2>
+          <address class="order-address">
+            <strong>{{ order.billing_name|default:order.shipping_name }}</strong><br>
+            {{ order.billing_street|default:order.shipping_street }}<br>
+            {{ order.billing_city|default:order.shipping_city }}{% if order.billing_province or order.shipping_province %}, {{ order.billing_province|default:order.shipping_province }}{% endif %}
+            {% if order.billing_postal_code or order.shipping_postal_code %} {{ order.billing_postal_code|default:order.shipping_postal_code }}{% endif %}<br>
+            <strong>Phone:</strong> <a href="tel:{{ order.billing_phone|default:order.shipping_phone }}">{{ order.billing_phone|default:order.shipping_phone }}</a>
+          </address>
+
           <h2>Payment</h2>
           <p>{{ order.get_payment_method_display }}</p>
           {% if order.payment_id %}

@@ -115,6 +115,125 @@
     });
   }
 
+  /* ───────── AUTOCOMPLETE SEARCH ───────── */
+  function initSearchAutocomplete() {
+    const input = document.getElementById("search-input");
+    const resultsContainer = document.getElementById("search-autocomplete-results");
+    if (!input || !resultsContainer) return;
+
+    let debounceTimeout = null;
+    let highlightedIndex = -1;
+
+    document.addEventListener("click", function (e) {
+      if (!input.contains(e.target) && !resultsContainer.contains(e.target)) {
+        resultsContainer.hidden = true;
+      }
+    });
+
+    input.addEventListener("focus", function () {
+      if (resultsContainer.children.length > 0 && input.value.trim().length >= 2) {
+        resultsContainer.hidden = false;
+      }
+    });
+
+    input.addEventListener("input", function () {
+      const q = input.value.trim();
+      clearTimeout(debounceTimeout);
+      highlightedIndex = -1;
+
+      if (q.length < 2) {
+        resultsContainer.hidden = true;
+        resultsContainer.innerHTML = "";
+        return;
+      }
+
+      debounceTimeout = setTimeout(function () {
+        fetch("/products/search/autocomplete/?q=" + encodeURIComponent(q))
+          .then(res => res.json())
+          .then(data => {
+            resultsContainer.innerHTML = "";
+            const items = data.results || [];
+            
+            if (items.length === 0) {
+              const empty = document.createElement("div");
+              empty.className = "autocomplete-no-results";
+              empty.textContent = "No products found";
+              resultsContainer.appendChild(empty);
+            } else {
+              items.forEach(function (item) {
+                const a = document.createElement("a");
+                a.className = "autocomplete-item";
+                a.href = item.url;
+                
+                const img = document.createElement("img");
+                img.src = item.image ? item.image : "/static/img/placeholder.png";
+                img.alt = item.title;
+                a.appendChild(img);
+
+                const info = document.createElement("div");
+                info.className = "autocomplete-item-info";
+                
+                const title = document.createElement("span");
+                title.className = "autocomplete-item-title";
+                title.textContent = item.title;
+                info.appendChild(title);
+
+                const meta = document.createElement("span");
+                meta.className = "autocomplete-item-meta";
+                meta.textContent = (item.brand ? item.brand + " · " : "") + item.category;
+                info.appendChild(meta);
+                
+                a.appendChild(info);
+
+                const price = document.createElement("span");
+                price.className = "autocomplete-item-price";
+                price.textContent = "Rs " + parseFloat(item.price).toFixed(2);
+                a.appendChild(price);
+
+                resultsContainer.appendChild(a);
+              });
+            }
+            resultsContainer.hidden = false;
+          })
+          .catch(err => {
+            console.error("Autocomplete fetch error:", err);
+          });
+      }, 250);
+    });
+
+    input.addEventListener("keydown", function (e) {
+      const items = resultsContainer.querySelectorAll(".autocomplete-item");
+      if (items.length === 0) return;
+
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        highlightedIndex = (highlightedIndex + 1) % items.length;
+        updateHighlight(items);
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        highlightedIndex = (highlightedIndex - 1 + items.length) % items.length;
+        updateHighlight(items);
+      } else if (e.key === "Enter") {
+        if (highlightedIndex >= 0 && highlightedIndex < items.length) {
+          e.preventDefault();
+          items[highlightedIndex].click();
+        }
+      } else if (e.key === "Escape") {
+        resultsContainer.hidden = true;
+        input.blur();
+      }
+    });
+
+    function updateHighlight(items) {
+      items.forEach((item, idx) => {
+        item.classList.toggle("highlighted", idx === highlightedIndex);
+        if (idx === highlightedIndex) {
+          item.scrollIntoView({ block: "nearest" });
+        }
+      });
+    }
+  }
+
   /* ───────── INIT ───────── */
   function init() {
     updateHeaderOffset();
@@ -122,6 +241,7 @@
     initBackToTop();
     initMessages();
     initMobileMenu();
+    initSearchAutocomplete();
   }
 
   /* ───────── EVENTS ───────── */

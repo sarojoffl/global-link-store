@@ -45,23 +45,58 @@
             <i class="fas fa-search" aria-hidden="true"></i>
           </button>
         </form>
+        <div id="search-autocomplete-results" class="autocomplete-results" hidden></div>
       </div>
+      <div class="nav-icons">
+        {% if user.is_authenticated %}
+          <div class="nav-icon-dropdown">
+            <button type="button" class="nav-icon-btn" aria-label="My Account">
+              <i class="fas fa-user" aria-hidden="true"></i>
+              <span class="nav-icon-label">{{ user.first_name|default:user.username }}</span>
+            </button>
+            <div class="nav-user-dropdown">
+              <a href="{% url 'accounts:dashboard' %}"><i class="fas fa-th-large" aria-hidden="true"></i> Dashboard</a>
+              <a href="{% url 'accounts:profile' %}"><i class="fas fa-user-circle" aria-hidden="true"></i> My Profile</a>
+              <a href="{% url 'shop:order_list' %}"><i class="fas fa-box" aria-hidden="true"></i> My Orders</a>
+              <a href="{% url 'shop:wishlist' %}"><i class="fas fa-heart" aria-hidden="true"></i> Wishlist</a>
+              <div class="dropdown-divider"></div>
+              <a href="{% url 'accounts:logout' %}" class="logout-link">
+                <i class="fas fa-sign-out-alt" aria-hidden="true"></i> Logout
+              </a>
+            </div>
+          </div>
+        {% else %}
+          <div class="nav-icon-dropdown">
+            <button type="button" class="nav-icon-btn" aria-label="My Account">
+              <i class="fas fa-user" aria-hidden="true"></i>
+              <span class="nav-icon-label">Account</span>
+            </button>
+            <div class="nav-user-dropdown">
+              <a href="{% url 'accounts:login' %}"><i class="fas fa-sign-in-alt" aria-hidden="true"></i> Login</a>
+              <a href="{% url 'accounts:register' %}"><i class="fas fa-user-plus" aria-hidden="true"></i> Register</a>
+            </div>
+          </div>
+        {% endif %}
 
-      <div class="contact-info">
-        <div class="contact-item">
-          <div class="icon-circle"><i class="fas fa-headset" aria-hidden="true"></i></div>
-          <div class="info-text">
-            <strong>24 Support</strong>
-            <a href="tel:+9779851402916">+977-9851402916</a>
-          </div>
-        </div>
-        <div class="contact-item">
-          <div class="icon-circle"><i class="fas fa-globe" aria-hidden="true"></i></div>
-          <div class="info-text">
-            <strong>Email</strong>
-            <a href="mailto:shop@globallinkstore.com">shop@globallinkstore.com</a>
-          </div>
-        </div>
+        <a href="{% url 'products:compare' %}" class="nav-icon-btn" title="Compare products" aria-label="Compare products" data-compare-link>
+          <i class="fas fa-exchange-alt" aria-hidden="true"></i>
+          <span class="badge" data-compare-count hidden>0</span>
+        </a>
+
+        {% if user.is_authenticated %}
+          <a href="{% url 'shop:wishlist' %}" class="nav-icon-btn" title="Wishlist" aria-label="Wishlist">
+            <i class="fas fa-heart" aria-hidden="true"></i>
+            <span class="badge" data-wishlist-count {% if not wishlist_count %}hidden{% endif %}>{{ wishlist_count|default:0 }}</span>
+          </a>
+        {% endif %}
+
+        <a href="{% url 'shop:cart' %}" class="cart-btn" aria-label="Shopping cart">
+          <span class="cart-icon-wrap">
+            <i class="fas fa-shopping-cart" aria-hidden="true"></i>
+            <span class="badge" id="cart-count"{% if not cart_count %} hidden{% endif %}>{{ cart_count|default:0 }}</span>
+          </span>
+          <span class="cart-total">Rs {{ cart_total|default:"0.00" }}</span>
+        </a>
       </div>
 
       <button
@@ -77,19 +112,6 @@
 
     <nav class="navbar" aria-label="Main navigation">
       <div class="navbar-inner">
-        <div class="all-categories" tabindex="0">
-          <i class="fas fa-bars" aria-hidden="true"></i>
-          All Categories
-          <i class="fas fa-chevron-down chevron" aria-hidden="true"></i>
-          <div class="cat-dropdown">
-            {% for cat in categories %}
-              <a href="{% url 'products:category' cat.slug %}">{{ cat.name }}</a>
-            {% empty %}
-              <a href="{% url 'core:index' %}">All Products</a>
-            {% endfor %}
-          </div>
-        </div>
-
         <ul class="nav-links">
           <li>
             <a href="{% url 'core:index' %}" class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">Home</a>
@@ -114,58 +136,6 @@
             </li>
           {% endfor %}
         </ul>
-
-        <div class="nav-icons">
-          {% if user.is_authenticated %}
-            <div class="nav-icon-dropdown">
-              <button type="button" class="nav-icon-btn" aria-label="My Account">
-                <i class="fas fa-user" aria-hidden="true"></i>
-                <span class="nav-icon-label">{{ user.first_name|default:user.username }}</span>
-              </button>
-              <div class="nav-user-dropdown">
-                <a href="{% url 'accounts:dashboard' %}"><i class="fas fa-th-large" aria-hidden="true"></i> Dashboard</a>
-                <a href="{% url 'accounts:profile' %}"><i class="fas fa-user-circle" aria-hidden="true"></i> My Profile</a>
-                <a href="{% url 'shop:order_list' %}"><i class="fas fa-box" aria-hidden="true"></i> My Orders</a>
-                <a href="{% url 'shop:wishlist' %}"><i class="fas fa-heart" aria-hidden="true"></i> Wishlist</a>
-                <div class="dropdown-divider"></div>
-                <a href="{% url 'accounts:logout' %}" class="logout-link">
-                  <i class="fas fa-sign-out-alt" aria-hidden="true"></i> Logout
-                </a>
-              </div>
-            </div>
-          {% else %}
-            <div class="nav-icon-dropdown">
-              <button type="button" class="nav-icon-btn" aria-label="My Account">
-                <i class="fas fa-user" aria-hidden="true"></i>
-                <span class="nav-icon-label">Account</span>
-              </button>
-              <div class="nav-user-dropdown">
-                <a href="{% url 'accounts:login' %}"><i class="fas fa-sign-in-alt" aria-hidden="true"></i> Login</a>
-                <a href="{% url 'accounts:register' %}"><i class="fas fa-user-plus" aria-hidden="true"></i> Register</a>
-              </div>
-            </div>
-          {% endif %}
-
-          <a href="{% url 'products:compare' %}" class="nav-icon-btn" title="Compare products" aria-label="Compare products" data-compare-link>
-            <i class="fas fa-exchange-alt" aria-hidden="true"></i>
-            <span class="badge" data-compare-count hidden>0</span>
-          </a>
-
-          {% if user.is_authenticated %}
-            <a href="{% url 'shop:wishlist' %}" class="nav-icon-btn" title="Wishlist" aria-label="Wishlist">
-              <i class="fas fa-heart" aria-hidden="true"></i>
-              <span class="badge" data-wishlist-count {% if not wishlist_count %}hidden{% endif %}>{{ wishlist_count|default:0 }}</span>
-            </a>
-          {% endif %}
-
-          <a href="{% url 'shop:cart' %}" class="cart-btn" aria-label="Shopping cart">
-            <span class="cart-icon-wrap">
-              <i class="fas fa-shopping-cart" aria-hidden="true"></i>
-              <span class="badge" id="cart-count"{% if not cart_count %} hidden{% endif %}>{{ cart_count|default:0 }}</span>
-            </span>
-            <span class="cart-total">Rs {{ cart_total|default:"0.00" }}</span>
-          </a>
-        </div>
       </div>
     </nav>
   </header>
@@ -237,6 +207,11 @@
             <span>Register</span>
           </a>
         {% endif %}
+        <a href="{% url 'products:compare' %}" class="mobile-nav-action" data-compare-link>
+          <i class="fas fa-exchange-alt" aria-hidden="true"></i>
+          <span>Compare</span>
+          <span class="mobile-nav-badge" data-compare-count hidden>0</span>
+        </a>
         <a href="{% url 'shop:cart' %}" class="mobile-nav-action mobile-nav-cart">
           <i class="fas fa-shopping-cart" aria-hidden="true"></i>
           <span>Cart · Rs {{ cart_total|default:"0.00" }}</span>

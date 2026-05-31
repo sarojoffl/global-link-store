@@ -150,7 +150,7 @@ def remove_cart_item(request, item_id):
     cart.items.filter(pk=item_id).delete()
 
 
-def get_cart_summary(cart):
+def get_cart_summary(cart, shipping_area="inside_valley"):
     items = list(
         cart.items.select_related(
             "product", "product__brand", "product__category", "sku"
@@ -158,7 +158,17 @@ def get_cart_summary(cart):
     )
     subtotal = sum((i.line_total for i in items), Decimal("0"))
     item_count = sum(i.quantity for i in items)
-    shipping = Decimal("0") if subtotal >= SHIPPING_FREE_THRESHOLD or not items else SHIPPING_COST
+    
+    if not items:
+        shipping = Decimal("0")
+    elif shipping_area == "outside_valley":
+        shipping = Decimal("200")
+    else: # inside_valley
+        if subtotal >= SHIPPING_FREE_THRESHOLD:
+            shipping = Decimal("0")
+        else:
+            shipping = Decimal("100")
+
     total = subtotal + shipping
     return {
         "items": items,
