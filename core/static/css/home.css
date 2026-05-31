@@ -929,12 +929,18 @@ body.page-home .home-top-zone {
   }
 
   .brand-strip {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 6px;
     padding-bottom: 16px;
   }
 
   .brand-arrow {
-    display: none;
+    display: inline-flex;
+    width: 24px;
+    height: 24px;
+    font-size: 9px;
+    border-width: 1px;
   }
 
   .brand-track-wrapper {
@@ -997,15 +1003,15 @@ body.page-home .home-top-zone {
   .section-header { flex-direction: column; align-items: flex-start; }
   .products-slider {
     --products-per-view: 2;
-    --products-gap: 12px;
-    gap: 8px;
+    --products-gap: 10px;
+    gap: 6px;
   }
   .products-arrow {
-    width: 36px;
-    height: 36px;
-    font-size: 12px;
+    display: none;
   }
-  .product-card { min-height: 280px; }
+  .product-card { min-height: 308px; }
+  .card-image-wrap { height: 182px; }
+  .card-image-wrap img { max-height: 140px; }
   .brand-item img { height: 26px; }
 }
 

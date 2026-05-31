@@ -60,6 +60,9 @@
             >
             <div class="zoom-lens" hidden aria-hidden="true"></div>
           </div>
+          <aside class="product-zoom-overlay" data-zoom-pane hidden aria-label="Image zoom preview">
+            <div class="zoom-result" hidden aria-hidden="true"></div>
+          </aside>
         </div>
 
         {% if gallery|length > 1 %}
@@ -81,10 +84,6 @@
 
       {# ── INFO PANEL ── #}
       <div class="product-info">
-        <aside class="product-zoom-overlay" data-zoom-pane hidden aria-label="Image zoom preview">
-          <div class="zoom-result" hidden aria-hidden="true"></div>
-        </aside>
-
         {# Meta: brand + SKU #}
         <div class="product-info__meta">
           {% if product.brand %}

@@ -129,21 +129,15 @@ body.page-product .main-content {
 }
 
 /* ───────── ZOOM OVERLAY (over product info on hover) ───────── */
-.product-info {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
 .product-zoom-overlay {
   display: none;
   position: absolute;
-  top: 0;
-  right: 0;
+  top: 14px;
+  right: 14px;
   width: min(360px, 52%);
   height: min(360px, 52%);
-  max-width: 100%;
+  max-width: calc(100% - 28px);
+  max-height: calc(100% - 28px);
   z-index: 20;
   border-radius: 14px;
   overflow: hidden;
@@ -294,6 +288,11 @@ body.page-product .main-content {
 }
 
 /* ───────── PRODUCT INFO (meta, title, price…) ───────── */
+.product-info {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 
 .product-info__meta {
