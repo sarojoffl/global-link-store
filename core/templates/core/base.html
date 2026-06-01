@@ -119,22 +119,43 @@
           <li>
             <a href="{% url 'core:index' %}" class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">Home</a>
           </li>
-          {% for item in nav_items %}
-            <li>
-              <a href="{% url 'products:category' item.category.slug %}">
-                {{ item.category.name }}
-                {% if item.brands %}
+          {% for cat in nav_categories %}
+            <li class="{% if cat.has_grandchildren %}has-megamenu{% elif cat.children.exists %}has-dropdown{% endif %}">
+              <a href="{% url 'products:category' cat.slug %}">
+                {{ cat.name }}
+                {% if cat.children.exists %}
                   <i class="fas fa-chevron-down" aria-hidden="true"></i>
                 {% endif %}
               </a>
-              {% if item.brands %}
-                <div class="dropdown">
-                  {% for brand in item.brands %}
-                    <a href="{% url 'products:category' item.category.slug %}?brand={{ brand.slug }}">
-                      {{ brand.name }}
-                    </a>
-                  {% endfor %}
-                </div>
+              {% if cat.children.exists %}
+                {% if cat.has_grandchildren %}
+                  <div class="megamenu-panel">
+                    <div class="megamenu-grid">
+                      {% for subcat in cat.children.all %}
+                        <div class="megamenu-column">
+                          <h4 class="megamenu-title">
+                            <a href="{% url 'products:category' subcat.slug %}">{{ subcat.name }}</a>
+                          </h4>
+                          {% if subcat.children.exists %}
+                            <ul class="megamenu-list">
+                              {% for grandchild in subcat.children.all %}
+                                <li>
+                                  <a href="{% url 'products:category' grandchild.slug %}">{{ grandchild.name }}</a>
+                                </li>
+                              {% endfor %}
+                            </ul>
+                          {% endif %}
+                        </div>
+                      {% endfor %}
+                    </div>
+                  </div>
+                {% else %}
+                  <div class="dropdown">
+                    {% for subcat in cat.children.all %}
+                      <a href="{% url 'products:category' subcat.slug %}">{{ subcat.name }}</a>
+                    {% endfor %}
+                  </div>
+                {% endif %}
               {% endif %}
             </li>
           {% endfor %}
@@ -166,18 +187,32 @@
         </div>
       </details>
 
-      {% for item in nav_items %}
-        <details class="mobile-nav-group">
-          <summary>{{ item.category.name }}</summary>
-          <div class="mobile-nav-sub">
-            <a href="{% url 'products:category' item.category.slug %}">All {{ item.category.name }}</a>
-            {% for brand in item.brands %}
-              <a href="{% url 'products:category' item.category.slug %}?brand={{ brand.slug }}">
-                {{ brand.name }}
-              </a>
-            {% endfor %}
-          </div>
-        </details>
+      {% for cat in nav_categories %}
+        {% if cat.children.exists %}
+          <details class="mobile-nav-group">
+            <summary>{{ cat.name }}</summary>
+            <div class="mobile-nav-sub">
+              <a href="{% url 'products:category' cat.slug %}" class="mobile-nav-all-link">All {{ cat.name }}</a>
+              {% for subcat in cat.children.all %}
+                {% if subcat.children.exists %}
+                  <details class="mobile-nav-subgroup">
+                    <summary>{{ subcat.name }}</summary>
+                    <div class="mobile-nav-sublist">
+                      <a href="{% url 'products:category' subcat.slug %}" class="mobile-nav-all-link">All {{ subcat.name }}</a>
+                      {% for grandchild in subcat.children.all %}
+                        <a href="{% url 'products:category' grandchild.slug %}">{{ grandchild.name }}</a>
+                      {% endfor %}
+                    </div>
+                  </details>
+                {% else %}
+                  <a href="{% url 'products:category' subcat.slug %}">{{ subcat.name }}</a>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </details>
+        {% else %}
+          <a href="{% url 'products:category' cat.slug %}" class="mobile-nav-link">{{ cat.name }}</a>
+        {% endif %}
       {% endfor %}
 
       <div class="mobile-nav-actions">
@@ -224,13 +259,7 @@
     </div>
   </aside>
 
-  <aside class="social-sidebar" aria-label="Social media links">
-    <a href="#" class="fb" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-    <a href="#" class="tw" aria-label="X (Twitter)"><i class="fab fa-x-twitter"></i></a>
-    <a href="#" class="ig" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-    <a href="#" class="yt" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
-    <a href="#" class="pin" aria-label="Pinterest"><i class="fab fa-pinterest-p"></i></a>
-  </aside>
+
 
   <main class="main-content">
     {% if messages and request.resolver_match.view_name != "accounts:login" and request.resolver_match.view_name != "accounts:register" %}

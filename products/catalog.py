@@ -21,6 +21,13 @@ def _parse_decimal(value):
         return None
 
 
+def _get_descendants(category):
+    descendants = [category]
+    for child in category.children.prefetch_related('children'):
+        descendants.extend(_get_descendants(child))
+    return descendants
+
+
 def build_catalog_queryset(
     *,
     category_slug=None,
@@ -43,11 +50,13 @@ def build_catalog_queryset(
     if category_slug:
         active_category = Category.objects.filter(slug=category_slug).first()
         if active_category:
-            qs = qs.filter(category=active_category)
+            descendants = _get_descendants(active_category)
+            qs = qs.filter(category__in=descendants)
     elif extra_category_slug:
         active_category = Category.objects.filter(slug=extra_category_slug).first()
         if active_category:
-            qs = qs.filter(category=active_category)
+            descendants = _get_descendants(active_category)
+            qs = qs.filter(category__in=descendants)
 
     if brand_slug:
         active_brand = Brand.objects.filter(slug=brand_slug, is_active=True).first()

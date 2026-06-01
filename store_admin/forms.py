@@ -58,11 +58,24 @@ class AboutSectionForm(BaseAdminForm):
 class CategoryForm(BaseAdminForm):
     class Meta:
         model = Category
-        fields = ["name", "icon", "is_popular"]
+        fields = ["name", "parent", "icon", "is_popular"]
         widgets = {
             "name": forms.TextInput(attrs={"placeholder": "e.g. Laptops"}),
             "icon": forms.TextInput(attrs={"placeholder": "e.g. fa-laptop"}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Add labels and customize queryset
+        self.fields["parent"].required = False
+        self.fields["parent"].empty_label = "None (Root Category)"
+        if self.instance and self.instance.pk:
+            from products.catalog import _get_descendants
+            descendants = _get_descendants(self.instance)
+            descendant_ids = [d.pk for d in descendants]
+            self.fields["parent"].queryset = Category.objects.exclude(pk__in=descendant_ids)
+        else:
+            self.fields["parent"].queryset = Category.objects.all()
 
 
 class BrandForm(BaseAdminForm):

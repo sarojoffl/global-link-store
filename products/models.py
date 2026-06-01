@@ -8,14 +8,47 @@ class Category(models.Model):
     slug = models.SlugField(unique=True, blank=True)
     icon = models.CharField(max_length=100, blank=True)
     is_popular = models.BooleanField(default=False)
+    parent = models.ForeignKey(
+        'self',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='children'
+    )
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.name)
+            base_slug = slugify(self.name)
+            slug = base_slug
+            counter = 1
+            # Exclude current category if it has an id (updating)
+            qs = Category.objects.all()
+            if self.pk:
+                qs = qs.exclude(pk=self.pk)
+            while qs.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
         super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
+
+    @property
+    def is_root(self):
+        return self.parent is None
+
+    @property
+    def has_grandchildren(self):
+        """Returns True if any of this category's children have children of their own (meaning it needs a mega-menu)."""
+        return self.children.filter(children__isnull=False).exists()
+
+    @property
+    def total_products_count(self):
+        """Returns the count of products in this category and all its descendants."""
+        from products.catalog import _get_descendants
+        descendants = _get_descendants(self)
+        return Product.objects.filter(category__in=descendants).count()
 
 
 class Brand(models.Model):
