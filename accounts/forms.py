@@ -1,3 +1,5 @@
+import os
+
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import AuthenticationForm
@@ -75,18 +77,20 @@ class LoginForm(AuthenticationForm):
 
 class ProfileForm(forms.ModelForm):
     first_name = forms.CharField(max_length=150, required=False)
-    last_name = forms.CharField(max_length=150, required=False)
-    email = forms.EmailField(required=True)
-    phone = forms.CharField(max_length=20, required=False, label="Phone number")
+    last_name  = forms.CharField(max_length=150, required=False)
+    email      = forms.EmailField(required=True)
+    phone      = forms.CharField(max_length=20, required=False, label="Phone number")
+    photo      = forms.ImageField(required=False, widget=forms.ClearableFileInput(attrs={"accept": "image/*"}))
 
     class Meta:
-        model = User
+        model  = User
         fields = ["first_name", "last_name", "email"]
 
     def __init__(self, user, *args, **kwargs):
         super().__init__(*args, instance=user, **kwargs)
         profile, _ = UserProfile.objects.get_or_create(user=user)
         self.fields["phone"].initial = profile.phone
+        self.fields["photo"].initial = profile.photo
         self._profile = profile
         for name in ("first_name", "last_name", "email", "phone"):
             if name in self.fields:
@@ -95,6 +99,17 @@ class ProfileForm(forms.ModelForm):
     def save(self, commit=True):
         user = super().save(commit=commit)
         self._profile.phone = self.cleaned_data.get("phone", "")
+
+        # Handle photo upload / clear
+        photo = self.cleaned_data.get("photo")
+        clear = self.data.get("photo-clear")
+        if clear:
+            if self._profile.photo and os.path.isfile(self._profile.photo.path):
+                os.remove(self._profile.photo.path)
+            self._profile.photo = None
+        elif photo:
+            self._profile.photo = photo
+
         self._profile.save()
         return user
 

@@ -7,6 +7,7 @@
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/shop.css' %}">
   <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+  <link rel="stylesheet" href="{% static 'css/profile.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -20,8 +21,43 @@
       </header>
 
       <div class="shop-card profile-form-card">
-        <form method="post" class="checkout-form" novalidate>
+        <form method="post" enctype="multipart/form-data" class="checkout-form" novalidate>
           {% csrf_token %}
+
+          {# ── Avatar ── #}
+          <div class="avatar-section">
+            <div class="avatar-wrapper">
+              <img
+                id="avatar-preview"
+                class="avatar-img"
+                src="{% if user.profile.photo %}{{ user.profile.photo.url }}{% else %}{% static 'img/avatar-placeholder.svg' %}{% endif %}"
+                data-placeholder="{% static 'img/avatar-placeholder.svg' %}"
+                alt="Profile photo"
+              >
+              <label for="{{ form.photo.id_for_label }}" class="avatar-overlay" title="Change photo">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z"/>
+                </svg>
+              </label>
+            </div>
+            <div class="avatar-info">
+              <strong>Profile Photo</strong>
+              <p class="avatar-hint">JPG, PNG or WebP · max 2 MB</p>
+              <div class="avatar-actions">
+                <label for="{{ form.photo.id_for_label }}">Change photo</label>
+                {% if user.profile.photo %}
+                  <button type="button" id="avatar-remove">Remove</button>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {# Hidden file input rendered by Django (display:none via wrapper) #}
+          <div style="display:none">{{ form.photo }}</div>
+          {# Checkbox that tells the backend to clear the photo #}
+          <input type="checkbox" name="photo-clear" id="photo-clear" style="display:none">
+          {# ── End avatar ── #}
+
           <div class="form-row-2">
             <div class="form-group">
               <label for="id_first_name">First name</label>
@@ -48,4 +84,8 @@
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/profile.js' %}" defer></script>
 {% endblock %}

@@ -389,9 +389,13 @@
               {% with review=item.review %}
                 <article class="review-card">
                   <div class="review-card__header">
-                    <div class="review-avatar" aria-hidden="true">
-                      {{ review.user.first_name|default:review.user.username|slice:":1"|upper }}{% if review.user.last_name %}{{ review.user.last_name|slice:":1"|upper }}{% else %}{{ review.user.username|slice:"1:2"|upper }}{% endif %}
-                    </div>
+                    {% if review.user.profile.photo %}
+                      <img class="review-avatar" src="{{ review.user.profile.photo.url }}" alt="{{ review.user.get_full_name|default:review.user.username }}" style="object-fit: cover;">
+                    {% else %}
+                      <div class="review-avatar" aria-hidden="true">
+                        {{ review.user.first_name|default:review.user.username|slice:":1"|upper }}{% if review.user.last_name %}{{ review.user.last_name|slice:":1"|upper }}{% else %}{{ review.user.username|slice:"1:2"|upper }}{% endif %}
+                      </div>
+                    {% endif %}
                     <div>
                       <strong>{{ review.user.get_full_name|default:review.user.username }}</strong>
                       {% if item.is_verified %}

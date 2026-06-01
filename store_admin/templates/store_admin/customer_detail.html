@@ -16,6 +16,19 @@
     <div class="card h-100">
       <div class="card-header"><strong>Account</strong></div>
       <div class="card-body">
+        <div class="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom">
+          {% if profile.photo %}
+            <img src="{{ profile.photo.url }}" alt="{{ customer.username }}" class="rounded-circle border" style="width: 64px; height: 64px; object-fit: cover;">
+          {% else %}
+            <div class="rounded-circle border bg-light d-flex align-items-center justify-content-center text-secondary" style="width: 64px; height: 64px; font-size: 24px; font-weight: bold;">
+              {{ customer.username|slice:":1"|upper }}
+            </div>
+          {% endif %}
+          <div>
+            <h5 class="mb-1">{{ customer.get_full_name|default:customer.username }}</h5>
+            <p class="text-muted small mb-0">Customer since {{ customer.date_joined|date:"M d, Y" }}</p>
+          </div>
+        </div>
         <table class="table table-sm mb-0">
           <tr><th style="width:120px;">Username</th><td>{{ customer.username }}</td></tr>
           <tr><th>Name</th><td>{{ customer.get_full_name|default:"—" }}</td></tr>

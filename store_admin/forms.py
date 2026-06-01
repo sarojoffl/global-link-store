@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 
-from accounts.models import Address
+from accounts.models import Address, UserProfile
 from core.models import HeroSlide, HomePageSettings, AboutSection
 from products.models import (
     Category, Brand, Product, ProductImage, ProductReview, ProductSKU,
@@ -153,6 +153,7 @@ class OrderStatusForm(BaseAdminForm):
 
 class CustomerForm(BaseAdminForm):
     phone = forms.CharField(max_length=20, required=False, label="Phone")
+    photo = forms.ImageField(required=False, label="Profile Photo", widget=forms.ClearableFileInput(attrs={"accept": "image/*"}))
 
     class Meta:
         model = User
@@ -162,6 +163,13 @@ class CustomerForm(BaseAdminForm):
             "last_name": forms.TextInput(attrs={"placeholder": "Last name"}),
             "email": forms.EmailInput(attrs={"placeholder": "email@example.com"}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            profile, _ = UserProfile.objects.get_or_create(user=self.instance)
+            self.fields["phone"].initial = profile.phone
+            self.fields["photo"].initial = profile.photo
 
 
 class CustomerAddressForm(BaseAdminForm):

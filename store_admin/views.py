@@ -622,6 +622,7 @@ def order_detail(request, pk):
 def customer_list(request):
     customers = (
         User.objects.filter(is_superuser=False)
+        .select_related("profile")
         .annotate(order_count=Count("orders"))
         .order_by("-date_joined")
     )
@@ -651,13 +652,24 @@ def customer_edit(request, pk):
     profile, _ = UserProfile.objects.get_or_create(user=customer)
 
     if request.method == "POST":
-        form = CustomerForm(request.POST, instance=customer)
+        form = CustomerForm(request.POST, request.FILES, instance=customer)
     else:
         form = CustomerForm(instance=customer, initial={"phone": profile.phone})
 
     if request.method == "POST" and form.is_valid():
         user = form.save()
         profile.phone = form.cleaned_data.get("phone", "")
+        photo = form.cleaned_data.get("photo")
+        if photo is False:
+            import os
+            if profile.photo and os.path.isfile(profile.photo.path):
+                try:
+                    os.remove(profile.photo.path)
+                except OSError:
+                    pass
+            profile.photo = None
+        elif photo:
+            profile.photo = photo
         profile.save()
         messages.success(request, "Customer updated.")
         return redirect("store_admin:customer_detail", pk=user.pk)

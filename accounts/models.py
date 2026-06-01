@@ -15,9 +15,15 @@ class EmailVerification(models.Model):
         return timezone.now() > self.created_at + timedelta(minutes=15)
 
 
+def profile_photo_path(instance, filename):
+    ext = filename.rsplit('.', 1)[-1].lower()
+    return f"profiles/user_{instance.user.pk}/avatar.{ext}"
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     phone = models.CharField(max_length=20, blank=True)
+
+    photo = models.ImageField(upload_to=profile_photo_path, blank=True, null=True)
 
     def __str__(self):
         return f"Profile: {self.user.username}"

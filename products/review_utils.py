@@ -35,7 +35,7 @@ def get_product_sold_count(product):
 def get_product_review_context(product):
     reviews_qs = (
         ProductReview.objects.filter(product=product, is_published=True)
-        .select_related("user")
+        .select_related("user__profile")
         .order_by("-created_at")
     )
     review_count = reviews_qs.count()

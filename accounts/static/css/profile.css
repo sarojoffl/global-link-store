@@ -1,0 +1,208 @@
+/* ==========================================================================
+   User Profile Dashboard Section Styles
+   ========================================================================== */
+
+.page-dashboard {
+  --profile-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.02);
+  --profile-focus-ring: 0 0 0 4px rgba(43, 101, 226, 0.15);
+}
+
+.profile-form-card {
+  border: none;
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--profile-shadow);
+  padding: 2.5rem 2rem;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.profile-form-card:hover {
+  box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.12);
+}
+
+/* Avatar Section styling */
+.avatar-section {
+  display: flex;
+  align-items: center;
+  gap: 1.75rem;
+  padding-bottom: 2rem;
+  margin-bottom: 2rem;
+  border-bottom: 1.5px dashed var(--color-border);
+}
+
+.avatar-wrapper {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  transition: transform 0.25s ease;
+}
+
+.avatar-wrapper:hover {
+  transform: scale(1.03);
+}
+
+.avatar-img {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--color-white);
+  display: block;
+  background: #f3f4f6;
+  transition: filter 0.25s ease;
+}
+
+.avatar-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  cursor: pointer;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+.avatar-wrapper:hover .avatar-overlay {
+  opacity: 1;
+}
+
+.avatar-overlay svg {
+  width: 24px;
+  height: 24px;
+  color: var(--color-white);
+  transition: transform 0.25s ease;
+}
+
+.avatar-wrapper:hover .avatar-overlay svg {
+  transform: scale(1.1);
+}
+
+.avatar-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.avatar-info strong {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 0.25rem;
+}
+
+.avatar-hint {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  margin: 0 0 0.75rem;
+}
+
+.avatar-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.avatar-actions label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  cursor: pointer;
+  transition: color 0.18s ease;
+}
+
+.avatar-actions label:hover {
+  color: var(--color-primary-dark);
+  text-decoration: underline;
+}
+
+#avatar-remove {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #dc2626;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.18s ease;
+}
+
+#avatar-remove:hover {
+  color: #b91c1c;
+  text-decoration: underline;
+}
+
+/* Fields layout */
+.checkout-form .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.checkout-form label {
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 0.5rem;
+  font-size: 0.88rem;
+}
+
+.checkout-form input[type="text"],
+.checkout-form input[type="email"],
+.checkout-form input[type="tel"] {
+  border: 1.5px solid var(--color-border);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  background: #fcfdfe;
+}
+
+.checkout-form input:focus {
+  background: var(--color-white);
+  border-color: var(--color-primary);
+  box-shadow: var(--profile-focus-ring);
+}
+
+.form-hint {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  margin-top: 0.5rem;
+  margin-bottom: 1.75rem;
+  background: var(--color-primary-light);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--color-primary);
+}
+
+.form-hint strong {
+  color: var(--color-primary-dark);
+}
+
+/* Submit button styling */
+.profile-form-card .btn-shop-primary {
+  width: auto;
+  min-width: 160px;
+  padding: 12px 28px;
+  border-radius: var(--radius-pill);
+  box-shadow: 0 4px 12px rgba(43, 101, 226, 0.2);
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.profile-form-card .btn-shop-primary:hover {
+  box-shadow: 0 6px 18px rgba(43, 101, 226, 0.3);
+}
+
+@media (max-width: 560px) {
+  .avatar-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.25rem;
+  }
+  
+  .profile-form-card {
+    padding: 1.5rem 1.25rem;
+  }
+}

@@ -51,7 +51,6 @@ def login_view(request):
             else:
                 request.session.set_expiry(0)
 
-            messages.success(request, f"Welcome back, {user.first_name or user.username}!")
             return redirect(request.GET.get('next', 'core:index'))
         else:
             messages.error(request, "Login failed. Check credentials or verify email.")
@@ -103,6 +102,8 @@ def profile_view(request):
     form = ProfileForm(request.user, request.POST or None)
 
     if request.method == 'POST':
+        form = ProfileForm(request.user, request.POST, request.FILES)
+
         if form.is_valid():
             form.save()
             messages.success(request, "Profile updated successfully.")
