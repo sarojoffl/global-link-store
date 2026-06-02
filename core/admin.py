@@ -2,6 +2,7 @@ from django.contrib import admin
 from .models import (
     AboutSection,
     ContactMessage,
+    HeroBanner,
     HeroSlide,
     HomePageSettings,
     NewsletterSubscriber,
@@ -25,6 +26,29 @@ class HeroSlideAdmin(admin.ModelAdmin):
         ),
     )
 
+ 
+@admin.register(HeroBanner)
+class HeroBannerAdmin(admin.ModelAdmin):
+    list_display  = ("__str__", "placement", "title", "active", "order")
+    list_editable = ("active", "order")
+    list_filter   = ("placement", "active")
+    search_fields = ("title", "subtitle")
+    fieldsets = (
+        (None, {
+            "fields": ("placement", "active", "order"),
+        }),
+        ("Content", {
+            "fields": ("title", "subtitle", "cta_label", "link"),
+        }),
+        ("Images", {
+            "fields": ("background", "image"),
+            "description": (
+                "background = full card background. "
+                "image = product/subject shown on the right side of the card."
+            ),
+        }),
+    )
+ 
 
 @admin.register(HomePageSettings)
 class HomePageSettingsAdmin(admin.ModelAdmin):

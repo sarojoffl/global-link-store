@@ -48,6 +48,63 @@ class HeroSlide(models.Model):
         if self.media_type == "video":
             return bool(self.video)
         return bool(self.image)
+    
+
+class HeroBanner(models.Model):
+    """
+    Static banner cards for the right side of the homepage hero.
+ 
+    Placements:
+      right_top    → the large top card (only 1 shown)
+      right_bottom → the two small bottom cards (max 2 shown, ordered by `order`)
+    """
+ 
+    PLACEMENT_CHOICES = (
+        ("right_top",    "Right — Top (large)"),
+        ("right_bottom", "Right — Bottom (small, max 2)"),
+    )
+ 
+    placement = models.CharField(
+        max_length=20,
+        choices=PLACEMENT_CHOICES,
+        default="right_top",
+    )
+    title = models.CharField(max_length=120, blank=True, default="")
+    subtitle = models.CharField(max_length=200, blank=True, default="")
+    cta_label = models.CharField(
+        max_length=60,
+        blank=True,
+        default="",
+        help_text="Button text e.g. 'Buy Now'. Leave blank to hide button.",
+    )
+    link = models.CharField(
+        max_length=255,
+        blank=True,
+        default="#",
+        help_text="URL the entire banner card links to.",
+    )
+    background = models.ImageField(
+        upload_to="hero/banners/bg/",
+        blank=True,
+        null=True,
+        help_text="Full-bleed background image for the card.",
+    )
+    image = models.ImageField(
+        upload_to="hero/banners/img/",
+        blank=True,
+        null=True,
+        help_text="Product / subject image shown on the right side of the card.",
+    )
+    active = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0, help_text="Lower = shown first.")
+ 
+    class Meta:
+        ordering = ["placement", "order", "id"]
+        verbose_name = "Hero Banner"
+        verbose_name_plural = "Hero Banners"
+ 
+    def __str__(self):
+        return f"{self.get_placement_display()} — {self.title or '(no title)'} (#{self.pk})"
 
 
 class HomePageSettings(models.Model):

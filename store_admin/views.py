@@ -10,7 +10,9 @@ from accounts.models import Address, UserProfile
 from core.models import (
     AboutSection,
     ContactMessage,
+    HeroBanner,
     HeroSlide,
+    HomePageSettings,
     HomePageSettings,
     NewsletterSubscriber,
 )
@@ -21,7 +23,7 @@ from products.models import (
 from shop.models import Order
 from shop.tasks import send_order_delivered_email, send_order_shipped_email
 from .forms import (
-    HeroSlideForm, HomePageSettingsForm, AboutSectionForm,
+    HeroBannerForm, HeroSlideForm, HomePageSettingsForm, AboutSectionForm,
     CategoryForm, BrandForm, ProductForm, ProductSKUForm,
     ProductImageForm, ProductSpecificationForm, OrderStatusForm,
     ProductVariantGroupForm, ProductVariantOptionForm,
@@ -100,6 +102,60 @@ def heroslide_delete(request, pk):
     return render(request, "store_admin/confirm_delete.html", {
         "object": slide,
         "cancel_url": reverse("store_admin:heroslide_list"),
+    })
+
+
+# ── HERO BANNERS ──
+
+@login_required
+@staff_required
+def herobanner_list(request):
+    banners = HeroBanner.objects.all()
+    return render(request, "store_admin/herobanner_list.html", {"banners": banners})
+
+
+@login_required
+@staff_required
+def herobanner_add(request):
+    form = HeroBannerForm(request.POST or None, request.FILES or None)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Hero banner added successfully.")
+        return redirect("store_admin:herobanner_list")
+    return render(request, "store_admin/generic_form.html", {
+        "form": form,
+        "title": "Add Hero Banner",
+        "cancel_url": reverse("store_admin:herobanner_list"),
+    })
+
+
+@login_required
+@staff_required
+def herobanner_edit(request, pk):
+    banner = get_object_or_404(HeroBanner, pk=pk)
+    form = HeroBannerForm(request.POST or None, request.FILES or None, instance=banner)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Hero banner updated successfully.")
+        return redirect("store_admin:herobanner_list")
+    return render(request, "store_admin/generic_form.html", {
+        "form": form,
+        "title": "Edit Hero Banner",
+        "cancel_url": reverse("store_admin:herobanner_list"),
+    })
+
+
+@login_required
+@staff_required
+def herobanner_delete(request, pk):
+    banner = get_object_or_404(HeroBanner, pk=pk)
+    if request.method == "POST":
+        banner.delete()
+        messages.success(request, "Hero banner deleted.")
+        return redirect("store_admin:herobanner_list")
+    return render(request, "store_admin/confirm_delete.html", {
+        "object": banner,
+        "cancel_url": reverse("store_admin:herobanner_list"),
     })
 
 

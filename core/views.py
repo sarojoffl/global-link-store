@@ -8,7 +8,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_POST
 
 from .forms import ContactForm, NewsletterForm
-from .models import AboutSection, HeroSlide, HomePageSettings, ContactMessage, NewsletterSubscriber
+from .models import AboutSection, HeroBanner, HeroSlide, HomePageSettings, ContactMessage, NewsletterSubscriber
 from products.models import Product, Category, Brand
 
 
@@ -22,6 +22,14 @@ def _active_hero_slides(placement):
     ).order_by("order", "id")
 
 
+def _hero_banners_right():
+    active = HeroBanner.objects.filter(active=True)
+    return {
+        "top":    active.filter(placement="right_top").first(),
+        "bottom": list(active.filter(placement="right_bottom")[:2]),
+    }
+
+
 @ensure_csrf_cookie
 def index(request):
     context = {
@@ -29,19 +37,17 @@ def index(request):
 
         "home_settings": HomePageSettings.load(),
         "about_section": AboutSection.load(),
-        "hero_slides_left": _active_hero_slides("left"),
-        "hero_slides_right": _active_hero_slides("right"),
+        "hero_slides_left":   _active_hero_slides("left"),
+        "hero_banners_right": _hero_banners_right(),
 
         "popular_categories": Category.objects.filter(
             is_popular=True
         )[:7],
 
-        # Latest by created date
         "latest_products": Product.objects.order_by(
             "-created_at"
         )[:8],
 
-        # Product type sections
         "featured_products": Product.objects.filter(
             product_type="featured"
         )[:8],
@@ -115,7 +121,7 @@ def newsletter_subscribe(request):
             subscriber.last_subscribed_at = now
             subscriber.save()
 
-        msg = "You’re subscribed! Watch your inbox for updates."
+        msg = "You're subscribed! Watch your inbox for updates."
         if is_ajax:
             return JsonResponse({"ok": True, "message": msg})
         messages.success(request, msg)

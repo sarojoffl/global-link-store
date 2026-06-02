@@ -1,0 +1,66 @@
+{% extends "store_admin/base.html" %}
+{% block title %}Hero Banners{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>Hero Banners</h2>
+  <a href="{% url 'store_admin:herobanner_add' %}" class="btn btn-success">
+    <i class="fas fa-plus me-1"></i> Add Banner
+  </a>
+</div>
+
+<table class="table table-bordered table-hover">
+  <thead class="table-light">
+    <tr>
+      <th>#</th>
+      <th>Placement</th>
+      <th>Title</th>
+      <th>Subtitle</th>
+      <th>Background</th>
+      <th>Image</th>
+      <th>CTA</th>
+      <th>Order</th>
+      <th>Active</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for banner in banners %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ banner.get_placement_display }}</td>
+        <td>{{ banner.title|default:"—" }}</td>
+        <td><small>{{ banner.subtitle|default:"—" }}</small></td>
+        <td>
+          {% if banner.background %}
+            <img src="{{ banner.background.url }}" height="40" style="object-fit:cover;border-radius:4px;">
+          {% else %}
+            <span class="text-muted">—</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if banner.image %}
+            <img src="{{ banner.image.url }}" height="40" style="object-fit:cover;border-radius:4px;">
+          {% else %}
+            <span class="text-muted">—</span>
+          {% endif %}
+        </td>
+        <td><small>{{ banner.cta_label|default:"—" }}</small></td>
+        <td>{{ banner.order }}</td>
+        <td>
+          {% if banner.active %}
+            <span class="badge bg-success">Active</span>
+          {% else %}
+            <span class="badge bg-secondary">Inactive</span>
+          {% endif %}
+        </td>
+        <td>
+          <a href="{% url 'store_admin:herobanner_edit' banner.pk %}" class="btn btn-warning btn-sm">Edit</a>
+          <a href="{% url 'store_admin:herobanner_delete' banner.pk %}" class="btn btn-danger btn-sm">Delete</a>
+        </td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="10" class="text-center">No hero banners added yet.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

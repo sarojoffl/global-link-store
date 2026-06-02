@@ -12,6 +12,12 @@ urlpatterns = [
     path("hero-slides/<int:pk>/edit/", views.heroslide_edit, name="heroslide_edit"),
     path("hero-slides/<int:pk>/delete/", views.heroslide_delete, name="heroslide_delete"),
 
+    # Hero Banners
+    path("hero-banners/",              views.herobanner_list,   name="herobanner_list"),
+    path("hero-banners/add/",          views.herobanner_add,    name="herobanner_add"),
+    path("hero-banners/<int:pk>/edit/",   views.herobanner_edit,   name="herobanner_edit"),
+    path("hero-banners/<int:pk>/delete/", views.herobanner_delete, name="herobanner_delete"),
+
     # Homepage Settings
     path("homepage-settings/", views.homepage_settings, name="homepage_settings"),
 

@@ -261,7 +261,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   flex: 1;
   min-width: 0;
   width: 100%;
-  padding: 11px 48px 11px 42px;
+  padding: 11px 48px 11px 16px;
   border: none;
   border-radius: var(--radius-pill);
   font-size: 14px;

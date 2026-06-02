@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 
 from accounts.models import Address, UserProfile
-from core.models import HeroSlide, HomePageSettings, AboutSection
+from core.models import HeroBanner, HeroSlide, HomePageSettings, AboutSection
 from products.models import (
     Category, Brand, Product, ProductImage, ProductReview, ProductSKU,
     ProductSpecification, ProductVariantGroup, ProductVariantOption,
@@ -33,6 +33,19 @@ class HeroSlideForm(BaseAdminForm):
         widgets = {
             "url": forms.TextInput(attrs={"placeholder": "/products/ or https://..."}),
             "order": forms.NumberInput(attrs={"min": 0}),
+        }
+
+
+class HeroBannerForm(BaseAdminForm):
+    class Meta:
+        model = HeroBanner
+        fields = ["placement", "title", "subtitle", "cta_label", "link", "background", "image", "active", "order"]
+        widgets = {
+            "title":     forms.TextInput(attrs={"placeholder": "e.g. Best Deals"}),
+            "subtitle":  forms.TextInput(attrs={"placeholder": "e.g. Up to 50% off"}),
+            "cta_label": forms.TextInput(attrs={"placeholder": "e.g. Buy Now"}),
+            "link":      forms.TextInput(attrs={"placeholder": "/products/ or https://..."}),
+            "order":     forms.NumberInput(attrs={"min": 0}),
         }
 
 

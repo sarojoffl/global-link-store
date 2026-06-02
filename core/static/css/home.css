@@ -62,8 +62,44 @@ body.page-home .home-top-zone {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 14px;
+  align-items: stretch;
 }
 
+/* Left big slider — fills full height of the dual grid row */
+.hero-dual > .hero-slider {
+  height: clamp(280px, 36vw, 460px);
+}
+
+/* ── Right panel: stacked top-large + two-small-bottom ── */
+.hero-right {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: clamp(280px, 36vw, 460px); /* matches left slider exactly */
+}
+
+/* Top large slot — targeted via parent so extra_class isn't needed */
+.hero-right > .hero-slider {
+  flex: 1 1 0;
+  min-height: 0;
+  height: 0 !important; /* override base .hero-slider height via flex */
+}
+
+/* Bottom row: two small slides side-by-side */
+.hero-right-bottom {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* Small slide cards — targeted via parent container */
+.hero-right-bottom .hero-slider {
+  height: clamp(120px, 11vw, 155px) !important;
+  flex-shrink: 0;
+}
+
+/* Base slider styles (shared by all variants) */
 .hero-slider {
   position: relative;
   background: var(--color-white);
@@ -71,7 +107,7 @@ body.page-home .home-top-zone {
   overflow: hidden;
   box-shadow: 0 8px 32px rgba(43, 101, 226, 0.1);
   border: 1px solid rgba(43, 101, 226, 0.08);
-  height: clamp(200px, 28vw, 360px);
+  height: clamp(200px, 28vw, 360px); /* default fallback; overridden by variants above */
   user-select: none;
 }
 
@@ -852,6 +888,192 @@ body.page-home .home-top-zone {
   letter-spacing: 0.02em;
 }
 
+
+/* ───────── HERO RIGHT — STATIC BANNERS ───────── */
+.hero-banner {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background-color: #1e293b;
+  background-image: var(--banner-bg);
+  background-size: cover;
+  background-position: center;
+  text-decoration: none;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: 0 8px 32px rgba(43, 101, 226, 0.1);
+  border: 1px solid rgba(43, 101, 226, 0.08);
+}
+
+.hero-banner:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 40px rgba(43, 101, 226, 0.18);
+}
+
+/* Overlay so text stays readable over any background */
+.hero-banner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    110deg,
+    rgba(15, 23, 42, 0.55) 0%,
+    rgba(15, 23, 42, 0.2) 55%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Top large banner — fills flex-grow space */
+.hero-banner--top {
+  flex: 1 1 0;
+  min-height: 0;
+  height: 0; /* flex controls this */
+  align-items: flex-start;
+  padding: 28px 24px;
+}
+
+/* Small banners */
+.hero-banner--small {
+  height: clamp(120px, 11vw, 155px) !important;
+  flex-shrink: 0;
+  padding: 20px 20px;
+}
+
+.hero-banner__body {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 55%;
+}
+
+.hero-banner__title {
+  font-size: clamp(15px, 1.6vw, 22px);
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.2;
+  margin: 0;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.hero-banner--small .hero-banner__title {
+  font-size: clamp(13px, 1.2vw, 17px);
+}
+
+.hero-banner__subtitle {
+  font-size: clamp(11px, 1vw, 14px);
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.hero-banner__btn {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 9px 18px;
+  background: var(--color-primary);
+  color: #fff;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(43, 101, 226, 0.4);
+  transition: background 0.2s ease, transform 0.2s ease;
+  align-self: flex-start;
+}
+
+.hero-banner:hover .hero-banner__btn {
+  background: var(--color-primary-dark);
+  transform: translateY(-1px);
+}
+
+.hero-banner__btn--outline {
+  background: #fff;
+  color: var(--color-text);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+}
+
+.hero-banner:hover .hero-banner__btn--outline {
+  background: #f1f5f9;
+}
+
+.hero-banner__img-wrap {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  width: 55%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 16px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.hero-banner__img-wrap img {
+  max-height: 90%;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 24px rgba(0,0,0,0.25));
+}
+
+
+/* ── Banner placeholder (shown when no data in admin) ── */
+.hero-banner--placeholder {
+  background-image: none;
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  border: 2px dashed #cbd5e1;
+  cursor: default;
+  pointer-events: none;
+}
+
+.hero-banner--placeholder:hover {
+  transform: none;
+  box-shadow: 0 8px 32px rgba(43, 101, 226, 0.1);
+}
+
+.hero-banner--placeholder::before {
+  display: none;
+}
+
+.hero-banner__placeholder-body {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  color: #94a3b8;
+  padding: 20px;
+}
+
+.hero-banner__placeholder-body i {
+  font-size: 28px;
+  opacity: 0.5;
+}
+
+.hero-banner__placeholder-body span {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.hero-banner__placeholder-body small {
+  font-size: 11px;
+  font-weight: 400;
+  opacity: 0.8;
+}
+
 /* ───────── RESPONSIVE ───────── */
 @media (max-width: 1200px) {
   .category-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
@@ -863,14 +1085,59 @@ body.page-home .home-top-zone {
     padding-bottom: 8px;
   }
 
-  /* Two separate hero sliders, stacked */
+  /* Stack left + right panel vertically */
   .hero-dual {
     display: grid;
     grid-template-columns: 1fr;
     gap: 12px;
   }
 
-  /* Each slider: swipe slides horizontally (like brands) */
+  /* Left big slider height on mobile */
+  .hero-dual > .hero-slider {
+    height: 220px;
+  }
+
+  /* Right panel: fully stacked, all slots equal height */
+  .hero-right {
+    height: auto;
+    min-height: auto;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* Top-right slot (slider or banner): same height as left slider */
+  .hero-right > .hero-slider,
+  .hero-right > .hero-banner {
+    height: 220px !important;
+    flex: none;
+  }
+
+  /* Bottom two slots: stack vertically, not side-by-side */
+  .hero-right-bottom {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .hero-right-bottom .hero-slider,
+  .hero-right-bottom .hero-banner {
+    height: 220px !important;
+  }
+
+  /* Banner body text adjustments for mobile */
+  .hero-banner--top {
+    padding: 20px 18px;
+  }
+
+  .hero-banner--small {
+    padding: 18px 16px;
+  }
+
+  .hero-banner__body {
+    max-width: 60%;
+  }
+
+  /* Default slider fallback height on mobile */
   .hero-slider {
     height: 220px;
   }

@@ -13,11 +13,81 @@
 
   <div class="home-top-zone{% if home_settings.top_zone_background %} home-top-zone--has-bg{% endif %}"
     {% if home_settings.top_zone_background %}style="--home-top-bg: url('{{ home_settings.top_zone_background.url }}');"{% endif %}>
-    {% if hero_slides_left or hero_slides_right %}
+    {% if hero_slides_left or hero_banners_right %}
       <section class="hero-section container">
         <div class="hero-dual">
+
+          {# ── Left: full-height slider (unchanged) ── #}
           {% include 'core/includes/hero_slider.html' with slides=hero_slides_left slider_id='hero-slider-left' %}
-          {% include 'core/includes/hero_slider.html' with slides=hero_slides_right slider_id='hero-slider-right' %}
+
+          {# ── Right: 1 large static banner + 2 small static banners ── #}
+          <div class="hero-right">
+
+            {# Top large static banner #}
+            {% if hero_banners_right.top %}
+              {% with b=hero_banners_right.top %}
+                <a href="{{ b.link|default:'#' }}" class="hero-banner hero-banner--top"
+                  {% if b.background %}style="--banner-bg: url('{{ b.background.url }}');"{% endif %}>
+                  <div class="hero-banner__body">
+                    {% if b.title %}<h2 class="hero-banner__title">{{ b.title }}</h2>{% endif %}
+                    {% if b.subtitle %}<p class="hero-banner__subtitle">{{ b.subtitle }}</p>{% endif %}
+                    {% if b.cta_label %}
+                      <span class="hero-banner__btn">{{ b.cta_label }}</span>
+                    {% endif %}
+                  </div>
+                  {% if b.image %}
+                    <div class="hero-banner__img-wrap">
+                      <img src="{{ b.image.url }}" alt="{{ b.title }}">
+                    </div>
+                  {% endif %}
+                </a>
+              {% endwith %}
+            {% else %}
+              {# Placeholder shown until a banner is added in admin #}
+              <div class="hero-banner hero-banner--top hero-banner--placeholder">
+                <div class="hero-banner__placeholder-body">
+                  <i class="fas fa-image"></i>
+                  <span>Add a banner in Admin → Hero Banners<br><small>Placement: Right — Top</small></span>
+                </div>
+              </div>
+            {% endif %}
+
+            {# Bottom two small static banners #}
+            <div class="hero-right-bottom">
+              {% for b in hero_banners_right.bottom %}
+                <a href="{{ b.link|default:'#' }}" class="hero-banner hero-banner--small"
+                  {% if b.background %}style="--banner-bg: url('{{ b.background.url }}');"{% endif %}>
+                  <div class="hero-banner__body">
+                    {% if b.title %}<h3 class="hero-banner__title">{{ b.title }}</h3>{% endif %}
+                    {% if b.subtitle %}<p class="hero-banner__subtitle">{{ b.subtitle }}</p>{% endif %}
+                    {% if b.cta_label %}
+                      <span class="hero-banner__btn hero-banner__btn--outline">{{ b.cta_label }}</span>
+                    {% endif %}
+                  </div>
+                  {% if b.image %}
+                    <div class="hero-banner__img-wrap">
+                      <img src="{{ b.image.url }}" alt="{{ b.title }}">
+                    </div>
+                  {% endif %}
+                </a>
+              {% endfor %}
+              {# Placeholders for missing bottom banners (shown until 2 are added) #}
+              {% if hero_banners_right.bottom|length == 0 %}
+                <div class="hero-banner hero-banner--small hero-banner--placeholder">
+                  <div class="hero-banner__placeholder-body"><i class="fas fa-image"></i><span>Bottom banner 1<br><small>Admin → Hero Banners</small></span></div>
+                </div>
+                <div class="hero-banner hero-banner--small hero-banner--placeholder">
+                  <div class="hero-banner__placeholder-body"><i class="fas fa-image"></i><span>Bottom banner 2<br><small>Admin → Hero Banners</small></span></div>
+                </div>
+              {% elif hero_banners_right.bottom|length == 1 %}
+                <div class="hero-banner hero-banner--small hero-banner--placeholder">
+                  <div class="hero-banner__placeholder-body"><i class="fas fa-image"></i><span>Bottom banner 2<br><small>Admin → Hero Banners</small></span></div>
+                </div>
+              {% endif %}
+            </div>
+
+          </div>
+
         </div>
       </section>
     {% endif %}
