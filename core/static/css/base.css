@@ -1161,7 +1161,7 @@ body.mobile-nav-open {
 .footer-bottom {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   padding: 16px 20px;
   border-top: 1px solid var(--color-border);
   max-width: var(--container-max);

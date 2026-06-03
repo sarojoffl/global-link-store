@@ -94,9 +94,6 @@
 
     {% if brands %}
       <section class="brand-strip container">
-        <button type="button" class="brand-arrow brand-arrow--prev" aria-label="Previous brands">
-          <i class="fas fa-chevron-left" aria-hidden="true"></i>
-        </button>
         <div class="brand-track-wrapper">
           <div class="brand-track">
             {% for brand in brands %}
@@ -104,11 +101,13 @@
                 <img src="{{ brand.logo.url }}" alt="{{ brand.name }}">
               </a>
             {% endfor %}
+            {% for brand in brands %}
+              <a href="{% url 'products:brand' brand.slug %}" class="brand-item" aria-hidden="true" tabindex="-1">
+                <img src="{{ brand.logo.url }}" alt="">
+              </a>
+            {% endfor %}
           </div>
         </div>
-        <button type="button" class="brand-arrow brand-arrow--next" aria-label="Next brands">
-          <i class="fas fa-chevron-right" aria-hidden="true"></i>
-        </button>
       </section>
     {% endif %}
   </div>
@@ -125,7 +124,11 @@
         {% for cat in popular_categories %}
           <a href="{% url 'products:category' cat.slug %}" class="category-card">
             <div class="cat-image">
-              <i class="{{ cat.icon|default:'fas fa-box' }}"></i>
+              {% if cat.image %}
+                <img src="{{ cat.image.url }}" alt="{{ cat.name }}">
+              {% else %}
+                <img src="{% static 'images/default-category.png' %}" alt="{{ cat.name }}">
+              {% endif %}
             </div>
             <h3>{{ cat.name }}</h3>
             <p class="count">{{ cat.total_products_count }} products</p>

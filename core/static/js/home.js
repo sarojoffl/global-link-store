@@ -54,12 +54,8 @@
     let dragging = false;
 
     function pointerX(e) {
-      if (e.touches && e.touches.length) {
-        return e.touches[0].clientX;
-      }
-      if (e.changedTouches && e.changedTouches.length) {
-        return e.changedTouches[0].clientX;
-      }
+      if (e.touches && e.touches.length) return e.touches[0].clientX;
+      if (e.changedTouches && e.changedTouches.length) return e.changedTouches[0].clientX;
       return e.clientX;
     }
 
@@ -76,9 +72,7 @@
       if (!dragging) return;
       const x = pointerX(e);
       const dx = startX - x;
-      if (e.cancelable && Math.abs(dx) > 4) {
-        e.preventDefault();
-      }
+      if (e.cancelable && Math.abs(dx) > 4) e.preventDefault();
       moveTo(Math.max(0, Math.min(startOffset + dx, maxOffset())), true);
     }
 
@@ -112,80 +106,6 @@
   }
 
   /* =========================================================
-     BRAND STRIP
-  ========================================================= */
-  function initBrandStrip() {
-    const strip = document.querySelector(".brand-strip");
-    if (!strip) return;
-
-    const track = strip.querySelector(".brand-track");
-    const wrapper = strip.querySelector(".brand-track-wrapper");
-    const prevBtn = strip.querySelector(".brand-arrow--prev");
-    const nextBtn = strip.querySelector(".brand-arrow--next");
-
-    let offset = 0;
-
-    function brandsPerView() {
-      const styles = getComputedStyle(strip);
-      const raw = styles.getPropertyValue("--brands-per-view").trim();
-      const count = parseInt(raw, 10);
-      return Number.isFinite(count) && count > 0 ? count : 9;
-    }
-
-    function stepSize() {
-      return wrapper.clientWidth / brandsPerView();
-    }
-
-    function moveTo(val) {
-      const maxScroll = track.scrollWidth - wrapper.clientWidth;
-      offset = Math.max(0, Math.min(val, maxScroll));
-      track.style.transform = `translateX(-${offset}px)`;
-    }
-
-    function scrollBrands(dir) {
-      wrapper.scrollBy({
-        left: dir === "next" ? wrapper.clientWidth * 0.8 : -wrapper.clientWidth * 0.8,
-        behavior: "smooth",
-      });
-    }
-
-    function onModeChange() {
-      if (MOBILE_MQ.matches) {
-        track.style.transform = "none";
-        offset = 0;
-      } else {
-        moveTo(offset);
-      }
-    }
-
-    if (nextBtn) {
-      nextBtn.addEventListener("click", () => {
-        if (MOBILE_MQ.matches) scrollBrands("next");
-        else moveTo(offset + stepSize());
-      });
-    }
-
-    if (prevBtn) {
-      prevBtn.addEventListener("click", () => {
-        if (MOBILE_MQ.matches) scrollBrands("prev");
-        else moveTo(offset - stepSize());
-      });
-    }
-
-    makeDraggable(wrapper, (dir) => {
-      if (MOBILE_MQ.matches) scrollBrands(dir);
-      else moveTo(dir === "next" ? offset + stepSize() : offset - stepSize());
-    });
-
-    wrapper.style.cursor = "grab";
-    MOBILE_MQ.addEventListener("change", onModeChange);
-    window.addEventListener("resize", () => {
-      if (!MOBILE_MQ.matches) moveTo(offset);
-    });
-    onModeChange();
-  }
-
-  /* =========================================================
      HERO — desktop: fade carousel | mobile: swipe scroll
   ========================================================= */
   function initHeroSlider(slider) {
@@ -216,12 +136,8 @@
       slides.forEach((slide, i) => {
         const video = slide.querySelector(".hero-video");
         if (!video) return;
-        if (i === index) {
-          video.play().catch(() => {});
-        } else {
-          video.pause();
-          video.currentTime = 0;
-        }
+        if (i === index) video.play().catch(() => {});
+        else { video.pause(); video.currentTime = 0; }
       });
     }
 
@@ -287,15 +203,11 @@
     }
 
     let scrollTimer = null;
-    track.addEventListener(
-      "scroll",
-      () => {
-        if (!MOBILE_MQ.matches) return;
-        clearTimeout(scrollTimer);
-        scrollTimer = setTimeout(updateScrollUI, 60);
-      },
-      { passive: true }
-    );
+    track.addEventListener("scroll", () => {
+      if (!MOBILE_MQ.matches) return;
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(updateScrollUI, 60);
+    }, { passive: true });
 
     if (nextBtn) nextBtn.addEventListener("click", () => { next(); startAutoplay(); });
     if (prevBtn) prevBtn.addEventListener("click", () => { prev(); startAutoplay(); });
@@ -303,10 +215,7 @@
     dots.forEach((dot, i) => {
       dot.addEventListener("click", () => {
         if (MOBILE_MQ.matches) scrollToSlide(i);
-        else {
-          updateCarouselUI(i);
-          startAutoplay();
-        }
+        else { updateCarouselUI(i); startAutoplay(); }
       });
     });
 
@@ -353,7 +262,6 @@
   }
 
   document.querySelectorAll(".hero-slider").forEach(initHeroSlider);
-  initBrandStrip();
 
   /* =========================================================
      PRODUCT SLIDERS
@@ -409,30 +317,15 @@
       function moveTo(val, instant) {
         offset = Math.max(0, Math.min(val, maxOffset()));
         track.style.transform = `translateX(-${offset}px)`;
-        if (instant) {
-          track.classList.add("is-dragging");
-        } else {
-          track.classList.remove("is-dragging");
-        }
+        if (instant) track.classList.add("is-dragging");
+        else track.classList.remove("is-dragging");
         updateArrows();
       }
 
-      if (nextBtn) {
-        nextBtn.addEventListener("click", () => moveTo(offset + stepSize(), false));
-      }
+      if (nextBtn) nextBtn.addEventListener("click", () => moveTo(offset + stepSize(), false));
+      if (prevBtn) prevBtn.addEventListener("click", () => moveTo(offset - stepSize(), false));
 
-      if (prevBtn) {
-        prevBtn.addEventListener("click", () => moveTo(offset - stepSize(), false));
-      }
-
-      bindSliderSwipe(
-        wrapper,
-        track,
-        moveTo,
-        () => offset,
-        stepSize,
-        maxOffset
-      );
+      bindSliderSwipe(wrapper, track, moveTo, () => offset, stepSize, maxOffset);
 
       function onResize() {
         syncCardWidths();
@@ -441,7 +334,6 @@
 
       window.addEventListener("resize", onResize);
       syncCardWidths();
-
       moveTo(0);
     });
   }
@@ -458,10 +350,6 @@
     const counters = Array.from(section.querySelectorAll("[data-count]"));
     if (!counters.length) return;
 
-    function formatNumber(n) {
-      return n.toLocaleString();
-    }
-
     function animateCounter(el) {
       const target = parseInt(el.getAttribute("data-count"), 10) || 0;
       const duration = 2200;
@@ -470,12 +358,9 @@
       function tick(now) {
         const progress = Math.min((now - startTime) / duration, 1);
         const eased = 1 - Math.pow(1 - progress, 3);
-        el.textContent = formatNumber(Math.floor(target * eased));
-        if (progress < 1) {
-          requestAnimationFrame(tick);
-        } else {
-          el.textContent = formatNumber(target);
-        }
+        el.textContent = Math.floor(target * eased).toLocaleString();
+        if (progress < 1) requestAnimationFrame(tick);
+        else el.textContent = target.toLocaleString();
       }
 
       requestAnimationFrame(tick);

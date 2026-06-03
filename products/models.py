@@ -6,7 +6,7 @@ from django.utils.text import slugify
 class Category(models.Model):
     name = models.CharField(max_length=120)
     slug = models.SlugField(unique=True, blank=True)
-    icon = models.CharField(max_length=100, blank=True)
+    image = models.ImageField(upload_to='category_icons/', blank=True, null=True)
     is_popular = models.BooleanField(default=False)
     parent = models.ForeignKey(
         'self',
