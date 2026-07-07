@@ -67,7 +67,7 @@ body.page-home .home-top-zone {
 
 /* Left big slider — fills full height of the dual grid row */
 .hero-dual > .hero-slider {
-  height: clamp(280px, 36vw, 460px);
+  height: clamp(350px, 44vw, 580px);
 }
 
 /* ── Right panel: stacked top-large + two-small-bottom ── */
@@ -75,7 +75,7 @@ body.page-home .home-top-zone {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  height: clamp(280px, 36vw, 460px); /* matches left slider exactly */
+  height: clamp(350px, 44vw, 580px); /* matches left slider exactly */
 }
 
 /* Top large slot — targeted via parent so extra_class isn't needed */
@@ -95,7 +95,7 @@ body.page-home .home-top-zone {
 
 /* Small slide cards — targeted via parent container */
 .hero-right-bottom .hero-slider {
-  height: clamp(120px, 11vw, 155px) !important;
+  height: clamp(150px, 14vw, 200px) !important;
   flex-shrink: 0;
 }
 
@@ -107,7 +107,7 @@ body.page-home .home-top-zone {
   overflow: hidden;
   box-shadow: 0 8px 32px rgba(43, 101, 226, 0.1);
   border: 1px solid rgba(43, 101, 226, 0.08);
-  height: clamp(200px, 28vw, 360px); /* default fallback; overridden by variants above */
+  height: clamp(260px, 34vw, 460px); /* default fallback; overridden by variants above */
   user-select: none;
 }
 

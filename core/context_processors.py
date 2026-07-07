@@ -1,6 +1,9 @@
 from products.models import Brand, Category
 from shop.context import shop_context
 
+WHATSAPP_NUMBER = "9779851402916"
+WHATSAPP_DISPLAY_NUMBER = "+977-9851402916"
+
 
 def store_defaults(request):
     """Shared template context for layout (nav, categories, cart, wishlist)."""
@@ -15,5 +18,7 @@ def store_defaults(request):
     return {
         "categories": categories,
         "nav_categories": nav_categories,
+        "whatsapp_number": WHATSAPP_NUMBER,
+        "whatsapp_display_number": WHATSAPP_DISPLAY_NUMBER,
         **ctx,
     }

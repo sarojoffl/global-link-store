@@ -1082,7 +1082,7 @@ body.mobile-nav-open {
 /* ───────── BACK TO TOP ───────── */
 .back-to-top {
   position: fixed;
-  bottom: 24px; right: 24px;
+  bottom: 96px; right: 24px;
   width: 44px; height: 44px;
   background: var(--color-white);
   border: 1px solid var(--color-border);
@@ -1555,3 +1555,32 @@ body.mobile-nav-open {
   color: var(--color-text-muted);
 }
 
+.wa-float-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #25D366;
+  color: #fff;
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
+}
+
+.wa-float-btn:hover {
+  transform: scale(1.06);
+  color: #fff;
+}
+
+@media (max-width: 480px) {
+  .wa-float-btn {
+    bottom: 16px;
+    right: 16px;
+  }
+}
