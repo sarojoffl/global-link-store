@@ -348,6 +348,15 @@ body.page-home .home-top-zone {
   max-width: 120px;
   object-fit: contain;
   pointer-events: none;
+  mix-blend-mode: multiply; /* makes white PNG backgrounds transparent — fixes heavy black Apple logo */
+  filter: grayscale(20%);
+  transition: filter 0.3s ease, opacity 0.3s ease;
+  opacity: 0.85;
+}
+
+.brand-item:hover img {
+  filter: grayscale(0%);
+  opacity: 1;
 }
 
 /* hide the old arrow buttons — no longer needed */
@@ -924,6 +933,7 @@ body.page-home .home-top-zone {
   height: 0; /* flex controls this */
   align-items: flex-start;
   padding: 28px 24px;
+  background-position: top center; /* prevent top-edge text / logo from being clipped */
 }
 
 /* Small banners */

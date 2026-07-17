@@ -1142,6 +1142,22 @@ body.mobile-nav-open {
   line-height: 1.7;
 }
 
+.footer-address {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 12px;
+  font-size: 13.5px;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.footer-address i {
+  color: var(--color-primary);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
 .footer-col h4 {
   font-size: 15px;
   font-weight: 700;
