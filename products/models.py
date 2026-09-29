@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.urls import reverse
 from django.utils.text import slugify
 
 
@@ -34,6 +35,9 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+    def get_absolute_url(self):
+        return reverse('products:category', kwargs={'category_slug': self.slug})
+
     @property
     def is_root(self):
         return self.parent is None
@@ -64,6 +68,9 @@ class Brand(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse('products:brand', kwargs={'brand_slug': self.slug})
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -96,6 +103,9 @@ class Product(models.Model):
 
     def __str__(self):
         return self.title
+
+    def get_absolute_url(self):
+        return reverse('products:detail', kwargs={'slug': self.slug})
 
     @property
     def is_in_stock(self):

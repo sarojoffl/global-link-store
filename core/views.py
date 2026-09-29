@@ -93,6 +93,10 @@ def terms(request):
     return render(request, "core/terms.html")
 
 
+def robots_txt(request):
+    return render(request, "core/robots.txt", content_type="text/plain")
+
+
 @require_POST
 @ensure_csrf_cookie
 def newsletter_subscribe(request):

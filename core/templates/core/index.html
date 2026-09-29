@@ -2,23 +2,63 @@
 {% load static %}
 
 {% block title %}Online Shopping in Nepal | Electronics, Gadgets & Best Deals{% endblock %}
+{% block meta_description %}Shop online in Nepal for electronics, laptops, smartphones, gadgets, and daily deals at Global Link Store. Best prices, warranty, and fast delivery across Nepal.{% endblock %}
 
 {% block body_class %} class="page-home{% if home_settings.top_zone_background %} page-home--hero{% endif %}"{% endblock %}
 
 {% block extra_css %}
-
-  <meta name="description" content="Shop online in Nepal for electronics, gadgets, and daily deals. Best prices, fast delivery, and trusted online shopping experience.">
-  <meta name="keywords" content="online shopping Nepal, electronics Nepal, gadgets Nepal, buy electronics online, Nepal ecommerce store, best deals Nepal">
-  <meta name="robots" content="index, follow">
-
-  <meta property="og:title" content="Online Shopping in Nepal | Electronics & Gadgets Deals">
-  <meta property="og:description" content="Buy electronics, gadgets, and daily essentials online in Nepal with best prices and fast delivery.">
+  <meta property="og:title" content="Online Shopping in Nepal | Electronics, Gadgets & Best Deals">
+  <meta property="og:description" content="Shop online in Nepal for electronics, laptops, smartphones, gadgets, and daily deals at Global Link Store. Best prices, warranty, and fast delivery.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://globallinkstore.com/">
-
-  <link rel="canonical" href="https://globallinkstore.com/">
-
+  <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}/">
   <link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "{{ request.scheme }}://{{ request.get_host }}/#organization",
+      "name": "Global Link Store",
+      "url": "{{ request.scheme }}://{{ request.get_host }}/",
+      "logo": "{{ request.scheme }}://{{ request.get_host }}{% static 'img/logo.png' %}",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+977-9851402916",
+        "contactType": "customer service",
+        "areaServed": "NP",
+        "availableLanguage": ["English", "Nepali"]
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Manbhawan Road",
+        "addressLocality": "Lalitpur",
+        "addressCountry": "NP"
+      }
+    },
+    {
+      "@type": "WebSite",
+      "@id": "{{ request.scheme }}://{{ request.get_host }}/#website",
+      "url": "{{ request.scheme }}://{{ request.get_host }}/",
+      "name": "Global Link Store",
+      "publisher": {
+        "@id": "{{ request.scheme }}://{{ request.get_host }}/#organization"
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "{{ request.scheme }}://{{ request.get_host }}{% url 'products:list' %}?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+  ]
+}
+</script>
 {% endblock %}
 
 {% block content %}

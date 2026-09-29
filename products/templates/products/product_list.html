@@ -1,12 +1,56 @@
 {% extends "core/base.html" %}
 {% load static catalog_tags %}
 
-{% block title %}{{ page_title }} – Global Link Store{% endblock %}
+{% block title %}
+  {% if active_category %}
+    Buy {{ active_category.name }} Online in Nepal | Best Deals – Global Link Store
+  {% elif active_brand %}
+    {{ active_brand.name }} in Nepal | Official Products – Global Link Store
+  {% elif query %}
+    Search results for "{{ query }}" – Global Link Store
+  {% else %}
+    Buy Electronics & Gadgets Online in Nepal – Global Link Store
+  {% endif %}
+{% endblock %}
+
+{% block meta_description %}
+  {% if active_category %}Shop the latest {{ active_category.name }} in Nepal at Global Link Store. Enjoy competitive prices, manufacturer warranty, and swift delivery in Kathmandu.{% elif active_brand %}Browse genuine {{ active_brand.name }} products in Nepal with warranty, fast shipping, and reliable support at Global Link Store.{% else %}Explore top electronics, computers, smartphones, and accessories at Global Link Store Nepal.{% endif %}
+{% endblock %}
+
+{% block canonical_url %}
+  {% if active_category %}{{ request.scheme }}://{{ request.get_host }}{% url 'products:category' active_category.slug %}{% elif active_brand %}{{ request.scheme }}://{{ request.get_host }}{% url 'products:brand' active_brand.slug %}{% else %}{{ request.scheme }}://{{ request.get_host }}{% url 'products:list' %}{% endif %}
+{% endblock %}
+
 {% block body_class %} class="page-catalog"{% endblock %}
 
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/catalog.css' %}">
   <link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block structured_data %}
+{% if active_category %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "{{ request.scheme }}://{{ request.get_host }}/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "{{ active_category.name|escapejs }}",
+      "item": "{{ request.scheme }}://{{ request.get_host }}{% url 'products:category' active_category.slug %}"
+    }
+  ]
+}
+</script>
+{% endif %}
 {% endblock %}
 
 {% block content %}

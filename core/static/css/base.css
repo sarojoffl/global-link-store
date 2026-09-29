@@ -1130,7 +1130,8 @@ body.mobile-nav-open {
 
 .footer-about .logo { margin-bottom: 20px; }
 
-.footer-about h3 {
+.footer-about h3,
+.footer-about .footer-heading {
   font-size: 15px;
   font-weight: 700;
   margin-bottom: 12px;
@@ -1158,7 +1159,8 @@ body.mobile-nav-open {
   flex-shrink: 0;
 }
 
-.footer-col h4 {
+.footer-col h4,
+.footer-col .footer-heading {
   font-size: 15px;
   font-weight: 700;
   margin-bottom: 16px;
@@ -1218,7 +1220,8 @@ body.mobile-nav-open {
   margin-bottom: 6px;
 }
 
-.footer-newsletter-bar__copy h3 {
+.footer-newsletter-bar__copy h3,
+.footer-newsletter-bar__copy .footer-heading {
   font-size: clamp(1.15rem, 2.5vw, 1.45rem);
   font-weight: 800;
   margin-bottom: 6px;

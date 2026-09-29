@@ -1,16 +1,101 @@
 {% extends "core/base.html" %}
 {% load static product_tags %}
 
-{% block title %}{{ product.title }} – Global Link Store{% endblock %}
+{% block title %}{{ product.title|truncatechars:50 }} | Buy Online Nepal – Global Link Store{% endblock %}
+{% block meta_description %}Buy {{ product.title }} in Nepal at Rs {{ product.price|floatformat:0 }}. Genuine warranty, 7-day easy returns & fast delivery in Kathmandu. Order online at Global Link Store!{% endblock %}
 {% block body_class %} class="page-product"{% endblock %}
 
 {% block extra_css %}
+  <meta property="og:title" content="{{ product.title }} | Global Link Store">
+  <meta property="og:description" content="Buy {{ product.title }} in Nepal for Rs {{ product.price|floatformat:0 }}. Fast delivery, warranty, and easy returns.">
+  <meta property="og:type" content="product">
+  <meta property="og:url" content="{{ request.build_absolute_uri }}">
+  {% if gallery.0 %}
+    <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ gallery.0.url }}">
+  {% endif %}
+
   {# Font imports — add these to base.html <head> for best performance #}
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;1,9..40,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/product.css' %}">
   <link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org/",
+  "@type": "Product",
+  "name": "{{ product.title|escapejs }}",
+  {% if gallery.0 %}
+  "image": ["{{ request.scheme }}://{{ request.get_host }}{{ gallery.0.url }}"],
+  {% endif %}
+  "description": "{{ product.description|striptags|truncatewords:40|default:product.title|escapejs }}",
+  "sku": "GLS-{{ product.id|stringformat:'05d' }}",
+  {% if product.brand %}
+  "brand": {
+    "@type": "Brand",
+    "name": "{{ product.brand.name|escapejs }}"
+  },
+  {% endif %}
+  "offers": {
+    "@type": "Offer",
+    "url": "{{ request.build_absolute_uri }}",
+    "priceCurrency": "NPR",
+    "price": "{{ product.price }}",
+    "priceValidUntil": "2027-12-31",
+    "availability": "{% if product.is_in_stock %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}",
+    "itemCondition": "https://schema.org/NewCondition"
+  }{% if review_count %},
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "{{ avg_rating }}",
+    "reviewCount": "{{ review_count }}"
+  }
+  {% endif %}
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "{{ request.scheme }}://{{ request.get_host }}/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "{{ product.category.name|escapejs }}",
+      "item": "{{ request.scheme }}://{{ request.get_host }}{% url 'products:category' product.category.slug %}"
+    }{% if product.brand %},
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "{{ product.brand.name|escapejs }}",
+      "item": "{{ request.scheme }}://{{ request.get_host }}{% url 'products:brand' product.brand.slug %}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 4,
+      "name": "{{ product.title|escapejs }}",
+      "item": "{{ request.build_absolute_uri }}"
+    }
+    {% else %},
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "{{ product.title|escapejs }}",
+      "item": "{{ request.build_absolute_uri }}"
+    }
+    {% endif %}
+  ]
+}
+</script>
 {% endblock %}
 
 {% block content %}
@@ -75,7 +160,7 @@
                 aria-label="View image {{ forloop.counter }}"
                 data-gallery-thumb="{{ item.url }}"
               >
-                <img src="{{ item.url }}" alt="" loading="lazy">
+                <img src="{{ item.url }}" alt="{{ product.title }} - view {{ forloop.counter }}" loading="lazy" width="70" height="70">
               </button>
             {% endfor %}
           </div>

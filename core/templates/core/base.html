@@ -4,7 +4,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Global Link Store — Your trusted online store for laptops, computers, smartphones, and electronics in Nepal.">
+  <meta name="description" content="{% block meta_description %}Global Link Store — Your trusted online store for laptops, computers, smartphones, and electronics in Nepal.{% endblock %}">
+  {% block meta_robots %}<meta name="robots" content="index, follow">{% endblock %}
+  <link rel="canonical" href="{% block canonical_url %}{{ request.scheme }}://{{ request.get_host }}{{ request.path }}{% endblock %}">
   <title>{% block title %}Global Link Store{% endblock %}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,6 +14,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   {% block extra_css %}{% endblock %}
+  {% block structured_data %}{% endblock %}
 </head>
 <body{% block body_class %}{% endblock %}>
   {# CSRF token available on every page for forms + AJAX #}
@@ -290,7 +293,7 @@
             <span class="tagline">Your Online Store</span>
           </div>
         </a>
-        <h3>About Us – Global Link Store</h3>
+        <p class="footer-heading footer-heading--about">About Us – Global Link Store</p>
         <p>
           Global Link Store is your trusted source for laptops, desktop computers, smartphones,
           tablets, and electronics. We offer quality products with reliable support across Nepal.
@@ -301,7 +304,7 @@
         </p>
       </div>
       <div class="footer-col">
-        <h4>Categories</h4>
+        <p class="footer-heading">Categories</p>
         <ul>
           {% for cat in categories|slice:":6" %}
             <li><a href="{% url 'products:category' cat.slug %}">{{ cat.name }}</a></li>
@@ -312,7 +315,7 @@
         </ul>
       </div>
       <div class="footer-col">
-        <h4>Categories</h4>
+        <p class="footer-heading">Categories</p>
         <ul>
           {% for cat in categories|slice:"6:11" %}
             <li><a href="{% url 'products:category' cat.slug %}">{{ cat.name }}</a></li>
@@ -322,7 +325,7 @@
         </ul>
       </div>
       <div class="footer-col">
-        <h4>Useful Links</h4>
+        <p class="footer-heading">Useful Links</p>
         <ul>
           <li><a href="{% url 'core:contact' %}">Contact Us</a></li>
           <li><a href="{% url 'products:compare' %}">Compare Products</a></li>
@@ -337,7 +340,7 @@
       <div class="footer-newsletter-bar__inner">
         <div class="footer-newsletter-bar__copy">
           <span class="footer-newsletter-bar__eyebrow">Stay in the loop</span>
-          <h3>Subscribe to our newsletter</h3>
+          <p class="footer-heading footer-heading--newsletter">Subscribe to our newsletter</p>
           <p>Get new arrivals, deals, and store updates delivered to your inbox.</p>
         </div>
         <form

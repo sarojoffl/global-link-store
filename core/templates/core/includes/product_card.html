@@ -5,7 +5,7 @@
       {% if product.old_price %}
         <span class="discount-badge">-{{ product.discount_percent }}%</span>
       {% endif %}
-      <img src="{{ product.image.url }}" alt="{{ product.title }}" loading="lazy">
+      <img src="{{ product.image.url }}" alt="{{ product.title }}" loading="lazy" width="300" height="300" style="aspect-ratio: 1 / 1; object-fit: contain;">
     </a>
 
     <div class="card-body">
@@ -30,7 +30,7 @@
         {% endif %}
       </div>
 
-      <a href="{% url 'products:detail' product.slug %}" class="btn-cart">View Product</a>
+      <a href="{% url 'products:detail' product.slug %}" class="btn-cart" aria-label="View {{ product.title }}">View Product</a>
 
       {% if product.description %}
         <p class="card-desc">{{ product.description|truncatewords:18 }}</p>
