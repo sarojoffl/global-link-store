@@ -1,0 +1,58 @@
+{% extends "store_admin/base.html" %}
+
+{% block title %}Blog Categories — Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="h3 mb-0">Blog Categories</h1>
+    <p class="text-muted mb-0">Manage topic categories for buying guides, reviews, and tutorials.</p>
+  </div>
+  <a href="{% url 'store_admin:blog_category_add' %}" class="btn btn-primary">
+    <i class="fas fa-plus me-1"></i> Add Category
+  </a>
+</div>
+
+<div class="card shadow-sm border-0">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Category Name</th>
+            <th>URL Slug</th>
+            <th>Articles Count</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for cat in categories %}
+            <tr>
+              <td class="fw-bold text-dark">{{ cat.name }}</td>
+              <td><code>/blog/category/{{ cat.slug }}/</code></td>
+              <td>{{ cat.posts.count }}</td>
+              <td class="text-end">
+                <a href="{{ cat.get_absolute_url }}" target="_blank" class="btn btn-sm btn-outline-secondary me-1" title="View Live">
+                  <i class="fas fa-external-link-alt"></i>
+                </a>
+                <a href="{% url 'store_admin:blog_category_edit' cat.pk %}" class="btn btn-sm btn-outline-primary me-1" title="Edit">
+                  <i class="fas fa-edit"></i>
+                </a>
+                <a href="{% url 'store_admin:blog_category_delete' cat.pk %}" class="btn btn-sm btn-outline-danger" title="Delete">
+                  <i class="fas fa-trash"></i>
+                </a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="4" class="text-center py-5 text-muted">
+                No blog categories found. <a href="{% url 'store_admin:blog_category_add' %}">Add one</a>.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

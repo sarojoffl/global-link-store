@@ -955,3 +955,185 @@ def newsletter_subscriber_delete(request, pk):
         "object": subscriber,
         "cancel_url": reverse("store_admin:newsletter_subscriber_list"),
     })
+
+
+# ---------------------------------------------------------------------------
+# Blog Posts & Categories Management
+# ---------------------------------------------------------------------------
+
+@login_required
+@staff_required
+def blog_post_list(request):
+    from blog.models import BlogPost
+    posts = BlogPost.objects.select_related("category", "author").order_by("-created_at")
+    return render(request, "store_admin/blog_post_list.html", {"posts": posts})
+
+
+@login_required
+@staff_required
+def blog_post_add(request):
+    from .forms import BlogPostForm
+    form = BlogPostForm(request.POST or None, request.FILES or None)
+    if request.method == "POST" and form.is_valid():
+        post = form.save(commit=False)
+        post.author = request.user
+        post.save()
+        form.save_m2m()
+        messages.success(request, f"Blog post '{post.title}' created.")
+        return redirect("store_admin:blog_post_list")
+    return render(request, "store_admin/generic_form.html", {
+        "form": form,
+        "title": "Create New Blog Post / Buying Guide",
+        "cancel_url": reverse("store_admin:blog_post_list"),
+    })
+
+
+@login_required
+@staff_required
+def blog_post_edit(request, pk):
+    from blog.models import BlogPost
+    from .forms import BlogPostForm
+    post = get_object_or_404(BlogPost, pk=pk)
+    form = BlogPostForm(request.POST or None, request.FILES or None, instance=post)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, f"Blog post '{post.title}' updated.")
+        return redirect("store_admin:blog_post_list")
+    return render(request, "store_admin/generic_form.html", {
+        "form": form,
+        "title": f"Edit Blog Post — {post.title}",
+        "cancel_url": reverse("store_admin:blog_post_list"),
+    })
+
+
+@login_required
+@staff_required
+def blog_post_delete(request, pk):
+    from blog.models import BlogPost
+    post = get_object_or_404(BlogPost, pk=pk)
+    if request.method == "POST":
+        post.delete()
+        messages.success(request, "Blog post deleted.")
+        return redirect("store_admin:blog_post_list")
+    return render(request, "store_admin/confirm_delete.html", {
+        "object": post,
+        "cancel_url": reverse("store_admin:blog_post_list"),
+    })
+
+
+@login_required
+@staff_required
+def blog_category_list(request):
+    from blog.models import BlogCategory
+    categories = BlogCategory.objects.all().order_by("name")
+    return render(request, "store_admin/blog_category_list.html", {"categories": categories})
+
+
+@login_required
+@staff_required
+def blog_category_add(request):
+    from .forms import BlogCategoryForm
+    form = BlogCategoryForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        cat = form.save()
+        messages.success(request, f"Category '{cat.name}' created.")
+        return redirect("store_admin:blog_category_list")
+    return render(request, "store_admin/generic_form.html", {
+        "form": form,
+        "title": "Add Blog Category",
+        "cancel_url": reverse("store_admin:blog_category_list"),
+    })
+
+
+@login_required
+@staff_required
+def blog_category_edit(request, pk):
+    from blog.models import BlogCategory
+    from .forms import BlogCategoryForm
+    cat = get_object_or_404(BlogCategory, pk=pk)
+    form = BlogCategoryForm(request.POST or None, instance=cat)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, f"Category '{cat.name}' updated.")
+        return redirect("store_admin:blog_category_list")
+    return render(request, "store_admin/generic_form.html", {
+        "form": form,
+        "title": f"Edit Blog Category — {cat.name}",
+        "cancel_url": reverse("store_admin:blog_category_list"),
+    })
+
+
+@login_required
+@staff_required
+def blog_category_delete(request, pk):
+    from blog.models import BlogCategory
+    cat = get_object_or_404(BlogCategory, pk=pk)
+    if request.method == "POST":
+        cat.delete()
+        messages.success(request, "Blog category deleted.")
+        return redirect("store_admin:blog_category_list")
+    return render(request, "store_admin/confirm_delete.html", {
+        "object": cat,
+        "cancel_url": reverse("store_admin:blog_category_list"),
+    })
+
+
+# ---------------------------------------------------------------------------
+# Curated SEO Collections Management
+# ---------------------------------------------------------------------------
+
+@login_required
+@staff_required
+def collection_list(request):
+    from products.models import ProductCollection
+    collections = ProductCollection.objects.all().order_by("-created_at")
+    return render(request, "store_admin/collection_list.html", {"collections": collections})
+
+
+@login_required
+@staff_required
+def collection_add(request):
+    from .forms import ProductCollectionForm
+    form = ProductCollectionForm(request.POST or None, request.FILES or None)
+    if request.method == "POST" and form.is_valid():
+        collection = form.save()
+        messages.success(request, f"Collection '{collection.name}' created.")
+        return redirect("store_admin:collection_list")
+    return render(request, "store_admin/generic_form.html", {
+        "form": form,
+        "title": "Create SEO Product Collection",
+        "cancel_url": reverse("store_admin:collection_list"),
+    })
+
+
+@login_required
+@staff_required
+def collection_edit(request, pk):
+    from products.models import ProductCollection
+    from .forms import ProductCollectionForm
+    collection = get_object_or_404(ProductCollection, pk=pk)
+    form = ProductCollectionForm(request.POST or None, request.FILES or None, instance=collection)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, f"Collection '{collection.name}' updated.")
+        return redirect("store_admin:collection_list")
+    return render(request, "store_admin/generic_form.html", {
+        "form": form,
+        "title": f"Edit Collection — {collection.name}",
+        "cancel_url": reverse("store_admin:collection_list"),
+    })
+
+
+@login_required
+@staff_required
+def collection_delete(request, pk):
+    from products.models import ProductCollection
+    collection = get_object_or_404(ProductCollection, pk=pk)
+    if request.method == "POST":
+        collection.delete()
+        messages.success(request, "Collection deleted.")
+        return redirect("store_admin:collection_list")
+    return render(request, "store_admin/confirm_delete.html", {
+        "object": collection,
+        "cancel_url": reverse("store_admin:collection_list"),
+    })

@@ -161,6 +161,11 @@
               {% endif %}
             </li>
           {% endfor %}
+          <li>
+            <a href="{% url 'blog:list' %}" class="{% if request.resolver_match.app_name == 'blog' %}active{% endif %}">
+              <i class="fas fa-newspaper" style="margin-right:4px;opacity:0.8;"></i> Buying Guides
+            </a>
+          </li>
         </ul>
       </div>
     </nav>
@@ -216,6 +221,10 @@
           <a href="{% url 'products:category' cat.slug %}" class="mobile-nav-link">{{ cat.name }}</a>
         {% endif %}
       {% endfor %}
+
+      <a href="{% url 'blog:list' %}" class="mobile-nav-link" style="color:var(--color-primary);font-weight:600;">
+        <i class="fas fa-newspaper" style="margin-right:6px;"></i> Buying Guides &amp; Blog
+      </a>
 
       <div class="mobile-nav-actions">
         <p class="mobile-nav-actions-title">Account &amp; Cart</p>
@@ -327,6 +336,7 @@
       <div class="footer-col">
         <p class="footer-heading">Useful Links</p>
         <ul>
+          <li><a href="{% url 'blog:list' %}">Buying Guides &amp; Blog</a></li>
           <li><a href="{% url 'core:contact' %}">Contact Us</a></li>
           <li><a href="{% url 'products:compare' %}">Compare Products</a></li>
           <li><a href="{% url 'core:refund_policy' %}">Refund &amp; Return Policy</a></li>

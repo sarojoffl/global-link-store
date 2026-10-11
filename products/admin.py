@@ -5,6 +5,7 @@ from .models import (
     Brand,
     Category,
     Product,
+    ProductCollection,
     ProductImage,
     ProductReview,
     ProductSKU,
@@ -81,8 +82,18 @@ class ProductSKUAdmin(admin.ModelAdmin):
     combo_display.short_description = "Variant combo"
 
 
-admin.site.register(Category)
-admin.site.register(Brand)
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ("name", "slug", "is_popular", "parent")
+    search_fields = ("name", "slug")
+    prepopulated_fields = {"slug": ("name",)}
+
+
+@admin.register(Brand)
+class BrandAdmin(admin.ModelAdmin):
+    list_display = ("name", "slug", "is_active", "order")
+    search_fields = ("name", "slug")
+    prepopulated_fields = {"slug": ("name",)}
 
 
 @admin.register(ProductReview)
@@ -91,3 +102,13 @@ class ProductReviewAdmin(admin.ModelAdmin):
     list_filter = ("is_published", "rating", "created_at")
     search_fields = ("product__title", "user__username", "title", "body")
     readonly_fields = ("created_at", "updated_at")
+
+
+@admin.register(ProductCollection)
+class ProductCollectionAdmin(admin.ModelAdmin):
+    list_display = ("name", "category", "min_price", "max_price", "is_active", "created_at")
+    list_filter = ("category", "is_active", "created_at")
+    search_fields = ("name", "meta_title", "intro_guide")
+    prepopulated_fields = {"slug": ("name",)}
+    filter_horizontal = ("manual_products",)
+    autocomplete_fields = ("category", "manual_products")

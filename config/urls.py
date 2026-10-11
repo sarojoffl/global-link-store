@@ -8,13 +8,18 @@ from products.sitemaps import (
     ProductSitemap,
     CategorySitemap,
     BrandSitemap,
+    ProductCollectionSitemap,
     StaticViewSitemap,
 )
+from blog.sitemaps import BlogPostSitemap, BlogCategorySitemap
 
 sitemaps = {
     "products": ProductSitemap,
     "categories": CategorySitemap,
     "brands": BrandSitemap,
+    "collections": ProductCollectionSitemap,
+    "blog": BlogPostSitemap,
+    "blog_categories": BlogCategorySitemap,
     "static": StaticViewSitemap,
 }
 
@@ -28,6 +33,7 @@ urlpatterns = [
     ),
     path('', include('core.urls')),
     path('products/', include('products.urls', namespace='products')),
+    path('blog/', include('blog.urls', namespace='blog')),
     path('', include('shop.urls', namespace='shop')),
     path('auth/', include('social_django.urls', namespace='social')),    
     path('accounts/', include('accounts.urls', namespace='accounts')),

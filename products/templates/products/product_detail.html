@@ -159,6 +159,7 @@
                 role="listitem"
                 aria-label="View image {{ forloop.counter }}"
                 data-gallery-thumb="{{ item.url }}"
+                data-thumb-index="{{ forloop.counter0 }}"
               >
                 <img src="{{ item.url }}" alt="{{ product.title }} - view {{ forloop.counter }}" loading="lazy" width="70" height="70">
               </button>

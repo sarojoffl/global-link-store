@@ -228,3 +228,64 @@ class ProductReview(models.Model):
 
     def __str__(self):
         return f"{self.product.title} — {self.rating}★ by {self.user}"
+
+
+class ProductCollection(models.Model):
+    name = models.CharField(max_length=150, help_text="e.g. Best Laptops Under 1 Lakh in Nepal")
+    slug = models.SlugField(unique=True, blank=True, max_length=150)
+    meta_title = models.CharField(max_length=150, blank=True, help_text="SEO Title for Google SERP")
+    meta_description = models.CharField(max_length=255, blank=True, help_text="SEO Description for Google SERP")
+    banner_image = models.ImageField(upload_to="collections/", blank=True, null=True)
+    intro_guide = models.TextField(blank=True, help_text="Expert buying advice and recommendations (HTML supported)")
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name="collections")
+    min_price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True, help_text="Minimum price filter in NPR")
+    max_price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True, help_text="Maximum price filter in NPR (e.g. 100000)")
+    manual_products = models.ManyToManyField(
+        Product, blank=True, related_name="curated_collections", help_text="Manually pinned flagship products for this collection"
+    )
+    faq_data = models.JSONField(
+        default=list, blank=True, help_text='List of FAQs: [{"question": "...", "answer": "..."}]'
+    )
+    is_active = models.BooleanField(default=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = slugify(self.name)
+            slug = base_slug
+            counter = 1
+            qs = ProductCollection.objects.all()
+            if self.pk:
+                qs = qs.exclude(pk=self.pk)
+            while qs.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
+        if not self.meta_title:
+            self.meta_title = f"{self.name} | Buy Online Nepal – Global Link Store"
+        super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return reverse("products:collection", kwargs={"slug": self.slug})
+
+    def get_products(self):
+        """Returns products matching this collection's category & price criteria, unioned with manual products."""
+        qs = Product.objects.all()
+        if self.category:
+            from products.catalog import _get_descendants
+            descendants = _get_descendants(self.category)
+            qs = qs.filter(category__in=descendants)
+        if self.min_price is not None:
+            qs = qs.filter(price__gte=self.min_price)
+        if self.max_price is not None:
+            qs = qs.filter(price__lte=self.max_price)
+
+        if self.manual_products.exists():
+            qs = (qs | self.manual_products.all()).distinct()
+        return qs.order_by("price")

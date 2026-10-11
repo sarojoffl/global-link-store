@@ -27,7 +27,16 @@ class BrandSitemap(Sitemap):
     priority = 0.7
 
     def items(self):
-        return Brand.objects.filter(is_active=True)
+        return Brand.objects.filter(is_active=True).order_by("name")
+
+
+class ProductCollectionSitemap(Sitemap):
+    changefreq = "weekly"
+    priority = 0.85
+
+    def items(self):
+        from products.models import ProductCollection
+        return ProductCollection.objects.filter(is_active=True).order_by("name")
 
 
 class StaticViewSitemap(Sitemap):
@@ -41,6 +50,7 @@ class StaticViewSitemap(Sitemap):
             "core:refund_policy",
             "core:terms",
             "products:list",
+            "blog:list",
         ]
 
     def location(self, item):

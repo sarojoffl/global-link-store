@@ -96,4 +96,21 @@ urlpatterns = [
     path("newsletter-subscribers/", views.newsletter_subscriber_list, name="newsletter_subscriber_list"),
     path("newsletter-subscribers/<int:pk>/toggle-active/", views.newsletter_subscriber_toggle_active, name="newsletter_subscriber_toggle_active"),
     path("newsletter-subscribers/<int:pk>/delete/", views.newsletter_subscriber_delete, name="newsletter_subscriber_delete"),
+
+    # ── Blog & Buying Guides ──
+    path("blog/", views.blog_post_list, name="blog_post_list"),
+    path("blog/add/", views.blog_post_add, name="blog_post_add"),
+    path("blog/<int:pk>/edit/", views.blog_post_edit, name="blog_post_edit"),
+    path("blog/<int:pk>/delete/", views.blog_post_delete, name="blog_post_delete"),
+
+    path("blog-categories/", views.blog_category_list, name="blog_category_list"),
+    path("blog-categories/add/", views.blog_category_add, name="blog_category_add"),
+    path("blog-categories/<int:pk>/edit/", views.blog_category_edit, name="blog_category_edit"),
+    path("blog-categories/<int:pk>/delete/", views.blog_category_delete, name="blog_category_delete"),
+
+    # ── SEO Product Collections ──
+    path("collections/", views.collection_list, name="collection_list"),
+    path("collections/add/", views.collection_add, name="collection_add"),
+    path("collections/<int:pk>/edit/", views.collection_edit, name="collection_edit"),
+    path("collections/<int:pk>/delete/", views.collection_delete, name="collection_delete"),
 ]

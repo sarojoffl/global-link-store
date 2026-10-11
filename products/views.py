@@ -308,3 +308,24 @@ def search_autocomplete(request):
                 "brand": p.brand.name if p.brand else "",
             })
     return JsonResponse({"results": results})
+
+
+def collection_detail(request, slug):
+    from .models import ProductCollection
+    collection = get_object_or_404(ProductCollection, slug=slug, is_active=True)
+    products = collection.get_products()
+
+    sort = request.GET.get("sort", "price_asc")
+    if sort == "price_desc":
+        products = products.order_by("-price")
+    elif sort == "newest":
+        products = products.order_by("-created_at")
+    else:
+        products = products.order_by("price")
+
+    context = {
+        "collection": collection,
+        "products": products,
+        "sort": sort,
+    }
+    return render(request, "products/collection_detail.html", context)

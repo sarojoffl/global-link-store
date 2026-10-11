@@ -230,3 +230,45 @@ class ProductReviewAdminForm(BaseAdminForm):
             "title": forms.TextInput(attrs={"placeholder": "Review title"}),
             "body": forms.Textarea(attrs={"rows": 5}),
         }
+
+
+class BlogCategoryForm(BaseAdminForm):
+    class Meta:
+        from blog.models import BlogCategory
+        model = BlogCategory
+        fields = ["name", "slug"]
+
+
+class BlogPostForm(BaseAdminForm):
+    class Meta:
+        from blog.models import BlogPost
+        model = BlogPost
+        fields = [
+            "title", "slug", "category", "featured_image",
+            "excerpt", "content", "featured_products",
+            "meta_title", "meta_description", "is_published",
+        ]
+        widgets = {
+            "title": forms.TextInput(attrs={"placeholder": "Article / Guide Title"}),
+            "excerpt": forms.Textarea(attrs={"rows": 3, "placeholder": "Short summary for search results (150-250 chars)"}),
+            "content": forms.Textarea(attrs={"rows": 14, "placeholder": "Article content. HTML tags allowed."}),
+            "meta_title": forms.TextInput(attrs={"placeholder": "SEO Title for Google SERP"}),
+            "meta_description": forms.Textarea(attrs={"rows": 2, "placeholder": "SEO Meta Description"}),
+        }
+
+
+class ProductCollectionForm(BaseAdminForm):
+    class Meta:
+        from products.models import ProductCollection
+        model = ProductCollection
+        fields = [
+            "name", "slug", "meta_title", "meta_description",
+            "banner_image", "intro_guide", "category",
+            "min_price", "max_price", "manual_products", "is_active",
+        ]
+        widgets = {
+            "name": forms.TextInput(attrs={"placeholder": "e.g. Best Laptops Under 1 Lakh in Nepal"}),
+            "meta_title": forms.TextInput(attrs={"placeholder": "SEO Title for Google SERP"}),
+            "meta_description": forms.Textarea(attrs={"rows": 2, "placeholder": "SEO Meta Description"}),
+            "intro_guide": forms.Textarea(attrs={"rows": 8, "placeholder": "Editorial buying advice (HTML supported)"}),
+        }

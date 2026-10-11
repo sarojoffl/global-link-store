@@ -123,13 +123,15 @@
 
   initImageZoom();
 
-  /* ───────── GALLERY THUMBS ───────── */
-  thumbs.forEach((thumb) => {
-    thumb.addEventListener("click", () => {
-      const url = thumb.dataset.galleryThumb;
-      if (!url || !mainImg) return;
+  /* ───────── GALLERY THUMBS & COLOR SYNC ───────── */
+  function activateThumb(thumb, preventReverseSync) {
+    if (!thumb || !mainImg) return;
+    const url = thumb.dataset.galleryThumb;
+    if (!url) return;
 
-      mainImg.style.opacity = "0";
+    if (mainImg.src !== url) {
+      mainImg.style.opacity = "0.2";
+      mainImg.style.transition = "opacity 0.2s ease";
       setTimeout(() => {
         const refreshZoomIfActive = () => {
           mainImg.style.opacity = "1";
@@ -145,10 +147,109 @@
         mainImg.onload = refreshZoomIfActive;
         mainImg.src = url;
         if (mainImg.complete) refreshZoomIfActive();
-      }, 150);
+      }, 100);
+    }
 
-      thumbs.forEach((t) => t.classList.remove("is-active"));
-      thumb.classList.add("is-active");
+    thumbs.forEach((t) => t.classList.remove("is-active"));
+    thumb.classList.add("is-active");
+
+    if (!preventReverseSync) {
+      const idx = parseInt(thumb.dataset.thumbIndex, 10);
+      syncColorForThumb(thumb, isNaN(idx) ? Array.from(thumbs).indexOf(thumb) : idx);
+    }
+  }
+
+  function switchImageForColor(colorName, optionIndex) {
+    if (!thumbs || thumbs.length === 0 || !mainImg) return;
+    const cleanColor = (colorName || "").trim().toLowerCase();
+    if (!cleanColor) return;
+
+    let targetThumb = null;
+
+    // 1. Direct filename / url / alt match
+    for (const thumb of thumbs) {
+      const url = (thumb.dataset.galleryThumb || "").toLowerCase().replace(/[-_]/g, " ");
+      const alt = (thumb.querySelector("img")?.alt || "").toLowerCase();
+      if (url.includes(cleanColor) || alt.includes(cleanColor)) {
+        targetThumb = thumb;
+        break;
+      }
+    }
+
+    // 2. Color alias dictionary match
+    if (!targetThumb) {
+      const colorAliases = {
+        "burgundy": ["burgundy", "red", "wine", "maroon", "crimson", "darkred", "cherry"],
+        "glacier": ["glacier", "blue", "cyan", "sky", "teal", "ice", "navy"],
+        "silver": ["silver", "white", "platinum", "starlight", "light", "metallic"],
+        "black": ["black", "midnight", "dark", "space", "graphite", "charcoal"],
+        "gold": ["gold", "champagne", "yellow", "amber"],
+        "titanium": ["titanium", "natural", "gray", "grey"],
+        "purple": ["purple", "violet", "lavender", "lilac"],
+        "green": ["green", "mint", "alpine", "olive", "emerald"]
+      };
+
+      for (const [key, aliases] of Object.entries(colorAliases)) {
+        if (cleanColor.includes(key) || aliases.some((a) => cleanColor.includes(a))) {
+          for (const thumb of thumbs) {
+            const url = (thumb.dataset.galleryThumb || "").toLowerCase().replace(/[-_]/g, " ");
+            const alt = (thumb.querySelector("img")?.alt || "").toLowerCase();
+            if (aliases.some((a) => url.includes(a) || alt.includes(a))) {
+              targetThumb = thumb;
+              break;
+            }
+          }
+          if (targetThumb) break;
+        }
+      }
+    }
+
+    // 3. Fallback: index mapping if thumbnails count matches or aligns
+    if (!targetThumb && typeof optionIndex === "number" && thumbs[optionIndex]) {
+      targetThumb = thumbs[optionIndex];
+    }
+
+    if (targetThumb) {
+      activateThumb(targetThumb, true);
+    }
+  }
+
+  function syncColorForThumb(thumb, thumbIndex) {
+    const colorGroup = document.querySelector(
+      '.variant-group[data-variant-group*="color" i], .variant-group[data-variant-group*="colour" i], .variant-group[data-variant-group*="shade" i], .variant-group[data-variant-group*="finish" i]'
+    ) || (document.querySelectorAll(".variant-group").length === 1 ? document.querySelector(".variant-group") : null);
+
+    if (!colorGroup) return;
+
+    const url = (thumb.dataset.galleryThumb || "").toLowerCase().replace(/[-_]/g, " ");
+    const alt = (thumb.querySelector("img")?.alt || "").toLowerCase();
+    const options = Array.from(colorGroup.querySelectorAll(".variant-option"));
+    let matchedOption = null;
+
+    // Match option text in url/alt
+    for (const opt of options) {
+      const val = (opt.dataset.value || "").trim().toLowerCase();
+      if (val && (url.includes(val) || alt.includes(val))) {
+        matchedOption = opt;
+        break;
+      }
+    }
+
+    // Index fallback
+    if (!matchedOption && typeof thumbIndex === "number" && options[thumbIndex]) {
+      matchedOption = options[thumbIndex];
+    }
+
+    if (matchedOption && !matchedOption.classList.contains("is-selected")) {
+      options.forEach((o) => o.classList.remove("is-selected"));
+      matchedOption.classList.add("is-selected");
+      onVariantChange();
+    }
+  }
+
+  thumbs.forEach((thumb, idx) => {
+    thumb.addEventListener("click", () => {
+      activateThumb(thumb, false);
     });
   });
 
@@ -298,10 +399,25 @@
 
   document.querySelectorAll(".variant-option").forEach((btn) => {
     btn.addEventListener("click", () => {
-      btn.closest(".variant-group").querySelectorAll(".variant-option")
-        .forEach((o) => o.classList.remove("is-selected"));
+      const group = btn.closest(".variant-group");
+      const groupLabel = (group?.dataset.variantGroup || "").toLowerCase();
+      const options = Array.from(group?.querySelectorAll(".variant-option") || []);
+      const optionIndex = options.indexOf(btn);
+
+      options.forEach((o) => o.classList.remove("is-selected"));
       btn.classList.add("is-selected");
       onVariantChange();
+
+      // Check if this variant group is color/colour/shade/finish or the primary group
+      if (
+        groupLabel.includes("color") ||
+        groupLabel.includes("colour") ||
+        groupLabel.includes("shade") ||
+        groupLabel.includes("finish") ||
+        document.querySelectorAll(".variant-group").length === 1
+      ) {
+        switchImageForColor(btn.dataset.value, optionIndex);
+      }
     });
   });
 

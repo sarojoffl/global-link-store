@@ -1,0 +1,170 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}{{ collection.meta_title|default:collection.name }}{% endblock %}
+{% block meta_description %}{{ collection.meta_description|default:collection.intro_guide|striptags|truncatewords:30 }}{% endblock %}
+
+{% block canonical_url %}{{ request.scheme }}://{{ request.get_host }}{{ collection.get_absolute_url }}{% endblock %}
+
+{% block extra_css %}
+  <meta property="og:title" content="{{ collection.name }} | Global Link Store Nepal">
+  <meta property="og:description" content="{{ collection.meta_description|default:collection.name }}">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{ request.build_absolute_uri }}">
+  {% if collection.banner_image %}
+    <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ collection.banner_image.url }}">
+  {% endif %}
+  <link rel="stylesheet" href="{% static 'css/catalog.css' %}">
+  <link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "{{ collection.name|escapejs }}",
+  "description": "{{ collection.meta_description|escapejs }}",
+  "url": "{{ request.build_absolute_uri }}",
+  "mainEntity": {
+    "@type": "ItemList",
+    "itemListElement": [
+      {% for product in products %}
+      {
+        "@type": "ListItem",
+        "position": {{ forloop.counter }},
+        "url": "{{ request.scheme }}://{{ request.get_host }}{% url 'products:detail' product.slug %}",
+        "name": "{{ product.title|escapejs }}"
+      }{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    ]
+  }
+}
+</script>
+
+{% if collection.faq_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {% for item in collection.faq_data %}
+    {
+      "@type": "Question",
+      "name": "{{ item.question|escapejs }}",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "{{ item.answer|escapejs }}"
+      }
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
+{% endif %}
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "{{ request.scheme }}://{{ request.get_host }}/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "{{ collection.name|escapejs }}",
+      "item": "{{ request.build_absolute_uri }}"
+    }
+  ]
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="catalog-page">
+  <div class="container">
+
+    {# Breadcrumb #}
+    <nav class="catalog-breadcrumb" aria-label="Breadcrumb">
+      <a href="{% url 'core:index' %}"><i class="fas fa-home" style="font-size:11px"></i> Home</a>
+      <span class="bc-sep" aria-hidden="true"><i class="fas fa-chevron-right"></i></span>
+      <span class="bc-current" aria-current="page">{{ collection.name }}</span>
+    </nav>
+
+    {# Collection Header & Buying Advice #}
+    <header class="catalog-header" style="background:#fff;padding:28px 32px;border-radius:12px;border:1px solid var(--color-border);margin-bottom:28px;">
+      <div style="max-width:900px;">
+        <span style="display:inline-block;background:var(--color-primary-light);color:var(--color-primary);font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;text-transform:uppercase;margin-bottom:10px;">
+          Curated Buying Guide
+        </span>
+        <h1 style="font-size:clamp(1.6rem, 3.2vw, 2.2rem);font-weight:800;color:var(--color-text);margin-bottom:12px;">
+          {{ collection.name }}
+        </h1>
+        {% if collection.intro_guide %}
+          <div style="font-size:15px;line-height:1.7;color:#475569;margin-bottom:16px;">
+            {{ collection.intro_guide|safe }}
+          </div>
+        {% endif %}
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding-top:16px;border-top:1px solid #f1f5f9;flex-wrap:wrap;gap:12px;">
+        <span style="font-weight:600;font-size:14px;color:var(--color-text-muted);">
+          Showing {{ products|length }} recommended model{{ products|length|pluralize }}
+        </span>
+
+        <form method="get" style="display:flex;align-items:center;gap:8px;">
+          <label for="sort-select" style="font-size:13.5px;color:var(--color-text-muted);">Sort By:</label>
+          <select id="sort-select" name="sort" onchange="this.form.submit()" style="padding:6px 12px;border-radius:6px;border:1px solid var(--color-border);font-family:inherit;font-size:13.5px;">
+            <option value="price_asc" {% if sort == "price_asc" %}selected{% endif %}>Price: Low to High</option>
+            <option value="price_desc" {% if sort == "price_desc" %}selected{% endif %}>Price: High to Low</option>
+            <option value="newest" {% if sort == "newest" %}selected{% endif %}>Newest Arrivals</option>
+          </select>
+        </form>
+      </div>
+    </header>
+
+    {# Product Grid #}
+    {% if products %}
+      <div class="products-grid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(250px, 1fr));gap:20px;margin-bottom:40px;">
+        {% for product in products %}
+          {% include "core/includes/product_card.html" with product=product %}
+        {% endfor %}
+      </div>
+    {% else %}
+      <div style="text-align:center;padding:60px 20px;background:#fff;border-radius:12px;border:1px solid var(--color-border);margin-bottom:40px;">
+        <i class="fas fa-box-open" style="font-size:3rem;color:var(--color-text-muted);margin-bottom:16px;"></i>
+        <h3>No Products Currently in this Price Bracket</h3>
+        <p style="color:var(--color-text-muted);">Check back soon as new models arrive weekly!</p>
+        <a href="{% url 'products:list' %}" class="btn-more" style="display:inline-block;margin-top:16px;">Browse All Products</a>
+      </div>
+    {% endif %}
+
+    {# FAQ Accordion Section for Rich Snippets #}
+    {% if collection.faq_data %}
+      <section style="background:#fff;padding:32px;border-radius:12px;border:1px solid var(--color-border);margin-bottom:40px;">
+        <h2 style="font-size:20px;font-weight:800;color:var(--color-text);margin-bottom:20px;">
+          Frequently Asked Questions (FAQs)
+        </h2>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          {% for item in collection.faq_data %}
+            <details style="background:#f8fafc;padding:16px 20px;border-radius:8px;border:1px solid var(--color-border);">
+              <summary style="font-weight:700;font-size:15.5px;cursor:pointer;color:var(--color-text);">
+                {{ item.question }}
+              </summary>
+              <p style="margin-top:10px;font-size:14.5px;line-height:1.6;color:var(--color-text-muted);">
+                {{ item.answer }}
+              </p>
+            </details>
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

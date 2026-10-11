@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'accounts',
     "products",
     "shop",
+    "blog",
     "store_admin",
     "social_django",
     "axes",
